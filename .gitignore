@@ -364,19 +364,17 @@ FodyWeavers.xsd
 
 ##### WEB
 # dependencies
-/node_modules
-/ESD/node_modules
-/ESD/build
-/ESD/.vscode
+node_modules/
+.vscode/
 package-lock.json
-/.pnp
+.pnp
 .pnp.js
 
 # testing
-/coverage
+coverage/
 
 # production
-/build
+build/
 
 # misc
 .DS_Store
@@ -389,3 +387,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 ECC_RE/.vscode/settings.json
+
+# 專案檔案
+DDMenu/
+Users/

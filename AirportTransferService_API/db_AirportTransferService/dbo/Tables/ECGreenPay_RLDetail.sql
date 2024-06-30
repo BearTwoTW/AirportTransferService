@@ -1,0 +1,26 @@
+﻿CREATE TABLE [dbo].[ECGreenPay_RLDetail] (
+    [id]                  INT            IDENTITY (1, 1) NOT NULL,
+    [cre_userid]          VARCHAR (50)   DEFAULT ('') NULL,
+    [cre_time]            DATETIME       DEFAULT (getdate()) NULL,
+    [upd_userid]          VARCHAR (50)   DEFAULT ('') NULL,
+    [upd_time]            DATETIME       DEFAULT (getdate()) NULL,
+    [customer_id]         VARCHAR (50)   DEFAULT ('') NULL,
+    [order_id]            VARCHAR (50)   DEFAULT ('') NULL,
+    [MerchantID]          VARCHAR (10)   DEFAULT ('') NOT NULL,
+    [LogisticsID]         VARCHAR (20)   DEFAULT ('') NULL,
+    [ServerReplyURL]      VARCHAR (200)  DEFAULT ('') NOT NULL,
+    [GoodsName]           VARCHAR (50)   DEFAULT ('') NULL,
+    [GoodsAmount]         INT            DEFAULT ((0)) NOT NULL,
+    [ServiceType]         VARCHAR (5)    DEFAULT ('') NOT NULL,
+    [SenderName]          VARCHAR (10)   DEFAULT ('') NULL,
+    [SenderPhone]         VARCHAR (10)   DEFAULT ('') NULL,
+    [Remark]              VARCHAR (40)   DEFAULT ('') NULL,
+    [RtnMerchantTradeNo]  VARCHAR (20)   DEFAULT ('') NULL,
+    [RtnOrderNo]          VARCHAR (12)   DEFAULT ('') NULL,
+    [RLDStatus]           NVARCHAR (10)  DEFAULT ('') NULL,
+    [UpdateStatusDate]    VARCHAR (10)   DEFAULT ('') NULL,
+    [LogisticsStatusName] NVARCHAR (100) DEFAULT ('') NULL,
+    [CVSType]             NVARCHAR (10)  DEFAULT ('') NULL,
+    CONSTRAINT [PK_ECGreenPay_RLDetail] PRIMARY KEY CLUSTERED ([id] ASC)
+);
+

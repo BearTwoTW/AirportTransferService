@@ -1,0 +1,25 @@
+﻿CREATE TABLE [dbo].[ImportLevel] (
+    [cre_userid]    VARCHAR (50)   NULL,
+    [cre_time]      DATETIME       NULL,
+    [職務代碼]          NVARCHAR (255) NULL,
+    [職務名稱]          NVARCHAR (255) NULL,
+    [母層職務名稱]        NVARCHAR (255) NULL,
+    [公司名稱]          NVARCHAR (255) NULL,
+    [總經理室名稱]        NVARCHAR (255) NULL,
+    [部門名稱]          NVARCHAR (255) NULL,
+    [據點名稱]          NVARCHAR (255) NULL,
+    [課級名稱]          NVARCHAR (255) NULL,
+    [組級名稱]          NVARCHAR (255) NULL,
+    [辦公室名稱]         NVARCHAR (255) NULL,
+    [職務信箱]          NVARCHAR (255) NULL,
+    [聯絡方式]          NVARCHAR (255) NULL,
+    [薪水種類]          NVARCHAR (255) NULL,
+    [職稱]            NVARCHAR (255) NULL,
+    [可編制人數上限]       INT            NULL,
+    [最低職等]          INT            NULL,
+    [最低職級]          INT            NULL,
+    [請假超過幾天就要審核]    INT            NULL,
+    [備註]            NVARCHAR (255) NULL,
+    [訂單超折金額多少以上要審核] INT            NULL
+);
+

@@ -1,0 +1,399 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>db_AirportTransferService</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{6a484041-3643-495d-94ce-afdc35e75380}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql160DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>db_AirportTransferService</RootNamespace>
+    <AssemblyName>db_AirportTransferService</AssemblyName>
+    <ModelCollation>1033, CI</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="dbo\" />
+    <Folder Include="dbo\Tables\" />
+    <Folder Include="dbo\Functions\" />
+    <Folder Include="dbo\Stored Procedures\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="dbo\Tables\車源SMT.sql" />
+    <Build Include="dbo\Tables\車部位匯入.sql" />
+    <Build Include="dbo\Tables\車型匯入.sql" />
+    <Build Include="dbo\Tables\WorkOrderTurnoverRepairDetail.sql" />
+    <Build Include="dbo\Tables\WorkOrderStockRequisition.sql" />
+    <Build Include="dbo\Tables\WorkOrderMaster.sql" />
+    <Build Include="dbo\Tables\WorkHoursRuleMaster.sql" />
+    <Build Include="dbo\Tables\WorkHoursRuleDetailP.sql" />
+    <Build Include="dbo\Tables\WorkHoursRuleDetailG.sql" />
+    <Build Include="dbo\Tables\WorkActionSetting.sql" />
+    <Build Include="dbo\Tables\Warehouse.sql" />
+    <Build Include="dbo\Tables\UserWorkShiftRecord.sql" />
+    <Build Include="dbo\Tables\UserWorkOvertimeRecord.sql" />
+    <Build Include="dbo\Tables\UserSigninLog.sql" />
+    <Build Include="dbo\Tables\UserSalarySettingXDepartment.sql" />
+    <Build Include="dbo\Tables\UserSalarySettingMaster.sql" />
+    <Build Include="dbo\Tables\UserSalarySettingDetail.sql" />
+    <Build Include="dbo\Tables\UserSalaryLog.sql" />
+    <Build Include="dbo\Tables\Users.sql" />
+    <Build Include="dbo\Tables\UserLevelDutyJoin.sql" />
+    <Build Include="dbo\Tables\UserLevelDutyHistory.sql" />
+    <Build Include="dbo\Tables\UserLevel.sql" />
+    <Build Include="dbo\Tables\UserDutyPermissionJoin.sql" />
+    <Build Include="dbo\Tables\UserDutyJoin.sql" />
+    <Build Include="dbo\Tables\UserDuty.sql" />
+    <Build Include="dbo\Tables\UserCustomMaster.sql" />
+    <Build Include="dbo\Tables\UserCustomDetail.sql" />
+    <Build Include="dbo\Tables\UserCustom.sql" />
+    <Build Include="dbo\Tables\UserCourseLicense.sql" />
+    <Build Include="dbo\Tables\UserContacter.sql" />
+    <Build Include="dbo\Tables\UserClockRecordPlace.sql" />
+    <Build Include="dbo\Tables\UserClockRecord.sql" />
+    <Build Include="dbo\Tables\UserCareerRankHistory.sql" />
+    <Build Include="dbo\Tables\UserCareerRank.sql" />
+    <Build Include="dbo\Tables\UnitConversion.sql" />
+    <Build Include="dbo\Tables\Unit.sql" />
+    <Build Include="dbo\Tables\TurnoverRepairSetting.sql" />
+    <Build Include="dbo\Tables\TollItemSettingLog.sql" />
+    <Build Include="dbo\Tables\TollItemSetting.sql" />
+    <Build Include="dbo\Tables\ToDoListLog.sql" />
+    <Build Include="dbo\Tables\ToDoList.sql" />
+    <Build Include="dbo\Tables\TI_SourceTableInfo.sql" />
+    <Build Include="dbo\Tables\TI_QuestionSettingMaster.sql" />
+    <Build Include="dbo\Tables\TI_QuestionSettingDetail.sql" />
+    <Build Include="dbo\Tables\TI_MatchExcelMaster.sql" />
+    <Build Include="dbo\Tables\TI_MatchExcelDetail.sql" />
+    <Build Include="dbo\Tables\TestDriveCar.sql" />
+    <Build Include="dbo\Tables\TestDrive.sql" />
+    <Build Include="dbo\Tables\TelephoneInterviewCommentReply.sql" />
+    <Build Include="dbo\Tables\TelephoneInterview_Q.sql" />
+    <Build Include="dbo\Tables\TelephoneInterview_LOG.sql" />
+    <Build Include="dbo\Tables\TelephoneInterview_A.sql" />
+    <Build Include="dbo\Tables\Tax.sql" />
+    <Build Include="dbo\Tables\SystemSetting.sql" />
+    <Build Include="dbo\Tables\StockUInpackMaster.sql" />
+    <Build Include="dbo\Tables\StockUInpackDetail.sql" />
+    <Build Include="dbo\Tables\StockTransferMaster.sql" />
+    <Build Include="dbo\Tables\StockTransferDetail.sql" />
+    <Build Include="dbo\Tables\StockScrapMaster.sql" />
+    <Build Include="dbo\Tables\StockScrapDetail.sql" />
+    <Build Include="dbo\Tables\StockMonthly.sql" />
+    <Build Include="dbo\Tables\StockAdjustMaster.sql" />
+    <Build Include="dbo\Tables\StockAdjustImport.sql" />
+    <Build Include="dbo\Tables\StockAdjustDetail.sql" />
+    <Build Include="dbo\Tables\Stock.sql" />
+    <Build Include="dbo\Tables\SPS.sql" />
+    <Build Include="dbo\Tables\SPP.sql" />
+    <Build Include="dbo\Tables\SignOffSettingMaster.sql" />
+    <Build Include="dbo\Tables\SignOffSettingDetailOption.sql" />
+    <Build Include="dbo\Tables\SignOffSettingDetail.sql" />
+    <Build Include="dbo\Tables\SignOffNoticeSetting.sql" />
+    <Build Include="dbo\Tables\SignOffInsertSetting.sql" />
+    <Build Include="dbo\Tables\SignOffConditionSetting.sql" />
+    <Build Include="dbo\Tables\SignOffAuditSetting.sql" />
+    <Build Include="dbo\Tables\ScheduleXEmployee.sql" />
+    <Build Include="dbo\Tables\ScheduleClass.sql" />
+    <Build Include="dbo\Tables\RepairListDispatchConstructLog.sql" />
+    <Build Include="dbo\Tables\RepairListDetail.sql" />
+    <Build Include="dbo\Tables\RelatedCompanyRecord.sql" />
+    <Build Include="dbo\Tables\QuotationMaster.sql" />
+    <Build Include="dbo\Tables\QuotationItemSetting.sql" />
+    <Build Include="dbo\Tables\QuotationItemDetail.sql" />
+    <Build Include="dbo\Tables\QuotationCommodityDetail.sql" />
+    <Build Include="dbo\Tables\QuestionnaireSettingMaster.sql" />
+    <Build Include="dbo\Tables\QuestionnaireQuestionSettingMaster.sql" />
+    <Build Include="dbo\Tables\QuestionnaireQuestionSettingDetail.sql" />
+    <Build Include="dbo\Tables\QuestionnaireQuestionGroup.sql" />
+    <Build Include="dbo\Tables\Questionnaire_Q.sql" />
+    <Build Include="dbo\Tables\Questionnaire_LOG.sql" />
+    <Build Include="dbo\Tables\Questionnaire_answer.sql" />
+    <Build Include="dbo\Tables\Questionnaire_A.sql" />
+    <Build Include="dbo\Tables\Questionnaire.sql" />
+    <Build Include="dbo\Tables\PurchaseMaster.sql" />
+    <Build Include="dbo\Tables\PurchaseDetail.sql" />
+    <Build Include="dbo\Tables\PSIMaster.sql" />
+    <Build Include="dbo\Tables\PSIDetail.sql" />
+    <Build Include="dbo\Tables\PromotionXGiftLog.sql" />
+    <Build Include="dbo\Tables\PromotionXGift.sql" />
+    <Build Include="dbo\Tables\PromotionXCommodityLog.sql" />
+    <Build Include="dbo\Tables\PromotionXCommodityLabelLog.sql" />
+    <Build Include="dbo\Tables\PromotionXCommodityLabel.sql" />
+    <Build Include="dbo\Tables\PromotionXCommodity.sql" />
+    <Build Include="dbo\Tables\PromotionLog.sql" />
+    <Build Include="dbo\Tables\Promotion.sql" />
+    <Build Include="dbo\Tables\PotentialCustomerRelation.sql" />
+    <Build Include="dbo\Tables\PotentialCustomerPhone.sql" />
+    <Build Include="dbo\Tables\PotentialCustomerEmail.sql" />
+    <Build Include="dbo\Tables\PotentialCustomerAddress.sql" />
+    <Build Include="dbo\Tables\PotentialCustomerActivity.sql" />
+    <Build Include="dbo\Tables\PotentialCustomer.sql" />
+    <Build Include="dbo\Tables\PermissionFunctionUserDutyJoin.sql" />
+    <Build Include="dbo\Tables\PermissionFunctionList.sql" />
+    <Build Include="dbo\Tables\PDIWorkstation.sql" />
+    <Build Include="dbo\Tables\PDIProdedureCarComponent.sql" />
+    <Build Include="dbo\Tables\PDIProcedureWorkstation.sql" />
+    <Build Include="dbo\Tables\PDIProcedureMaster.sql" />
+    <Build Include="dbo\Tables\PDIOrder.sql" />
+    <Build Include="dbo\Tables\PayLog.sql" />
+    <Build Include="dbo\Tables\PanelPaintWorkstation.sql" />
+    <Build Include="dbo\Tables\PanelPaintStatusLabel.sql" />
+    <Build Include="dbo\Tables\PanelPaintPriceLevel.sql" />
+    <Build Include="dbo\Tables\PanelPaintOrderStatusLog.sql" />
+    <Build Include="dbo\Tables\PanelPaintOrder.sql" />
+    <Build Include="dbo\Tables\Pages.sql" />
+    <Build Include="dbo\Tables\PageGroup.sql" />
+    <Build Include="dbo\Tables\PageControl.sql" />
+    <Build Include="dbo\Tables\OrderPayment.sql" />
+    <Build Include="dbo\Tables\OrderMap.sql" />
+    <Build Include="dbo\Tables\OrderInvoice.sql" />
+    <Build Include="dbo\Tables\OrderCustodyLog.sql" />
+    <Build Include="dbo\Tables\OrderCarSubsidyDetail.sql" />
+    <Build Include="dbo\Tables\OrderCarComponent.sql" />
+    <Build Include="dbo\Tables\OrderAuditLog.sql" />
+    <Build Include="dbo\Tables\OrderAllotmentLog.sql" />
+    <Build Include="dbo\Tables\OrderAbnormalReturnLog.sql" />
+    <Build Include="dbo\Tables\Order.sql" />
+    <Build Include="dbo\Tables\Notification.sql" />
+    <Build Include="dbo\Tables\MRM.sql" />
+    <Build Include="dbo\Tables\MRD.sql" />
+    <Build Include="dbo\Tables\MRA.sql" />
+    <Build Include="dbo\Tables\MeetingRoomBooking.sql" />
+    <Build Include="dbo\Tables\MeetingRoom.sql" />
+    <Build Include="dbo\Tables\MealServiceBellLog.sql" />
+    <Build Include="dbo\Tables\MealServiceBellCheckCarCondition_log.sql" />
+    <Build Include="dbo\Tables\MealServiceBell.sql" />
+    <Build Include="dbo\Tables\MealPlaceLog.sql" />
+    <Build Include="dbo\Tables\MealPlaceGroup.sql" />
+    <Build Include="dbo\Tables\MealPlace.sql" />
+    <Build Include="dbo\Tables\MealOrderEmployee.sql" />
+    <Build Include="dbo\Tables\MealOrderDetailEmployee.sql" />
+    <Build Include="dbo\Tables\MealOrderDetail.sql" />
+    <Build Include="dbo\Tables\MealOrder.sql" />
+    <Build Include="dbo\Tables\MealGroup.sql" />
+    <Build Include="dbo\Tables\Meal.sql" />
+    <Build Include="dbo\Tables\MAPSaveData.sql" />
+    <Build Include="dbo\Tables\MaintainStatusDetail_ING.sql" />
+    <Build Include="dbo\Tables\MaintainStatusAppend_ING.sql" />
+    <Build Include="dbo\Tables\MaintainStatus_ING.sql" />
+    <Build Include="dbo\Tables\LeaveRuleNoAnnual.sql" />
+    <Build Include="dbo\Tables\LeaveRuleAnnual.sql" />
+    <Build Include="dbo\Tables\LeaveRemainSettleLog.sql" />
+    <Build Include="dbo\Tables\LeaveRemainNoAnnual.sql" />
+    <Build Include="dbo\Tables\LeaveRemainAnnualLog.sql" />
+    <Build Include="dbo\Tables\LeaveRemainAnnual.sql" />
+    <Build Include="dbo\Tables\LeaveRecord.sql" />
+    <Build Include="dbo\Tables\InvoiceSetting.sql" />
+    <Build Include="dbo\Tables\InvoiceMachine.sql" />
+    <Build Include="dbo\Tables\InvoiceHeader.sql" />
+    <Build Include="dbo\Tables\InvoiceDetail.sql" />
+    <Build Include="dbo\Tables\ImportPotentialCustomer.sql" />
+    <Build Include="dbo\Tables\ImportPDICarStock.sql" />
+    <Build Include="dbo\Tables\ImportNewCarStock.sql" />
+    <Build Include="dbo\Tables\ImportMaster.sql" />
+    <Build Include="dbo\Tables\ImportLevel.sql" />
+    <Build Include="dbo\Tables\ImportDuty.sql" />
+    <Build Include="dbo\Tables\ImportDetail.sql" />
+    <Build Include="dbo\Tables\ImportCarTypeInteriorPrice.sql" />
+    <Build Include="dbo\Tables\ImportCarTypeFormatPrice.sql" />
+    <Build Include="dbo\Tables\ImportCarTypeExteriorPrice.sql" />
+    <Build Include="dbo\Tables\ImportCarComponent.sql" />
+    <Build Include="dbo\Tables\ImportCalendar.sql" />
+    <Build Include="dbo\Tables\ImportAppointment.sql" />
+    <Build Include="dbo\Tables\ImportAccount.sql" />
+    <Build Include="dbo\Tables\HintBellReadLog.sql" />
+    <Build Include="dbo\Tables\HintBell.sql" />
+    <Build Include="dbo\Tables\Files.sql" />
+    <Build Include="dbo\Tables\FaceMeLog.sql" />
+    <Build Include="dbo\Tables\EC_OrderPickingMaster.sql" />
+    <Build Include="dbo\Tables\EC_OrderCommodityCombinationDetail.sql" />
+    <Build Include="dbo\Tables\EC_OrderCommodity.sql" />
+    <Build Include="dbo\Tables\EC_Order.sql" />
+    <Build Include="dbo\Tables\EC_CustomerShoppingCart.sql" />
+    <Build Include="dbo\Tables\EC_Customer.sql" />
+    <Build Include="dbo\Tables\DealerSetting.sql" />
+    <Build Include="dbo\Tables\Customer.sql" />
+    <Build Include="dbo\Tables\Currency.sql" />
+    <Build Include="dbo\Tables\CompanyContacter.sql" />
+    <Build Include="dbo\Tables\Company.sql" />
+    <Build Include="dbo\Tables\CommodityXCompany.sql" />
+    <Build Include="dbo\Tables\CommodityXCarTypeXFormat.sql" />
+    <Build Include="dbo\Tables\CommodityVideo.sql" />
+    <Build Include="dbo\Tables\CommodityOnShelfPeriodXLabel.sql" />
+    <Build Include="dbo\Tables\CommodityOnShelfPeriod.sql" />
+    <Build Include="dbo\Tables\CommodityLabel.sql" />
+    <Build Include="dbo\Tables\CommodityImport.sql" />
+    <Build Include="dbo\Tables\CommodityForbidLogistics.sql" />
+    <Build Include="dbo\Tables\CommodityCustomAttriMaster.sql" />
+    <Build Include="dbo\Tables\CommodityCustomAttriDetail.sql" />
+    <Build Include="dbo\Tables\CommodityCombinationDetail.sql" />
+    <Build Include="dbo\Tables\Commodity.sql" />
+    <Build Include="dbo\Tables\ColumnUpdateLog.sql" />
+    <Build Include="dbo\Tables\CITYAREAZIP.sql" />
+    <Build Include="dbo\Tables\CarXCustomerXAppointment.sql" />
+    <Build Include="dbo\Tables\CarWarehouse.sql" />
+    <Build Include="dbo\Tables\CarTypeInteriorPrice.sql" />
+    <Build Include="dbo\Tables\CarTypeFormatPrice.sql" />
+    <Build Include="dbo\Tables\CarTypeFormat.sql" />
+    <Build Include="dbo\Tables\CarTypeExteriorPrice.sql" />
+    <Build Include="dbo\Tables\CarType.sql" />
+    <Build Include="dbo\Tables\CarSubsidyMaster.sql" />
+    <Build Include="dbo\Tables\CarSubsidyDetail.sql" />
+    <Build Include="dbo\Tables\CarSubsidyCondition.sql" />
+    <Build Include="dbo\Tables\CarStockTransport.sql" />
+    <Build Include="dbo\Tables\CarStockTransferRecord.sql" />
+    <Build Include="dbo\Tables\CarStockReserveLog.sql" />
+    <Build Include="dbo\Tables\CarStockReserveImportMaster.sql" />
+    <Build Include="dbo\Tables\CarStockReserveImportLog.sql" />
+    <Build Include="dbo\Tables\CarStockReserveImportDetail.sql" />
+    <Build Include="dbo\Tables\CarStockQRCode.sql" />
+    <Build Include="dbo\Tables\CarStockManageLog.sql" />
+    <Build Include="dbo\Tables\CarStockKey.sql" />
+    <Build Include="dbo\Tables\CarStock.sql" />
+    <Build Include="dbo\Tables\CarPartSetting.sql" />
+    <Build Include="dbo\Tables\CarLicenseRecord.sql" />
+    <Build Include="dbo\Tables\CarInterior.sql" />
+    <Build Include="dbo\Tables\CarExterior.sql" />
+    <Build Include="dbo\Tables\CarComponentType.sql" />
+    <Build Include="dbo\Tables\CarComponent.sql" />
+    <Build Include="dbo\Tables\Car.sql" />
+    <Build Include="dbo\Tables\CalendarMaster.sql" />
+    <Build Include="dbo\Tables\CalendarDetail.sql" />
+    <Build Include="dbo\Tables\BulletinTarget.sql" />
+    <Build Include="dbo\Tables\BulletinReadLog.sql" />
+    <Build Include="dbo\Tables\Bulletin.sql" />
+    <Build Include="dbo\Tables\AutoNumber.sql" />
+    <Build Include="dbo\Tables\AuditProcedure.sql" />
+    <Build Include="dbo\Tables\Appointment.sql" />
+    <Build Include="dbo\Functions\UserLevelTreeESC.sql" />
+    <Build Include="dbo\Functions\UserLevelTreeDESC.sql" />
+    <Build Include="dbo\Stored Procedures\RDE_UserCreate_GiveVacation.sql" />
+    <Build Include="dbo\Stored Procedures\RDE_Pregive_NoAnnualLeave.sql" />
+    <Build Include="dbo\Stored Procedures\RDE_Pregive_HalfAnnualLeave.sql" />
+    <Build Include="dbo\Stored Procedures\RDE_Pregive_FullAnnualLeave.sql" />
+    <Build Include="dbo\Stored Procedures\RDE_NoAnnual_Anniversary.sql" />
+    <Build Include="dbo\Tables\WarehouseMaster.sql" />
+    <Build Include="dbo\Tables\WarehouseDetail.sql" />
+    <Build Include="dbo\Tables\VenueSubType.sql" />
+    <Build Include="dbo\Tables\VenueReservation.sql" />
+    <Build Include="dbo\Tables\VenueMaster.sql" />
+    <Build Include="dbo\Tables\VenueDetailStationsetting.sql" />
+    <Build Include="dbo\Tables\VenueDetailStationRestdate.sql" />
+    <Build Include="dbo\Tables\VenueDetailResttime.sql" />
+    <Build Include="dbo\Tables\VenueDetailRestdate.sql" />
+    <Build Include="dbo\Tables\VenueDetailOpendate.sql" />
+    <Build Include="dbo\Tables\UserRollcallMaster.sql" />
+    <Build Include="dbo\Tables\UserRollcallDetail.sql" />
+    <Build Include="dbo\Tables\Supplier.sql" />
+    <Build Include="dbo\Tables\StockPutInMaster.sql" />
+    <Build Include="dbo\Tables\StockPutInDetail.sql" />
+    <Build Include="dbo\Tables\PurchaseRequisitionMaster.sql" />
+    <Build Include="dbo\Tables\PurchaseRequisitionDetail.sql" />
+    <Build Include="dbo\Tables\PromotionUseLog.sql" />
+    <Build Include="dbo\Tables\OSS_WebsiteSetting.sql" />
+    <Build Include="dbo\Tables\OSS_TermSetting.sql" />
+    <Build Include="dbo\Tables\OSS_SocialLinkSetting.sql" />
+    <Build Include="dbo\Tables\OSS_QASetting.sql" />
+    <Build Include="dbo\Tables\OSS_CustomPageSetting.sql" />
+    <Build Include="dbo\Tables\LogisticsMaster.sql" />
+    <Build Include="dbo\Tables\LogisticsDetail.sql" />
+    <Build Include="dbo\Tables\LackMaterialMaster.sql" />
+    <Build Include="dbo\Tables\LackMaterialDetail.sql" />
+    <Build Include="dbo\Tables\InvoicePaymentSubject.sql" />
+    <Build Include="dbo\Tables\InvoicePaymentProjectMaster.sql" />
+    <Build Include="dbo\Tables\InvoicePaymentProjectDetail.sql" />
+    <Build Include="dbo\Tables\InvoicePaymentPayShare.sql" />
+    <Build Include="dbo\Tables\InvoicePaymentMaster.sql" />
+    <Build Include="dbo\Tables\InvoicePaymentDetail.sql" />
+    <Build Include="dbo\Tables\ImportWorkOrderMaster.sql" />
+    <Build Include="dbo\Tables\EinvInvoiceLOG.sql" />
+    <Build Include="dbo\Tables\EinvInvoice.sql" />
+    <Build Include="dbo\Tables\EinvGetWinnerList.sql" />
+    <Build Include="dbo\Tables\EinvBlankInvoice.sql" />
+    <Build Include="dbo\Tables\ECPayGreenLogisticsReverse_HOME.sql" />
+    <Build Include="dbo\Tables\ECPayGreenLogisticsReverse_CVS.sql" />
+    <Build Include="dbo\Tables\ECPayGreenLogisticsOrder.sql" />
+    <Build Include="dbo\Tables\ECPayGreenLogisticsMap.sql" />
+    <Build Include="dbo\Tables\ECPayGreenLogisticsLog.sql" />
+    <Build Include="dbo\Tables\ECPayGreenAIO_sendbeck.sql" />
+    <Build Include="dbo\Tables\ECPayGreenAIO_send.sql" />
+    <Build Include="dbo\Tables\ECPayGreenAIO_LOG.sql" />
+    <Build Include="dbo\Tables\ECGreenPay_TEST.sql" />
+    <Build Include="dbo\Tables\ECGreenPay_RLDetail.sql" />
+    <Build Include="dbo\Tables\ECGreenPay_MarkTest.sql" />
+    <Build Include="dbo\Tables\ECGreenPay_Log.sql" />
+    <Build Include="dbo\Tables\ECGreenPay_LODetail.sql" />
+    <Build Include="dbo\Tables\ECGreenPay_CheckOutFeedback.sql" />
+    <Build Include="dbo\Tables\ECGreenPay_CheckOut.sql" />
+    <Build Include="dbo\Tables\EC_Payment.sql" />
+    <Build Include="dbo\Tables\EC_OrderMessage.sql" />
+    <Build Include="dbo\Tables\EC_OrderLogistics.sql" />
+    <Build Include="dbo\Tables\EC_LINEPAYrequest.sql" />
+    <Build Include="dbo\Tables\EC_LINEPAYPaymentResponse.sql" />
+    <Build Include="dbo\Tables\EC_LINEConfirmResponse.sql" />
+    <Build Include="dbo\Tables\EC_CustomerSigninLog.sql" />
+    <Build Include="dbo\Tables\EC_CustomerShoppingVoucherLog.sql" />
+    <Build Include="dbo\Tables\EC_CustomerReceiveInfo.sql" />
+    <Build Include="dbo\Tables\EC_CustomerLevel.sql" />
+    <Build Include="dbo\Tables\EC_CustomerCollection.sql" />
+    <Build Include="dbo\Tables\EC_CustomerBonusStock.sql" />
+    <Build Include="dbo\Tables\EC_CustomerBonusLog.sql" />
+    <Build Include="dbo\Tables\EC_CustomerBonusImportMaster.sql" />
+    <Build Include="dbo\Tables\EC_CustomerBonusImportDetail.sql" />
+    <Build Include="dbo\Tables\CommodityCustomAttriDetailPrice.sql" />
+    <Build Include="dbo\Tables\AccountsReceivableMaster.sql" />
+    <Build Include="dbo\Tables\AccountsReceivableDetail.sql" />
+    <Build Include="dbo\Tables\ATS_WebSettings.sql" />
+    <Build Include="dbo\Tables\ATS_OrderMaster.sql" />
+    <Build Include="dbo\Tables\ATS_GASettings.sql" />
+    <Build Include="dbo\Tables\ATS_FareSettings.sql" />
+    <Build Include="dbo\Tables\ATS_ExtraSettings.sql" />
+    <Build Include="dbo\Tables\ATS_CityAreaSettings.sql" />
+    <Build Include="dbo\Tables\ATS_CarModelSettings.sql" />
+    <Build Include="dbo\Tables\ATS_AirportTerminalSettings.sql" />
+  </ItemGroup>
+</Project>

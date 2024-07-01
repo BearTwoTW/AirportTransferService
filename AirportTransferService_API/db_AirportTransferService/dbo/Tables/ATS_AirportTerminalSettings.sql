@@ -3,8 +3,8 @@
     [cre_time]   DATETIME       NULL,
     [upd_userid] VARCHAR (50)   NULL,
     [upd_time]   DATETIME       NULL,
-    [visible]    VARCHAR (2)    NULL,
     [ats_id]     VARCHAR (10)   NULL,
+    [visible]    VARCHAR (2)    NULL,
     [airport]    NVARCHAR (255) NULL,
     [terminal]   NVARCHAR (255) NULL
 );

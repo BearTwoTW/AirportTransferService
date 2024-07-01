@@ -3,12 +3,15 @@
     [cre_time]        DATETIME       NULL,
     [upd_userid]      VARCHAR (50)   NULL,
     [upd_time]        DATETIME       NULL,
-    [gas_id]          VARCHAR (10)   NULL,
+    [gas_id]          VARCHAR (10)   NOT NULL,
     [tracking_code]   NVARCHAR (255) NULL,
     [keyword]         NVARCHAR (255) NULL,
     [summary]         NVARCHAR (MAX) NULL,
-    [descriptive_url] NVARCHAR (MAX) NULL
+    [descriptive_url] NVARCHAR (MAX) NULL,
+    CONSTRAINT [PK_ATS_GASettings] PRIMARY KEY CLUSTERED ([gas_id] ASC)
 );
+
+
 
 
 GO

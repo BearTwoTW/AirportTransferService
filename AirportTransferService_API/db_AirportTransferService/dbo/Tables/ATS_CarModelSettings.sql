@@ -3,14 +3,17 @@
     [cre_time]           DATETIME       NULL,
     [upd_userid]         VARCHAR (50)   NULL,
     [upd_time]           DATETIME       NULL,
-    [cms_id]             VARCHAR (10)   NULL,
+    [cms_id]             VARCHAR (10)   NOT NULL,
     [visible]            VARCHAR (2)    NULL,
     [name]               NVARCHAR (255) NULL,
     [max_passengers]     INT            NULL,
     [max_luggage]        INT            NULL,
     [max_child_seats]    INT            NULL,
-    [max_service_extras] INT            NULL
+    [max_service_extras] INT            NULL,
+    CONSTRAINT [PK_ATS_CarModelSettings] PRIMARY KEY CLUSTERED ([cms_id] ASC)
 );
+
+
 
 
 GO

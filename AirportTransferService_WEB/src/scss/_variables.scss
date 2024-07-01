@@ -1,0 +1,212 @@
+$pc-xl: 1920px;
+$pc-lg: 1366px;
+$pc-md: 1024px;
+$mobile-xl: 992px;
+$mobile-lg: 768px;
+$mobile-md: 568px;
+$mobile-sm: 414px;
+$mobile-xs: 375px;
+$mobile-xxs: 320px;
+$White: #fff;
+/**
+ * 通用可以用於 scss 所有檔案
+ * 主題專屬只能用於 js 所有檔案
+ */
+
+$LightOFF__: (
+  Default: #1D212C,
+  DefaultLight: #33363d,
+  DefaultDark: #151a27,
+  DefaultDarkTransparent: rgba(84, 107, 122, 0.1),
+  DefaultContrastText: #AAADC4,
+
+  Primary:#4f7caf,
+  PrimaryLight: #698cb4,
+  PrimaryDark: #486e9c,
+  PrimaryDarkTransparent: rgba(189, 189, 189, 0.1),
+  PrimaryContrastText: $White,
+
+  Secondary:#7E78D2,
+  SecondaryLight: #9d99d3,
+  SecondaryDark: #585492,
+  SecondaryDarkTransparent: rgba(73, 77, 120, 0.1),
+  SecondaryContrastText: $White,
+
+  BtnSuccess:#9EE493,
+  BtnSuccessLight: #afe4a7,
+  BtnSuccessDark: #82bb79,
+  BtnSuccessDarkTransparent: rgba(116, 179, 118, 0.1),
+  BtnSuccessContrastText: $White,
+
+  BtnInfo:#5E7CE2,
+  BtnInfoLight: #8097e4,
+  BtnInfoDark: #4c65b8,
+  BtnInfoTransparent: rgba(116, 179, 118, 0.1),
+  BtnInfoContrastText: $White,
+
+  BtnWarning:#FFC857,
+  BtnWarningLight: #fad07b,
+  BtnWarningDark: #ca9e45,
+  BtnWarningTransparent: rgba(116, 179, 118, 0.1),
+  BtnWarningContrastText: $White,
+
+  BtnError:#D36060,
+  BtnErrorLight: #d47e7e,
+  BtnErrorDark: #9e4848,
+  BtnErrorDarkTransparent: rgba(229, 115, 115, 0.1),
+  BtnErrorContrastText: $White,
+
+  WarningDarkTransparent: rgba(245, 123, 0, 0.1),
+  infoDarkTransparent: rgba(25, 118, 210, 0.1),
+
+  BoxShadowDark:#0f1116,
+  BoxShadowLight:#2c3242,
+  BoxShadowHoverDark:#0f1116,
+  BoxShadowHoverLight:#2c3242,
+
+  PrimaryBoxShadowHoverDark:#47709e,
+  PrimaryBoxShadowHoverLight:#5585bb,
+
+  SecondaryBoxShadowHoverDark:#716cbd,
+  SecondaryBoxShadowHoverLight:#8780e1,
+
+  SuccessBoxShadowHoverDark:#8ecd84,
+  SuccessBoxShadowHoverLight:#a9f49d,
+
+  InfoBoxShadowHoverDark:#5570cb,
+  InfoBoxShadowHoverLight:#6585f2,
+
+  WarningBoxShadowHoverDark:#e6b44e,
+  WarningBoxShadowHoverLight:#ffd65d,
+
+  ErrorBoxShadowHoverDark:#be5656,
+  ErrorBoxShadowHoverLight:#e26767,
+
+  DisabledColor:#2c3242,
+  DisabledTextColor:#434c64,
+  DrawerBackgroundColor:#1D212C,
+  DrawerColor:#6496b8,
+  FooterHeight:30px,
+  FooterBackgroundColor:#1D212C,
+  BreadcrumbsHeight:30px,
+  BreadcrumbsBackground:#1D212C,
+  TableHeadBackgroundColor:#7077b8,
+  TableHeadColor:$White,
+  DividerMarginTop:2,
+  DividerMarginBottom:2,
+  SidebarTextColor:#6496b8,
+  DialogWarningText:#3d85c6,
+  MainOutletBackgroundColor:#1D212C,
+  MainSecOutletBackgroundColor:#1D212C,
+);
+
+$LightON__: (
+  Default: #F1F2F6,
+  DefaultLight: #93aebf,
+  DefaultDark: #e4e5e9,
+  DefaultDarkTransparent: rgba(84, 107, 122, 0.1),
+  DefaultContrastText: #546b7a,
+
+  Primary:#546b7a,
+  PrimaryLight: #546b7a,
+  PrimaryDark: #475b68,
+  PrimaryDarkTransparent: rgba(189, 189, 189, 0.1),
+  PrimaryContrastText: $White,
+
+  Secondary:#696fac,
+  SecondaryLight: #a5a8cd,
+  SecondaryDark: #5b6094,
+  SecondaryDarkTransparent: rgba(73, 77, 120, 0.1),
+  SecondaryContrastText: $White,
+
+  BtnSuccess:#81c784,
+  BtnSuccessLight: #c0e3c1,
+  BtnSuccessDark: #74b376,
+  BtnSuccessDarkTransparent: rgba(116, 179, 118, 0.1),
+  BtnSuccessContrastText: $White,
+
+  BtnInfo:#507CEF,
+  BtnInfoLight: #95ADEB,
+  BtnInfoDark: #476ecf,
+  BtnInfoTransparent: rgba(116, 179, 118, 0.1),
+  BtnInfoContrastText: $White,
+
+  BtnWarning:#f7ab1f,
+  BtnWarningLight: #FFDC98,
+  BtnWarningDark: #e7a01d,
+  BtnWarningTransparent: rgba(116, 179, 118, 0.1),
+  BtnWarningContrastText: $White,
+
+  BtnError:#e57373,
+  BtnErrorLight: #efabab,
+  BtnErrorDark: #d46b6b,
+  BtnErrorDarkTransparent: rgba(229, 115, 115, 0.1),
+  BtnErrorContrastText: $White,
+
+  WarningDarkTransparent: rgba(245, 123, 0, 0.1),
+  infoDarkTransparent: rgba(25, 118, 210, 0.1),
+
+  BoxShadowDark:#cdced1,
+  BoxShadowLight:#ffffff,
+  BoxShadowHoverDark:#d9dadd,
+  BoxShadowHoverLight:#ffffff,
+
+  PrimaryBoxShadowHoverDark:#475b68,
+  PrimaryBoxShadowHoverLight:#617b8c,
+
+  SecondaryBoxShadowHoverDark:#5f649b,
+  SecondaryBoxShadowHoverLight:#7077b8,
+
+  SuccessBoxShadowHoverDark:#74b377,
+  SuccessBoxShadowHoverLight:#8ad58d,
+
+  InfoBoxShadowHoverDark:#4870d7,
+  InfoBoxShadowHoverLight:#5685ff,
+
+  WarningBoxShadowHoverDark:#de9a1c,
+  WarningBoxShadowHoverLight:#ffb721,
+
+  ErrorBoxShadowHoverDark:#ce6868,
+  ErrorBoxShadowHoverLight:#f57b7b,
+
+  DisabledColor:rgba(0, 0, 0, 0.12),
+  DisabledTextColor:#8e8f91,
+  DrawerBackgroundColor:#F1F2F6,
+  DrawerColor:#546b7a,
+  FooterHeight:30px,
+  FooterBackgroundColor:#F1F2F6,
+  BreadcrumbsHeight:30px,
+  BreadcrumbsBackground:#F1F2F6,
+  TableHeadBackgroundColor:#7077b8,
+  TableHeadColor:$White,
+  DividerMarginTop:2,
+  DividerMarginBottom:2,
+  SidebarTextColor:#546b7a,
+  DialogWarningText:#3d85c6,
+  MainOutletBackgroundColor:#F1F2F6,
+  MainSecOutletBackgroundColor:#F1F2F6,
+);
+
+// 通用
+$Utility__: (
+  borderRadius:4px,
+  LogoHeight:64px
+);
+
+:export {
+
+  @each $color,
+  $value in $LightOFF__ {
+    #{"LightOFF__" + $color}: $value;
+  }
+
+  @each $color,
+  $value in $LightON__ {
+    #{"LightON__" + $color}: $value;
+  }
+
+  @each $color,
+  $value in $Utility__ {
+    #{"Utility__" + $color}: $value;
+  }
+}

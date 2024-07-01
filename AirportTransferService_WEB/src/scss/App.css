@@ -1,0 +1,869 @@
+@charset "UTF-8";
+/**
+ * 通用可以用於 scss 所有檔案
+ * 主題專屬只能用於 js 所有檔案
+ */
+:export {
+  LightOFF__Default: #1D212C;
+  LightOFF__DefaultLight: #33363d;
+  LightOFF__DefaultDark: #151a27;
+  LightOFF__DefaultDarkTransparent: rgba(84, 107, 122, 0.1);
+  LightOFF__DefaultContrastText: #AAADC4;
+  LightOFF__Primary: #4f7caf;
+  LightOFF__PrimaryLight: #698cb4;
+  LightOFF__PrimaryDark: #486e9c;
+  LightOFF__PrimaryDarkTransparent: rgba(189, 189, 189, 0.1);
+  LightOFF__PrimaryContrastText: #fff;
+  LightOFF__Secondary: #7E78D2;
+  LightOFF__SecondaryLight: #9d99d3;
+  LightOFF__SecondaryDark: #585492;
+  LightOFF__SecondaryDarkTransparent: rgba(73, 77, 120, 0.1);
+  LightOFF__SecondaryContrastText: #fff;
+  LightOFF__BtnSuccess: #9EE493;
+  LightOFF__BtnSuccessLight: #afe4a7;
+  LightOFF__BtnSuccessDark: #82bb79;
+  LightOFF__BtnSuccessDarkTransparent: rgba(116, 179, 118, 0.1);
+  LightOFF__BtnSuccessContrastText: #fff;
+  LightOFF__BtnInfo: #5E7CE2;
+  LightOFF__BtnInfoLight: #8097e4;
+  LightOFF__BtnInfoDark: #4c65b8;
+  LightOFF__BtnInfoTransparent: rgba(116, 179, 118, 0.1);
+  LightOFF__BtnInfoContrastText: #fff;
+  LightOFF__BtnWarning: #FFC857;
+  LightOFF__BtnWarningLight: #fad07b;
+  LightOFF__BtnWarningDark: #ca9e45;
+  LightOFF__BtnWarningTransparent: rgba(116, 179, 118, 0.1);
+  LightOFF__BtnWarningContrastText: #fff;
+  LightOFF__BtnError: #D36060;
+  LightOFF__BtnErrorLight: #d47e7e;
+  LightOFF__BtnErrorDark: #9e4848;
+  LightOFF__BtnErrorDarkTransparent: rgba(229, 115, 115, 0.1);
+  LightOFF__BtnErrorContrastText: #fff;
+  LightOFF__WarningDarkTransparent: rgba(245, 123, 0, 0.1);
+  LightOFF__infoDarkTransparent: rgba(25, 118, 210, 0.1);
+  LightOFF__BoxShadowDark: #0f1116;
+  LightOFF__BoxShadowLight: #2c3242;
+  LightOFF__BoxShadowHoverDark: #0f1116;
+  LightOFF__BoxShadowHoverLight: #2c3242;
+  LightOFF__PrimaryBoxShadowHoverDark: #47709e;
+  LightOFF__PrimaryBoxShadowHoverLight: #5585bb;
+  LightOFF__SecondaryBoxShadowHoverDark: #716cbd;
+  LightOFF__SecondaryBoxShadowHoverLight: #8780e1;
+  LightOFF__SuccessBoxShadowHoverDark: #8ecd84;
+  LightOFF__SuccessBoxShadowHoverLight: #a9f49d;
+  LightOFF__InfoBoxShadowHoverDark: #5570cb;
+  LightOFF__InfoBoxShadowHoverLight: #6585f2;
+  LightOFF__WarningBoxShadowHoverDark: #e6b44e;
+  LightOFF__WarningBoxShadowHoverLight: #ffd65d;
+  LightOFF__ErrorBoxShadowHoverDark: #be5656;
+  LightOFF__ErrorBoxShadowHoverLight: #e26767;
+  LightOFF__DisabledColor: #2c3242;
+  LightOFF__DisabledTextColor: #434c64;
+  LightOFF__DrawerBackgroundColor: #1D212C;
+  LightOFF__DrawerColor: #6496b8;
+  LightOFF__FooterHeight: 30px;
+  LightOFF__FooterBackgroundColor: #1D212C;
+  LightOFF__BreadcrumbsHeight: 30px;
+  LightOFF__BreadcrumbsBackground: #1D212C;
+  LightOFF__TableHeadBackgroundColor: #7077b8;
+  LightOFF__TableHeadColor: #fff;
+  LightOFF__DividerMarginTop: 2;
+  LightOFF__DividerMarginBottom: 2;
+  LightOFF__SidebarTextColor: #6496b8;
+  LightOFF__DialogWarningText: #3d85c6;
+  LightOFF__MainOutletBackgroundColor: #1D212C;
+  LightOFF__MainSecOutletBackgroundColor: #1D212C;
+  LightON__Default: #F1F2F6;
+  LightON__DefaultLight: #93aebf;
+  LightON__DefaultDark: #e4e5e9;
+  LightON__DefaultDarkTransparent: rgba(84, 107, 122, 0.1);
+  LightON__DefaultContrastText: #546b7a;
+  LightON__Primary: #546b7a;
+  LightON__PrimaryLight: #546b7a;
+  LightON__PrimaryDark: #475b68;
+  LightON__PrimaryDarkTransparent: rgba(189, 189, 189, 0.1);
+  LightON__PrimaryContrastText: #fff;
+  LightON__Secondary: #696fac;
+  LightON__SecondaryLight: #a5a8cd;
+  LightON__SecondaryDark: #5b6094;
+  LightON__SecondaryDarkTransparent: rgba(73, 77, 120, 0.1);
+  LightON__SecondaryContrastText: #fff;
+  LightON__BtnSuccess: #81c784;
+  LightON__BtnSuccessLight: #c0e3c1;
+  LightON__BtnSuccessDark: #74b376;
+  LightON__BtnSuccessDarkTransparent: rgba(116, 179, 118, 0.1);
+  LightON__BtnSuccessContrastText: #fff;
+  LightON__BtnInfo: #507CEF;
+  LightON__BtnInfoLight: #95ADEB;
+  LightON__BtnInfoDark: #476ecf;
+  LightON__BtnInfoTransparent: rgba(116, 179, 118, 0.1);
+  LightON__BtnInfoContrastText: #fff;
+  LightON__BtnWarning: #f7ab1f;
+  LightON__BtnWarningLight: #FFDC98;
+  LightON__BtnWarningDark: #e7a01d;
+  LightON__BtnWarningTransparent: rgba(116, 179, 118, 0.1);
+  LightON__BtnWarningContrastText: #fff;
+  LightON__BtnError: #e57373;
+  LightON__BtnErrorLight: #efabab;
+  LightON__BtnErrorDark: #d46b6b;
+  LightON__BtnErrorDarkTransparent: rgba(229, 115, 115, 0.1);
+  LightON__BtnErrorContrastText: #fff;
+  LightON__WarningDarkTransparent: rgba(245, 123, 0, 0.1);
+  LightON__infoDarkTransparent: rgba(25, 118, 210, 0.1);
+  LightON__BoxShadowDark: #cdced1;
+  LightON__BoxShadowLight: #ffffff;
+  LightON__BoxShadowHoverDark: #d9dadd;
+  LightON__BoxShadowHoverLight: #ffffff;
+  LightON__PrimaryBoxShadowHoverDark: #475b68;
+  LightON__PrimaryBoxShadowHoverLight: #617b8c;
+  LightON__SecondaryBoxShadowHoverDark: #5f649b;
+  LightON__SecondaryBoxShadowHoverLight: #7077b8;
+  LightON__SuccessBoxShadowHoverDark: #74b377;
+  LightON__SuccessBoxShadowHoverLight: #8ad58d;
+  LightON__InfoBoxShadowHoverDark: #4870d7;
+  LightON__InfoBoxShadowHoverLight: #5685ff;
+  LightON__WarningBoxShadowHoverDark: #de9a1c;
+  LightON__WarningBoxShadowHoverLight: #ffb721;
+  LightON__ErrorBoxShadowHoverDark: #ce6868;
+  LightON__ErrorBoxShadowHoverLight: #f57b7b;
+  LightON__DisabledColor: rgba(0, 0, 0, 0.12);
+  LightON__DisabledTextColor: #8e8f91;
+  LightON__DrawerBackgroundColor: #F1F2F6;
+  LightON__DrawerColor: #546b7a;
+  LightON__FooterHeight: 30px;
+  LightON__FooterBackgroundColor: #F1F2F6;
+  LightON__BreadcrumbsHeight: 30px;
+  LightON__BreadcrumbsBackground: #F1F2F6;
+  LightON__TableHeadBackgroundColor: #7077b8;
+  LightON__TableHeadColor: #fff;
+  LightON__DividerMarginTop: 2;
+  LightON__DividerMarginBottom: 2;
+  LightON__SidebarTextColor: #546b7a;
+  LightON__DialogWarningText: #3d85c6;
+  LightON__MainOutletBackgroundColor: #F1F2F6;
+  LightON__MainSecOutletBackgroundColor: #F1F2F6;
+  Utility__borderRadius: 4px;
+  Utility__LogoHeight: 64px;
+}
+
+/**
+  * Header start
+  */
+.WebHeader {
+  position: fixed;
+  box-shadow: none;
+}
+.WebHeader__Toolbar {
+  min-height: 64px;
+  background-color: #FFFFFF;
+}
+.WebHeader__button {
+  display: flex;
+  border-radius: 10px !important;
+}
+.WebHeader__button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+.WebHeader__button:active span {
+  margin-top: 1px;
+}
+.WebHeader__menuButton {
+  min-width: 0;
+  margin: 1em;
+}
+.WebHeader__userButton {
+  margin: 1em;
+}
+.WebHeader__logo {
+  height: 64px;
+  width: 64px;
+}
+.WebHeader__Toolbar__dark {
+  min-height: 64px;
+  background-color: #1D212C;
+}
+.WebHeader__button__dark {
+  display: flex;
+  border-radius: 10px !important;
+}
+.WebHeader__button__dark:active span {
+  margin-top: 1px;
+}
+.WebHeader__menuButton__dark {
+  min-width: 0;
+  margin: 1em;
+}
+.WebHeader__userButton__dark {
+  margin: 1em;
+}
+
+/**
+ * Header end
+ */
+/**
+ * 通用可以用於 scss 所有檔案
+ * 主題專屬只能用於 js 所有檔案
+ */
+:export {
+  LightOFF__Default: #1D212C;
+  LightOFF__DefaultLight: #33363d;
+  LightOFF__DefaultDark: #151a27;
+  LightOFF__DefaultDarkTransparent: rgba(84, 107, 122, 0.1);
+  LightOFF__DefaultContrastText: #AAADC4;
+  LightOFF__Primary: #4f7caf;
+  LightOFF__PrimaryLight: #698cb4;
+  LightOFF__PrimaryDark: #486e9c;
+  LightOFF__PrimaryDarkTransparent: rgba(189, 189, 189, 0.1);
+  LightOFF__PrimaryContrastText: #fff;
+  LightOFF__Secondary: #7E78D2;
+  LightOFF__SecondaryLight: #9d99d3;
+  LightOFF__SecondaryDark: #585492;
+  LightOFF__SecondaryDarkTransparent: rgba(73, 77, 120, 0.1);
+  LightOFF__SecondaryContrastText: #fff;
+  LightOFF__BtnSuccess: #9EE493;
+  LightOFF__BtnSuccessLight: #afe4a7;
+  LightOFF__BtnSuccessDark: #82bb79;
+  LightOFF__BtnSuccessDarkTransparent: rgba(116, 179, 118, 0.1);
+  LightOFF__BtnSuccessContrastText: #fff;
+  LightOFF__BtnInfo: #5E7CE2;
+  LightOFF__BtnInfoLight: #8097e4;
+  LightOFF__BtnInfoDark: #4c65b8;
+  LightOFF__BtnInfoTransparent: rgba(116, 179, 118, 0.1);
+  LightOFF__BtnInfoContrastText: #fff;
+  LightOFF__BtnWarning: #FFC857;
+  LightOFF__BtnWarningLight: #fad07b;
+  LightOFF__BtnWarningDark: #ca9e45;
+  LightOFF__BtnWarningTransparent: rgba(116, 179, 118, 0.1);
+  LightOFF__BtnWarningContrastText: #fff;
+  LightOFF__BtnError: #D36060;
+  LightOFF__BtnErrorLight: #d47e7e;
+  LightOFF__BtnErrorDark: #9e4848;
+  LightOFF__BtnErrorDarkTransparent: rgba(229, 115, 115, 0.1);
+  LightOFF__BtnErrorContrastText: #fff;
+  LightOFF__WarningDarkTransparent: rgba(245, 123, 0, 0.1);
+  LightOFF__infoDarkTransparent: rgba(25, 118, 210, 0.1);
+  LightOFF__BoxShadowDark: #0f1116;
+  LightOFF__BoxShadowLight: #2c3242;
+  LightOFF__BoxShadowHoverDark: #0f1116;
+  LightOFF__BoxShadowHoverLight: #2c3242;
+  LightOFF__PrimaryBoxShadowHoverDark: #47709e;
+  LightOFF__PrimaryBoxShadowHoverLight: #5585bb;
+  LightOFF__SecondaryBoxShadowHoverDark: #716cbd;
+  LightOFF__SecondaryBoxShadowHoverLight: #8780e1;
+  LightOFF__SuccessBoxShadowHoverDark: #8ecd84;
+  LightOFF__SuccessBoxShadowHoverLight: #a9f49d;
+  LightOFF__InfoBoxShadowHoverDark: #5570cb;
+  LightOFF__InfoBoxShadowHoverLight: #6585f2;
+  LightOFF__WarningBoxShadowHoverDark: #e6b44e;
+  LightOFF__WarningBoxShadowHoverLight: #ffd65d;
+  LightOFF__ErrorBoxShadowHoverDark: #be5656;
+  LightOFF__ErrorBoxShadowHoverLight: #e26767;
+  LightOFF__DisabledColor: #2c3242;
+  LightOFF__DisabledTextColor: #434c64;
+  LightOFF__DrawerBackgroundColor: #1D212C;
+  LightOFF__DrawerColor: #6496b8;
+  LightOFF__FooterHeight: 30px;
+  LightOFF__FooterBackgroundColor: #1D212C;
+  LightOFF__BreadcrumbsHeight: 30px;
+  LightOFF__BreadcrumbsBackground: #1D212C;
+  LightOFF__TableHeadBackgroundColor: #7077b8;
+  LightOFF__TableHeadColor: #fff;
+  LightOFF__DividerMarginTop: 2;
+  LightOFF__DividerMarginBottom: 2;
+  LightOFF__SidebarTextColor: #6496b8;
+  LightOFF__DialogWarningText: #3d85c6;
+  LightOFF__MainOutletBackgroundColor: #1D212C;
+  LightOFF__MainSecOutletBackgroundColor: #1D212C;
+  LightON__Default: #F1F2F6;
+  LightON__DefaultLight: #93aebf;
+  LightON__DefaultDark: #e4e5e9;
+  LightON__DefaultDarkTransparent: rgba(84, 107, 122, 0.1);
+  LightON__DefaultContrastText: #546b7a;
+  LightON__Primary: #546b7a;
+  LightON__PrimaryLight: #546b7a;
+  LightON__PrimaryDark: #475b68;
+  LightON__PrimaryDarkTransparent: rgba(189, 189, 189, 0.1);
+  LightON__PrimaryContrastText: #fff;
+  LightON__Secondary: #696fac;
+  LightON__SecondaryLight: #a5a8cd;
+  LightON__SecondaryDark: #5b6094;
+  LightON__SecondaryDarkTransparent: rgba(73, 77, 120, 0.1);
+  LightON__SecondaryContrastText: #fff;
+  LightON__BtnSuccess: #81c784;
+  LightON__BtnSuccessLight: #c0e3c1;
+  LightON__BtnSuccessDark: #74b376;
+  LightON__BtnSuccessDarkTransparent: rgba(116, 179, 118, 0.1);
+  LightON__BtnSuccessContrastText: #fff;
+  LightON__BtnInfo: #507CEF;
+  LightON__BtnInfoLight: #95ADEB;
+  LightON__BtnInfoDark: #476ecf;
+  LightON__BtnInfoTransparent: rgba(116, 179, 118, 0.1);
+  LightON__BtnInfoContrastText: #fff;
+  LightON__BtnWarning: #f7ab1f;
+  LightON__BtnWarningLight: #FFDC98;
+  LightON__BtnWarningDark: #e7a01d;
+  LightON__BtnWarningTransparent: rgba(116, 179, 118, 0.1);
+  LightON__BtnWarningContrastText: #fff;
+  LightON__BtnError: #e57373;
+  LightON__BtnErrorLight: #efabab;
+  LightON__BtnErrorDark: #d46b6b;
+  LightON__BtnErrorDarkTransparent: rgba(229, 115, 115, 0.1);
+  LightON__BtnErrorContrastText: #fff;
+  LightON__WarningDarkTransparent: rgba(245, 123, 0, 0.1);
+  LightON__infoDarkTransparent: rgba(25, 118, 210, 0.1);
+  LightON__BoxShadowDark: #cdced1;
+  LightON__BoxShadowLight: #ffffff;
+  LightON__BoxShadowHoverDark: #d9dadd;
+  LightON__BoxShadowHoverLight: #ffffff;
+  LightON__PrimaryBoxShadowHoverDark: #475b68;
+  LightON__PrimaryBoxShadowHoverLight: #617b8c;
+  LightON__SecondaryBoxShadowHoverDark: #5f649b;
+  LightON__SecondaryBoxShadowHoverLight: #7077b8;
+  LightON__SuccessBoxShadowHoverDark: #74b377;
+  LightON__SuccessBoxShadowHoverLight: #8ad58d;
+  LightON__InfoBoxShadowHoverDark: #4870d7;
+  LightON__InfoBoxShadowHoverLight: #5685ff;
+  LightON__WarningBoxShadowHoverDark: #de9a1c;
+  LightON__WarningBoxShadowHoverLight: #ffb721;
+  LightON__ErrorBoxShadowHoverDark: #ce6868;
+  LightON__ErrorBoxShadowHoverLight: #f57b7b;
+  LightON__DisabledColor: rgba(0, 0, 0, 0.12);
+  LightON__DisabledTextColor: #8e8f91;
+  LightON__DrawerBackgroundColor: #F1F2F6;
+  LightON__DrawerColor: #546b7a;
+  LightON__FooterHeight: 30px;
+  LightON__FooterBackgroundColor: #F1F2F6;
+  LightON__BreadcrumbsHeight: 30px;
+  LightON__BreadcrumbsBackground: #F1F2F6;
+  LightON__TableHeadBackgroundColor: #7077b8;
+  LightON__TableHeadColor: #fff;
+  LightON__DividerMarginTop: 2;
+  LightON__DividerMarginBottom: 2;
+  LightON__SidebarTextColor: #546b7a;
+  LightON__DialogWarningText: #3d85c6;
+  LightON__MainOutletBackgroundColor: #F1F2F6;
+  LightON__MainSecOutletBackgroundColor: #F1F2F6;
+  Utility__borderRadius: 4px;
+  Utility__LogoHeight: 64px;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes rotate {
+  100% {
+    transform: rotate(1turn);
+  }
+}
+@keyframes pass {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes slideInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes slideOutRight {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100%);
+    visibility: hidden;
+  }
+}
+@keyframes slideInTop {
+  0% {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+html,
+body {
+  overflow: visible !important;
+}
+
+html {
+  font-size: 0.8rem !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue";
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue" sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  overflow: hidden;
+}
+
+#sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+.Card__Light {
+  background-color: #FFFFFF;
+  border-radius: 14px;
+  padding: 14px;
+  margin: 20px 10px;
+  transition: all 0.2s ease;
+  animation: fade 0.5s ease;
+}
+
+.Card__Dark {
+  border-radius: 14px;
+  padding: 14px;
+  margin: 20px 10px;
+  transition: all 0.2s ease;
+  animation: fade 0.5s ease;
+}
+
+.LinearLoading {
+  background-color: #a4bbca !important;
+}
+.LinearLoading span {
+  background-color: #546b7a !important;
+}
+
+.CircularLoading {
+  color: #546b7a !important;
+}
+
+/* Scrollbar thumb styles */
+/* width */
+::-webkit-scrollbar {
+  height: 7px;
+  width: 7px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #c7c6c6;
+  width: 7px;
+  border-radius: 5px;
+}
+
+/* 重直水平置中 */
+.middle {
+  align-items: center;
+  justify-content: center;
+  display: flex;
+}
+
+/* 重直置中 */
+.alignMiddle {
+  align-items: center;
+  display: flex;
+}
+
+/* 是否必填 */
+.starRequired label::after {
+  content: "*";
+  color: #d32f2f;
+  padding-left: 4px;
+}
+
+.main__container {
+  position: relative;
+  flex-grow: 1;
+  height: calc(100vh - 64px);
+  margin-top: 64px;
+}
+.main__outlet {
+  overflow-y: auto;
+  overflow-x: auto;
+  padding: 8px;
+  padding-bottom: 38px;
+}
+.main__link {
+  text-decoration: none !important;
+  text-decoration-color: transparent !important;
+}
+
+.Pagination__btn {
+  margin: 5px;
+  min-width: 35px;
+  min-height: 35px;
+  border-radius: 50%;
+  color: #546b7a;
+}
+.Pagination__btn.active {
+  background-color: rgba(120, 154, 175, 0.2);
+  color: #546b7a;
+}
+@media screen and (max-width: 600px) {
+  .Pagination__btn {
+    margin: 0;
+  }
+}
+
+.simpleTable {
+  background: #fff;
+}
+.simpleTable__color {
+  color: #343434 !important;
+}
+
+.cusError__NoResults {
+  display: flex;
+  padding: 3rem 5rem;
+  text-align: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+.cusError__NoResults > svg {
+  margin: 0 0.5rem;
+  width: 5rem;
+  height: 5rem;
+  color: #cbd1dd;
+}
+.cusError__NoResults > span {
+  margin: 0.5rem;
+  text-align: center;
+  font-size: 1rem;
+  color: #cbd1dd;
+}
+
+.upload_file {
+  /* 選擇預覽或是刪除 */
+  /* 上傳檔案的卡片形式 */
+}
+.upload_file_input {
+  position: relative;
+  cursor: pointer;
+}
+.upload_file_input:hover .upload_file_overlay {
+  opacity: 1;
+}
+.upload_file_overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.12);
+  /* Semi-transparent black background */
+  display: flex;
+  justify-content: center;
+  /* Centers buttons in the middle */
+  align-items: center;
+  opacity: 0;
+  /* Initially hide the overlay */
+  transition: opacity 0.3s;
+  /* Smooth transition for the overlay */
+}
+.upload_file_edit {
+  display: none;
+  z-index: 100;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  justify-content: center;
+  align-items: center;
+  background: rgba(71, 72, 77, 0.8);
+  border-radius: 4px;
+}
+.upload_file_preview {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: auto;
+  height: 170px;
+  max-width: 100%;
+  max-height: 170px;
+  margin: 0 auto;
+}
+.upload_file_preview:hover > .upload_file_edit {
+  display: flex;
+}
+.upload_file_preview > img {
+  max-height: 100%;
+  max-width: 100%;
+}
+.upload_file_upload {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  height: 170px;
+  max-width: 100%;
+  max-height: 170px;
+  margin: 0 auto;
+  border: 1px dashed #cccccc;
+}
+@media screen and (max-width: 960px) {
+  .upload_file .upload_file_card {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  .upload_file .upload_file_card > div {
+    overflow: hidden;
+  }
+  .upload_file .upload_file_btn {
+    display: flex;
+    justify-content: flex-start;
+  }
+  .upload_file .upload_file_preview {
+    width: 30vw;
+    height: 10vh;
+    margin: 0;
+    min-width: 30vw;
+  }
+  .upload_file .upload_file_upload {
+    height: 10vh;
+  }
+}
+
+.hasBorder {
+  border: 1px solid rgba(0, 0, 0, 0.125) !important;
+  border-radius: 0.25rem;
+  /* overflow: hidden; */
+}
+
+.file-img-input {
+  display: inline-block;
+  text-align: left;
+  width: 450px;
+  position: relative;
+  border-radius: 3px;
+}
+.file-img-input > [type=file] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  z-index: 10;
+  cursor: pointer;
+  transition: all 1s;
+}
+.file-img-input > button:not(.clear-input) {
+  display: inline-block;
+  cursor: pointer;
+  background: #eee;
+  padding: 8px 16px;
+  border-radius: 0;
+  border: 1px solid rgba(0, 0, 0, 0.1176470588);
+  transition: 0.5s;
+}
+.file-img-input > button:not(.clear-input):not(.clear-input) {
+  background: #a4bbca;
+  color: white;
+}
+.file-img-input > .label {
+  padding-left: 10px;
+  color: #333;
+  white-space: nowrap;
+  opacity: 0.3;
+}
+.file-img-input.-chosen > .label {
+  opacity: 1;
+}
+
+.file-img-preview {
+  height: 10rem;
+  width: 10rem;
+  overflow: hidden;
+  margin: auto;
+  border-radius: 10px;
+}
+.file-img-preview img[src=""],
+.file-img-preview img:not([src]) {
+  display: none;
+}
+
+.ellipsis-normal {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.dollarSign::before {
+  text-align: right;
+  content: "$ ";
+}
+
+.plusSign::before {
+  text-align: right;
+  content: "+ ";
+}
+
+.discountSign::before {
+  text-align: right;
+  content: "- ";
+}
+
+.dollarSignDiscount::before {
+  text-align: right;
+  content: "- $ ";
+}
+
+.percent::after {
+  text-align: right;
+  content: "% ";
+}
+
+.countSign::before {
+  text-align: right;
+  content: "X ";
+}
+
+.l {
+  color: #F1F2F6;
+  opacity: 0;
+  animation: pass 2s ease-in-out infinite;
+  animation-delay: 0.2s;
+  letter-spacing: 0.5em;
+  text-shadow: 2px 2px 3px #aaaaaa, -2px -2px 4px #ffffff;
+  font-size: 25px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+.o {
+  color: #F1F2F6;
+  opacity: 0;
+  animation: pass 2s ease-in-out infinite;
+  animation-delay: 0.4s;
+  letter-spacing: 0.5em;
+  text-shadow: 2px 2px 3px #aaaaaa, -2px -2px 4px #ffffff;
+  font-size: 25px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+.a {
+  color: #F1F2F6;
+  opacity: 0;
+  animation: pass 2s ease-in-out infinite;
+  animation-delay: 0.6s;
+  letter-spacing: 0.5em;
+  text-shadow: 2px 2px 3px #aaaaaa, -2px -2px 4px #ffffff;
+  font-size: 25px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+.d {
+  color: #F1F2F6;
+  opacity: 0;
+  animation: pass 2s ease-in-out infinite;
+  animation-delay: 0.8s;
+  letter-spacing: 0.5em;
+  text-shadow: 2px 2px 3px #aaaaaa, -2px -2px 4px #ffffff;
+  font-size: 25px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+.i {
+  color: #F1F2F6;
+  opacity: 0;
+  animation: pass 2s ease-in-out infinite;
+  animation-delay: 1s;
+  letter-spacing: 0.5em;
+  text-shadow: 2px 2px 3px #aaaaaa, -2px -2px 4px #ffffff;
+  font-size: 25px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+.n {
+  color: #F1F2F6;
+  opacity: 0;
+  animation: pass 2s ease-in-out infinite;
+  animation-delay: 1.2s;
+  letter-spacing: 0.5em;
+  text-shadow: 2px 2px 3px #aaaaaa, -2px -2px 4px #ffffff;
+  font-size: 25px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+.g {
+  color: #F1F2F6;
+  opacity: 0;
+  animation: pass 2s ease-in-out infinite;
+  animation-delay: 1.4s;
+  letter-spacing: 0.5em;
+  text-shadow: 2px 2px 3px #aaaaaa, -2px -2px 4px #ffffff;
+  font-size: 25px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+.d1 {
+  color: #F1F2F6;
+  opacity: 0;
+  animation: pass 2s ease-in-out infinite;
+  animation-delay: 1.6s;
+  letter-spacing: 0.5em;
+  text-shadow: 2px 2px 3px #aaaaaa, -2px -2px 4px #ffffff;
+  font-size: 25px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+.d2 {
+  color: #F1F2F6;
+  opacity: 0;
+  animation: pass 2s ease-in-out infinite;
+  animation-delay: 2s;
+  letter-spacing: 0.5em;
+  text-shadow: 2px 2px 3px #aaaaaa, -2px -2px 4px #ffffff;
+  font-size: 25px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}/*# sourceMappingURL=App.css.map */

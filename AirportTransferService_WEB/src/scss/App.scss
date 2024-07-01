@@ -1,0 +1,547 @@
+@import './_Navigation.scss';
+@import './variables.scss';
+@import './animation.scss';
+
+html,
+body {
+  overflow: visible !important;
+}
+
+html {
+  // font-size: 0.87rem !important;
+  font-size: 0.8rem !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue';
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue'
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  // padding: 0 !important;
+}
+
+#root {
+  overflow: hidden;
+}
+
+// 隱藏sidebar的卷軸
+#sidebar::-webkit-scrollbar {
+  display: none
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+// loader lightOn
+// .Loader__Light {
+//   width: 50px;
+//   height: 50px;
+//   border-radius: 50%;
+//   box-shadow: 6px 6px 12px #cdced1, -6px -6px 12px #ffffff;
+//   animation: size1_2 2.0s infinite linear;
+// }
+
+// // loader darkOff
+// .Loader__Dark {
+//   width: 50px;
+//   height: 50px;
+//   border-radius: 50%;
+//   box-shadow: 5px 5px 10px #0c0d12, -5px -5px 10px #2e3546;
+//   animation: rotate 2.0s infinite linear;
+// }
+
+// soft-ui lightOn
+.Card__Light {
+  background-color: #FFFFFF;
+  border-radius: 14px;
+  padding: 14px;
+  margin: 20px 10px;
+  transition: all .2s ease;
+  animation: fade .5s ease;
+}
+
+// soft-ui lightOff
+.Card__Dark {
+  border-radius: 14px;
+  padding: 14px;
+  margin: 20px 10px;
+  transition: all .2s ease;
+  animation: fade .5s ease;
+}
+
+.LinearLoading {
+  background-color: #a4bbca !important;
+
+  & span {
+    background-color: #546b7a !important;
+  }
+}
+
+.CircularLoading {
+  color: #546b7a !important;
+}
+
+/* Scrollbar thumb styles */
+/* width */
+::-webkit-scrollbar {
+  height: 7px;
+  width: 7px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  // background: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #c7c6c6;
+  //background: transparent;
+  width: 7px;
+  border-radius: 5px;
+}
+
+/* 重直水平置中 */
+.middle {
+  align-items: center;
+  justify-content: center;
+  display: flex;
+}
+
+/* 重直置中 */
+.alignMiddle {
+  align-items: center;
+  display: flex;
+}
+
+/* 是否必填 */
+.starRequired {
+  label {
+    &::after {
+      content: "*";
+      color: #d32f2f;
+      padding-left: 4px;
+    }
+  }
+}
+
+.main {
+  &__container {
+    position: relative;
+    flex-grow: 1;
+    height: calc(100vh - map-get($Utility__, LogoHeight));
+    margin-top: map-get($Utility__, LogoHeight);
+  }
+
+  &__outlet {
+    overflow-y: auto;
+    overflow-x: auto;
+    padding: 8px;
+    padding-bottom: 38px;
+  }
+
+  &__link {
+    text-decoration: none !important;
+    text-decoration-color: transparent !important;
+  }
+}
+
+// iframe {
+//   display: none;
+// }
+
+.Pagination {
+  &__btn {
+    margin: 5px;
+    min-width: 35px;
+    min-height: 35px;
+    border-radius: 50%;
+    color: #546b7a;
+
+    &.active {
+      background-color: rgba(120, 154, 175, 0.2);
+      color: #546b7a
+    }
+
+    @media screen and (max-width: 600px) {
+      margin: 0;
+    }
+  }
+
+
+}
+
+.simpleTable {
+  background: #fff;
+
+  &__color {
+    color: #343434 !important;
+  }
+}
+
+.cusError {
+  &__NoResults {
+    display: flex;
+    padding: 3rem 5rem;
+    text-align: center;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+
+    &>svg {
+      margin: 0 0.5rem;
+      width: 5rem;
+      height: 5rem;
+      color: #cbd1dd;
+    }
+
+    &>span {
+      margin: 0.5rem;
+      text-align: center;
+      font-size: 1rem;
+      color: #cbd1dd;
+    }
+  }
+}
+
+
+$border-color: #cccccc;
+$overlay-color: rgba(71, 72, 77, 0.8);
+
+.upload_file {
+
+  &_input {
+    position: relative;
+    cursor: pointer;
+
+    &:hover .upload_file_overlay {
+      opacity: 1;
+    }
+  }
+
+  &_overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.12);
+    /* Semi-transparent black background */
+    display: flex;
+    justify-content: center;
+    /* Centers buttons in the middle */
+    align-items: center;
+    opacity: 0;
+    /* Initially hide the overlay */
+    transition: opacity 0.3s;
+    /* Smooth transition for the overlay */
+  }
+
+  /* 選擇預覽或是刪除 */
+  &_edit {
+    display: none;
+    z-index: 100;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+    background: $overlay-color;
+    border-radius: 4px;
+  }
+
+  /* 上傳檔案的卡片形式 */
+  &_preview {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: auto;
+    height: 170px;
+    max-width: 100%;
+    max-height: 170px;
+    margin: 0 auto;
+
+    &:hover {
+      >.upload_file_edit {
+        display: flex;
+      }
+    }
+
+    >img {
+      max-height: 100%;
+      max-width: 100%;
+    }
+  }
+
+  &_upload {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    height: 170px;
+    max-width: 100%;
+    max-height: 170px;
+    margin: 0 auto;
+    border: 1px dashed $border-color;
+  }
+
+  @media screen and (max-width:960px) {
+    .upload_file_card {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .upload_file_card>div {
+      overflow: hidden;
+    }
+
+    .upload_file_btn {
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    .upload_file_preview {
+      width: 30vw;
+      height: 10vh;
+      margin: 0;
+      min-width: 30vw;
+    }
+
+    .upload_file_upload {
+      height: 10vh;
+    }
+  }
+}
+
+.hasBorder {
+  border: 1px solid rgba(0, 0, 0, 0.125) !important;
+  border-radius: 0.25rem;
+  /* overflow: hidden; */
+}
+
+.file-img-input {
+  display: inline-block;
+  text-align: left;
+  width: 450px;
+  position: relative;
+  border-radius: 3px;
+
+  >[type='file'] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    z-index: 10;
+    cursor: pointer;
+    transition: all 1s;
+  }
+
+  >button:not(.clear-input) {
+    display: inline-block;
+    cursor: pointer;
+    background: #eee;
+    padding: 8px 16px;
+    border-radius: 0;
+    border: 1px solid #0000001e;
+    transition: 0.5s;
+
+    &:not(.clear-input) {
+      background: #a4bbca;
+      color: #ffff;
+    }
+  }
+
+  >.label {
+    padding-left: 10px;
+    color: #333;
+    white-space: nowrap;
+    opacity: 0.3;
+  }
+
+  &.-chosen>.label {
+    opacity: 1;
+  }
+}
+
+.file-img-preview {
+  height: 10rem;
+  width: 10rem;
+  overflow: hidden;
+  margin: auto;
+  border-radius: 10px;
+
+  img[src=""],
+  img:not([src]) {
+    display: none;
+  }
+}
+
+.ellipsis-normal {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.dollarSign::before {
+  text-align: right;
+  content: "$ "
+}
+
+.plusSign::before {
+  text-align: right;
+  content: "+ ";
+}
+
+.discountSign::before {
+  text-align: right;
+  content: "- ";
+}
+
+.dollarSignDiscount::before {
+  text-align: right;
+  content: "- $ "
+}
+
+.percent::after {
+  text-align: right;
+  content: "% "
+}
+
+.countSign::before {
+  text-align: right;
+  content: "X "
+}
+
+
+
+// 暫時用此 Loader, 圖形版還沒想法 
+.l {
+  color: #F1F2F6;
+  opacity: 0;
+  animation: pass 2s ease-in-out infinite;
+  animation-delay: 0.2s;
+  letter-spacing: 0.5em;
+  text-shadow: 2px 2px 3px #aaaaaa, -2px -2px 4px #ffffff;
+  font-size: 25px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+.o {
+  color: #F1F2F6;
+  opacity: 0;
+  animation: pass 2s ease-in-out infinite;
+  animation-delay: 0.4s;
+  letter-spacing: 0.5em;
+  text-shadow: 2px 2px 3px #aaaaaa, -2px -2px 4px #ffffff;
+  font-size: 25px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+.a {
+  color: #F1F2F6;
+  opacity: 0;
+  animation: pass 2s ease-in-out infinite;
+  animation-delay: 0.6s;
+  letter-spacing: 0.5em;
+  text-shadow: 2px 2px 3px #aaaaaa, -2px -2px 4px #ffffff;
+  font-size: 25px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+.d {
+  color: #F1F2F6;
+  opacity: 0;
+  animation: pass 2s ease-in-out infinite;
+  animation-delay: 0.8s;
+  letter-spacing: 0.5em;
+  text-shadow: 2px 2px 3px #aaaaaa, -2px -2px 4px #ffffff;
+  font-size: 25px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+.i {
+  color: #F1F2F6;
+  opacity: 0;
+  animation: pass 2s ease-in-out infinite;
+  animation-delay: 1s;
+  letter-spacing: 0.5em;
+  text-shadow: 2px 2px 3px #aaaaaa, -2px -2px 4px #ffffff;
+  font-size: 25px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+.n {
+  color: #F1F2F6;
+  opacity: 0;
+  animation: pass 2s ease-in-out infinite;
+  animation-delay: 1.2s;
+  letter-spacing: 0.5em;
+  text-shadow: 2px 2px 3px #aaaaaa, -2px -2px 4px #ffffff;
+  font-size: 25px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+.g {
+  color: #F1F2F6;
+  opacity: 0;
+  animation: pass 2s ease-in-out infinite;
+  animation-delay: 1.4s;
+  letter-spacing: 0.5em;
+  text-shadow: 2px 2px 3px #aaaaaa, -2px -2px 4px #ffffff;
+  font-size: 25px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+.d1 {
+  color: #F1F2F6;
+  opacity: 0;
+  animation: pass 2s ease-in-out infinite;
+  animation-delay: 1.6s;
+  letter-spacing: 0.5em;
+  text-shadow: 2px 2px 3px #aaaaaa, -2px -2px 4px #ffffff;
+  font-size: 25px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+.d2 {
+  color: #F1F2F6;
+  opacity: 0;
+  animation: pass 2s ease-in-out infinite;
+  animation-delay: 2s;
+  letter-spacing: 0.5em;
+  text-shadow: 2px 2px 3px #aaaaaa, -2px -2px 4px #ffffff;
+  font-size: 25px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}

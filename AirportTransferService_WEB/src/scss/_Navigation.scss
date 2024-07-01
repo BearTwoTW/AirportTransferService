@@ -1,0 +1,76 @@
+@import '_variables';
+
+/**
+  * Header start
+  */
+.WebHeader {
+  position: fixed;
+  box-shadow: none;
+
+  // light mode
+  &__Toolbar {
+    min-height: 64px;
+    background-color: #FFFFFF;
+  }
+
+  &__button {
+    display: flex;
+    border-radius: 10px !important;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    &:active {
+      span {
+        margin-top: 1px;
+      }
+    }
+  }
+
+  &__menuButton {
+    min-width: 0;
+    margin: 1em;
+  }
+
+  &__userButton {
+    margin: 1em;
+  }
+
+  &__logo {
+    height: map-get($Utility__, LogoHeight);
+    width: 64px;
+  }
+
+  // Dark mode
+  &__Toolbar__dark {
+    min-height: 64px;
+    background-color: #1D212C;
+  }
+
+  &__button__dark {
+    display: flex;
+    border-radius: 10px !important;
+
+    &:hover {}
+
+    &:active {
+      span {
+        margin-top: 1px;
+      }
+    }
+  }
+
+  &__menuButton__dark {
+    min-width: 0;
+    margin: 1em;
+  }
+
+  &__userButton__dark {
+    margin: 1em;
+  }
+}
+
+/**
+ * Header end
+ */

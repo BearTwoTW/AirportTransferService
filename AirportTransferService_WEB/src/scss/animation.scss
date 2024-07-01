@@ -1,0 +1,73 @@
+// 淡入
+@keyframes fade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+// 轉圈
+@keyframes rotate {
+    100% {
+        transform: rotate(1turn);
+    }
+}
+
+// 淡入、淡出
+@keyframes pass {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+// 右側滑入
+@keyframes slideInRight {
+    0% {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+// 右側滑出
+@keyframes slideOutRight {
+    0% {
+        opacity: 1;
+        transform: translateX(0);
+        visibility: visible;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(100%);
+        visibility: hidden;
+    }
+}
+
+// 上方滑入
+@keyframes slideInTop {
+    0% {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

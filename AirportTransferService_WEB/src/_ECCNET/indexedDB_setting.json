@@ -1,0 +1,134 @@
+[
+    {
+        "data_base_name": "ATS",
+        "version": 2,
+        "tables_set": [
+            {
+                "table_name": "QueryCondition",
+                "option": {
+                    "keyPath": [
+                        "page",
+                        "action",
+                        "user_id"
+                    ]
+                },
+                "index": [
+                    {
+                        "index_name": [
+                            "page"
+                        ],
+                        "index_value": [
+                            "page"
+                        ],
+                        "option": {
+                            "unique": false
+                        }
+                    },
+                    {
+                        "index_name": [
+                            "action"
+                        ],
+                        "index_value": [
+                            "action"
+                        ],
+                        "option": {
+                            "unique": false
+                        }
+                    },
+                    {
+                        "index_name": [
+                            "user_id"
+                        ],
+                        "index_value": [
+                            "user_id"
+                        ],
+                        "option": {
+                            "unique": false
+                        }
+                    }
+                ]
+            },
+            {
+                "table_name": "CartStorage",
+                "option": {
+                    "keyPath": [
+                        "page",
+                        "action",
+                        "customer_id",
+                        "commodity_id",
+                        "ccad_id_1",
+                        "ccad_id_2"
+                    ]
+                },
+                "index": [
+                    {
+                        "index_name": [
+                            "page"
+                        ],
+                        "index_value": [
+                            "page"
+                        ],
+                        "option": {
+                            "unique": false
+                        }
+                    },
+                    {
+                        "index_name": [
+                            "action"
+                        ],
+                        "index_value": [
+                            "action"
+                        ],
+                        "option": {
+                            "unique": false
+                        }
+                    },
+                    {
+                        "index_name": [
+                            "customer_id"
+                        ],
+                        "index_value": [
+                            "customer_id"
+                        ],
+                        "option": {
+                            "unique": false
+                        }
+                    },
+                    {
+                        "index_name": [
+                            "commodity_id"
+                        ],
+                        "index_value": [
+                            "commodity_id"
+                        ],
+                        "option": {
+                            "unique": false
+                        }
+                    },
+                    {
+                        "index_name": [
+                            "ccad_id_1"
+                        ],
+                        "index_value": [
+                            "ccad_id_1"
+                        ],
+                        "option": {
+                            "unique": false
+                        }
+                    },
+                    {
+                        "index_name": [
+                            "ccad_id_2"
+                        ],
+                        "index_value": [
+                            "ccad_id_2"
+                        ],
+                        "option": {
+                            "unique": false
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+]

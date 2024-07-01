@@ -1,0 +1,322 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+    background-color: #fff;
+    padding-right: 0 !important;
+    font-family: 'noto sans tc', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+        'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue';
+}
+
+html {
+    font-size: 1rem !important;
+}
+
+/* 密碼 input 自動帶入紀錄值時的眼睛背景色 */
+input:-webkit-autofill,
+.MuiInputBase-root:has(> input:-webkit-autofill) {
+    background-color: #e8f0fe;
+}
+
+/* 移除手風琴在手機版會有 summary 的預設箭頭(實心箭頭) */
+details {
+    display: block;
+}
+
+summary {
+    display: block;
+    list-style-type: none;
+}
+
+details summary::-webkit-details-marker,
+details summary::marker {
+    display: none;
+}
+
+/* scrollbar 樣式 */
+/* 卷軸寬度 */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+/* 背景 */
+::-webkit-scrollbar-track {
+    background: #cccccc;
+}
+
+/* 卷軸本體 */
+::-webkit-scrollbar-thumb {
+    background: #888888;
+    border-radius: 4px;
+}
+
+/* 卷軸 hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #666666;
+}
+
+/* 測試用浮水印 (正式環境要註解掉) */
+.watermark {
+    position: relative;
+    overflow: hidden;
+}
+/* 輪播圖浮水印 */
+.big_watermark::before {
+    position: absolute;
+    content: '「僅供測試使用，如有法律相關責任，我們將主動移除」';
+    top: 40%;
+    left: 18%;
+    transform: translate(-50%, -50%);
+    transform: rotate(-30deg);
+    line-height: 3em;
+    text-shadow: 0.1em 0.1em 0.2em #fff;
+    letter-spacing: 2px;
+    font-size: 50px;
+    font-weight: 400;
+    color: #000;
+    z-index: 999999;
+}
+/* 一般圖浮水印 */
+.watermark::before {
+    position: absolute;
+    content: '「僅供測試使用，如有法律相關責任，我們將主動移除」';
+    top: 50%;
+    left: 15%;
+    transform: translate(-50%, -50%);
+    transform: rotate(-45deg);
+    text-shadow: 0.1em 0.1em 0.2em #fff;
+    letter-spacing: 2px;
+    font-weight: 400;
+    color: #000;
+    z-index: 5;
+}
+
+/* 商品圖片遮罩+放大動畫 */
+.img_container {
+    position: relative;
+    overflow: hidden;
+}
+
+.img_container:hover .commodity_img {
+    transform: scale(1.05);
+}
+
+.img_container:hover .overlay {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.overlay {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 1;
+}
+
+/* 瀑布流產品標題換行省略號 */
+.multi-line-truncate {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    -webkit-line-clamp: 2; /* 设置为你希望的行数 */
+    white-space: normal;
+}
+
+/* Navbar Hover 動畫 */
+.subnav-animation a {
+    position: relative;
+}
+.subnav-animation a::before {
+    content: '';
+    bottom: -10px;
+    opacity: 0;
+    height: 2px;
+    width: 100%;
+    background-color: #000;
+    position: absolute;
+    transition: all ease-in-out 250ms;
+}
+.subnav-animation a:hover {
+    font-weight: bold;
+}
+.subnav-animation a:hover::before {
+    opacity: 1;
+    bottom: -5px;
+}
+
+/* Navbar 子目錄 */
+.subnav {
+    overflow: hidden;
+}
+
+.subnav-content {
+    overflow: hidden;
+    position: absolute;
+    max-height: 0;
+    top: 111px;
+    left: 0;
+    width: 100%;
+    z-index: 1;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.subnav:hover .subnav-content {
+    max-height: 500px;
+}
+
+.navbar {
+    transition: max-height 0.3s ease-in-out, opacity 0.5s ease-in-out, margin 0.4s ease-in-out;
+    max-height: 100px; /* 假設最大高度 */
+    opacity: 1;
+}
+
+.navbar.hide {
+    max-height: 0; /* 高度變為0，這樣可以在動畫後不再佔用空間 */
+    opacity: 0;
+    overflow: hidden; /* 防止內容在動畫過程中溢出 */
+    margin: 0 !important;
+}
+
+@layer base {
+    a {
+        @apply select-none;
+    }
+
+    h1 {
+        @apply text-xl font-medium text-info;
+        /* @apply text-xl font-medium text-primary; */
+    }
+
+    h2 {
+        @apply text-lg font-medium text-info;
+        /* @apply text-lg font-medium text-primary; */
+    }
+
+    h3 {
+        @apply text-sm font-medium text-info;
+        /* @apply text-sm font-medium text-primary; */
+    }
+
+    h4 {
+        @apply text-xs font-medium text-info;
+        /* @apply text-xs font-medium text-primary; */
+    }
+}
+
+@layer components {
+    /* 大標題 */
+    .title {
+        @apply flex items-center space-x-2.5 border-b text-lg font-medium bg-transparent text-info p-0 py-2;
+    }
+
+    .titleBlock {
+        @apply w-3 h-3 bg-secondary;
+    }
+
+    /* 大按鈕 */
+    .btn-main-big {
+        @apply flex justify-center items-center bg-primary text-info py-2;
+    }
+
+    /* 小按鈕 */
+    .btn-main-small {
+        @apply flex justify-center items-center bg-primary text-sm text-info py-2 px-4;
+    }
+
+    /* 表單欄位的標題 */
+    .input_label {
+        @apply text-sm my-2;
+    }
+
+    /* 下拉選單 */
+    .select {
+        @apply border-b border-secondary p-1;
+    }
+
+    /* 輸入欄位 */
+    .input {
+        @apply border-b border-secondary p-[3px] pl-2;
+    }
+
+    /* 商品圖片 */
+    .carousel_img {
+        @apply object-cover w-full aspect-square;
+    }
+
+    /* 商品圖片 */
+    .commodity_img {
+        @apply object-cover w-full aspect-square;
+    }
+
+    /* 商品上排文字 */
+    .commodity_info {
+        @apply flex flex-col justify-center items-center max-sm:block max-sm:text-center text-lg max-sm:my-1;
+    }
+}
+
+@layer utilities {
+    /* 對話泡泡 */
+    .imessage {
+        border-radius: 0.25rem;
+        display: flex;
+        flex-direction: column;
+        margin: 0 auto 1rem;
+        max-width: 600px;
+        padding: 0.5rem 1.5rem;
+    }
+
+    .imessage p {
+        border-radius: 1.15rem;
+        line-height: 1.25;
+        max-width: 75%;
+        padding: 0.5rem 0.875rem;
+        position: relative;
+        word-wrap: break-word;
+    }
+
+    .imessage p::before,
+    .imessage p::after {
+        bottom: -0.1rem;
+        content: '';
+        height: 1rem;
+        position: absolute;
+    }
+
+    p.from-me {
+        align-self: flex-end;
+        background-color: #788aa3;
+        color: #fff;
+    }
+
+    p[class^='from-'] {
+        margin: 0.5rem 0;
+        width: fit-content;
+    }
+
+    p.from-me ~ p.from-me {
+        margin: 0.25rem 0 0;
+    }
+
+    p.from-me ~ p.from-me:not(:last-child) {
+        margin: 0.25rem 0 0;
+    }
+
+    p.from-me ~ p.from-me:last-child {
+        margin-bottom: 0.5rem;
+    }
+
+    p.from-them {
+        align-items: flex-start;
+        background-color: #222e4e;
+        color: #fff;
+    }
+}

@@ -86,6 +86,7 @@ namespace AirportTransferService.Controllers
             using (TransactionScope tx = new())
             {
                 _ATS_FareSettings.UpdateATS_FareSettings(new UpdateATS_FareSettingsParam(
+                    cre_time: Appsettings.api_datetime_param_no_pass,
                     upd_userid: jwtObject.user_id,
                     upd_time: upd_time,
                     fs_id: data.fs_id,
@@ -182,7 +183,7 @@ namespace AirportTransferService.Controllers
                 string.IsNullOrEmpty(data.cms_id)
                 ? _ATS_CarModelSettings.SearchATS_CarModelSettings(
                   new SearchATS_CarModelSettingsParam(),
-                  ["cms_id", "car_model"], [],
+                  ["cms_id"], [],
                   out _)
                 : [new SearchATS_CarModelSettingsResult() { cms_id = data.cms_id }];
             //取得所有城市區域
@@ -260,16 +261,17 @@ namespace AirportTransferService.Controllers
                 using (TransactionScope tx = new())
                 {
                     _ATS_FareSettings.UpdateATS_FareSettings(new UpdateATS_FareSettingsParam(
+                        cre_time: Appsettings.api_datetime_param_no_pass,
                         upd_userid: jwtObject.user_id,
                         upd_time: upd_time,
                         fs_id: x.fs_id,
-                        cms_id: string.IsNullOrEmpty(data[1].cms_id) ? null : data[1].cms_id,
-                        city: string.IsNullOrEmpty(data[1].city) ? null : data[1].city,
-                        area: string.IsNullOrEmpty(data[1].area) ? null : data[1].area,
-                        road: string.IsNullOrEmpty(data[1].road) ? null : data[1].road,
-                        section: string.IsNullOrEmpty(data[1].section) ? null : data[1].section,
-                        airport: string.IsNullOrEmpty(data[1].airport) ? null : data[1].airport,
-                        terminal: string.IsNullOrEmpty(data[1].terminal) ? null : data[1].terminal));
+                        cms_id: string.IsNullOrEmpty(data[1].cms_id) ? Appsettings.api_string_param_no_pass : data[1].cms_id,
+                        city: string.IsNullOrEmpty(data[1].city) ? Appsettings.api_string_param_no_pass : data[1].city,
+                        area: string.IsNullOrEmpty(data[1].area) ? Appsettings.api_string_param_no_pass : data[1].area,
+                        road: string.IsNullOrEmpty(data[1].road) ? Appsettings.api_string_param_no_pass : data[1].road,
+                        section: string.IsNullOrEmpty(data[1].section) ? Appsettings.api_string_param_no_pass : data[1].section,
+                        airport: string.IsNullOrEmpty(data[1].airport) ? Appsettings.api_string_param_no_pass : data[1].airport,
+                        terminal: string.IsNullOrEmpty(data[1].terminal) ? Appsettings.api_string_param_no_pass : data[1].terminal));
 
                     tx.Complete();
                 }

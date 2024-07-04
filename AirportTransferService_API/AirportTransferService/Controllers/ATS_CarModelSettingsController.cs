@@ -82,6 +82,7 @@ namespace AirportTransferService.Controllers
             using (TransactionScope tx = new())
             {
                 _ATS_CarModelSettings.UpdateATS_CarModelSettings(new UpdateATS_CarModelSettingsParam(
+                    cre_time: Appsettings.api_datetime_param_no_pass,
                     upd_userid: jwtObject.user_id,
                     upd_time: upd_time,
                     cms_id: data.cms_id,

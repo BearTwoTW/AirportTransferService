@@ -66,7 +66,7 @@ namespace AirportTransferService.Controllers
             //查自己
             SearchATS_AirportTerminalSettingsResult? search_own_result = _ATS_AirportTerminalSettings.SearchATS_AirportTerminalSettings(
                 new SearchATS_AirportTerminalSettingsParam(ats_id: data.ats_id),
-                ["ats_id"], [],
+                ["ats_id", "airport", "terminal"], [],
                 out _).FirstOrDefault();
             if (search_own_result == null) return new ResultObject<string> { success = false, message = "修改失敗，查無機場航廈設定" };
             //查要檢查重複的東西
@@ -82,6 +82,7 @@ namespace AirportTransferService.Controllers
             using (TransactionScope tx = new())
             {
                 _ATS_AirportTerminalSettings.UpdateATS_AirportTerminalSettings(new UpdateATS_AirportTerminalSettingsParam(
+                    cre_time: Appsettings.api_datetime_param_no_pass,
                     upd_userid: jwtObject.user_id,
                     upd_time: upd_time,
                     ats_id: data.ats_id,
@@ -91,7 +92,7 @@ namespace AirportTransferService.Controllers
 
                 ATS_FareSettingsController aTS_FareSettingsController = new(_ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings, _baseService) { ControllerContext = ControllerContext };
                 aTS_FareSettingsController.ATS_FareSettingsSystemUpdate(
-                    [new ATS_FareSettingsCreate { airport = search_results[0].airport, terminal = search_results[0].terminal },
+                    [new ATS_FareSettingsCreate { airport = search_own_result.airport, terminal = search_own_result.terminal },
                      new ATS_FareSettingsCreate { airport = data.airport, terminal = data.terminal }]);
 
                 tx.Complete();

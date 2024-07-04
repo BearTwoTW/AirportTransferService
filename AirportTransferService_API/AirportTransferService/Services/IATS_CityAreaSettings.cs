@@ -116,7 +116,7 @@
                 from ATS_CityAreaSettings
                 where 1=1
                 {SQL.GenerateSQLWhereQuery(param)}
-                {SQL.GenerateSQLOrderQuery<SearchATS_CityAreaSettingsResult>(sort_columns, "order by ATS_CityAreaSettings.zip desc")}
+                {SQL.GenerateSQLOrderQuery<SearchATS_CityAreaSettingsResult>(sort_columns, "order by ATS_CityAreaSettings.zip")}
                 {(param.page > 0 ? "offset((@page-1)) * @num_per_page ROWS fetch next @num_per_page ROWS only;" : "")}";
 
                 dt = SQL.GenerateSQLSelectResult(param, strSql, myConn, out page_count);

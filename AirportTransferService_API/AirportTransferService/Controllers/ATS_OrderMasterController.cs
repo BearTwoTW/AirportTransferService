@@ -91,6 +91,7 @@ namespace AirportTransferService.Controllers
             using (TransactionScope tx = new())
             {
                 _ATS_OrderMaster.UpdateATS_OrderMaster(new UpdateATS_OrderMasterParam(
+                    cre_time: Appsettings.api_datetime_param_no_pass,
                     upd_userid: jwtObject.user_id,
                     upd_time: upd_time,
                     o_id: data.o_id,

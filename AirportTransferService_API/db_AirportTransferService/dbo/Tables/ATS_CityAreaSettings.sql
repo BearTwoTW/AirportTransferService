@@ -4,7 +4,7 @@
     [upd_userid] VARCHAR (50)   NULL,
     [upd_time]   DATETIME       NULL,
     [cas_id]     VARCHAR (10)   NOT NULL,
-    [visible]    VARCHAR (2)    NULL,
+    [visible]    VARCHAR (2)    CONSTRAINT [DF_ATS_CityAreaSettings_visible] DEFAULT ('Y') NULL,
     [zip]        VARCHAR (10)   NULL,
     [city]       NVARCHAR (255) NULL,
     [area]       NVARCHAR (255) NULL,
@@ -12,6 +12,8 @@
     [section]    NVARCHAR (255) NULL,
     CONSTRAINT [PK_ATS_CityAreaSettings] PRIMARY KEY CLUSTERED ([cas_id] ASC)
 );
+
+
 
 
 

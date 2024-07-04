@@ -100,21 +100,27 @@ namespace AirportTransferService.Models
     /// <summary>
     /// UpdateATS_GASettingsParam
     /// </summary>
+    /// <param name="cre_time"></param>
     /// <param name="upd_userid"></param>
     /// <param name="upd_time"></param>
     /// <param name="gas_id"></param>
+    /// <param name="cre_userid"></param>
     /// <param name="tracking_code"></param>
     /// <param name="keyword"></param>
     /// <param name="summary"></param>
     /// <param name="descriptive_url"></param>
     public class UpdateATS_GASettingsParam(
+        DateTime? cre_time,
         string? upd_userid,
         DateTime? upd_time,
         string? gas_id,
+        string? cre_userid = api_string_param_no_pass,
         string? tracking_code = api_string_param_no_pass,
         string? keyword = api_string_param_no_pass,
         string? summary = api_string_param_no_pass,
         string? descriptive_url = api_string_param_no_pass) : ATS_GASettings(
+            cre_userid: cre_userid,
+            cre_time: cre_time,
             upd_userid: upd_userid,
             upd_time: upd_time,
             gas_id: gas_id,

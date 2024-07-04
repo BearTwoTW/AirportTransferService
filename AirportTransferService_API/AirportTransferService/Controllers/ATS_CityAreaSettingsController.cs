@@ -86,6 +86,7 @@ namespace AirportTransferService.Controllers
             using (TransactionScope tx = new())
             {
                 _ATS_CityAreaSettings.UpdateATS_CityAreaSettings(new UpdateATS_CityAreaSettingsParam(
+                    cre_time: Appsettings.api_datetime_param_no_pass,
                     upd_userid: jwtObject.user_id,
                     upd_time: upd_time,
                     cas_id: data.cas_id,

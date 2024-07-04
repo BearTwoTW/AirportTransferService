@@ -53,6 +53,7 @@ namespace AirportTransferService.Controllers
             using (TransactionScope tx = new())
             {
                 _ATS_GASettings.UpdateATS_GASettings(new UpdateATS_GASettingsParam(
+                    cre_time: Appsettings.api_datetime_param_no_pass,
                     upd_userid: jwtObject.user_id,
                     upd_time: upd_time,
                     gas_id: data.gas_id,

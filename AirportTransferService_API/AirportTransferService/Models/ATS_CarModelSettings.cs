@@ -120,9 +120,11 @@ namespace AirportTransferService.Models
     /// <summary>
     /// UpdateATS_CarModelSettingsParam
     /// </summary>
+    /// <param name="cre_time"></param>
     /// <param name="upd_userid"></param>
     /// <param name="upd_time"></param>
     /// <param name="cms_id"></param>
+    /// <param name="cre_userid"></param>
     /// <param name="visible"></param>
     /// <param name="name"></param>
     /// <param name="max_passengers"></param>
@@ -130,15 +132,19 @@ namespace AirportTransferService.Models
     /// <param name="max_child_seats"></param>
     /// <param name="max_service_extras"></param>
     public class UpdateATS_CarModelSettingsParam(
+        DateTime? cre_time,
         string? upd_userid,
         DateTime? upd_time,
         string? cms_id,
+        string? cre_userid = api_string_param_no_pass,
         string? visible = api_string_param_no_pass,
         string? name = api_string_param_no_pass,
         int? max_passengers = api_numeric_param_no_pass,
         int? max_luggage = api_numeric_param_no_pass,
         int? max_child_seats = api_numeric_param_no_pass,
         int? max_service_extras = api_numeric_param_no_pass) : ATS_CarModelSettings(
+            cre_userid: cre_userid,
+            cre_time: cre_time,
             upd_userid: upd_userid,
             upd_time: upd_time,
             cms_id: cms_id,

@@ -120,9 +120,11 @@ namespace AirportTransferService.Models
     /// <summary>
     /// UpdateATS_CityAreaSettingsParam
     /// </summary>
+    /// <param name="cre_time"></param>
     /// <param name="upd_userid"></param>
     /// <param name="upd_time"></param>
     /// <param name="cas_id"></param>
+    /// <param name="cre_userid"></param>
     /// <param name="visible"></param>
     /// <param name="zip"></param>
     /// <param name="city"></param>
@@ -130,15 +132,19 @@ namespace AirportTransferService.Models
     /// <param name="road"></param>
     /// <param name="section"></param>
     public class UpdateATS_CityAreaSettingsParam(
+        DateTime? cre_time,
         string? upd_userid,
         DateTime? upd_time,
         string? cas_id,
+        string? cre_userid = api_string_param_no_pass,
         string? visible = api_string_param_no_pass,
         string? zip = api_string_param_no_pass,
         string? city = api_string_param_no_pass,
         string? area = api_string_param_no_pass,
         string? road = api_string_param_no_pass,
         string? section = api_string_param_no_pass) : ATS_CityAreaSettings(
+            cre_userid: cre_userid,
+            cre_time: cre_time,
             upd_userid: upd_userid,
             upd_time: upd_time,
             visible: visible,

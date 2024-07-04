@@ -67,7 +67,7 @@ namespace AirportTransferService.Controllers
             //查自己
             SearchATS_CityAreaSettingsResult? search_own_result = _ATS_CityAreaSettings.SearchATS_CityAreaSettings(
                 new SearchATS_CityAreaSettingsParam(cas_id: data.cas_id),
-                ["cas_id"], [],
+                ["cas_id", "city", "area", "road", "section"], [],
                 out _).FirstOrDefault();
             if (search_own_result == null) return new ResultObject<string> { success = false, message = "修改失敗，查無行政區域設定" };
             //查要檢查重複的東西
@@ -99,7 +99,7 @@ namespace AirportTransferService.Controllers
 
                 ATS_FareSettingsController aTS_FareSettingsController = new(_ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings, _baseService) { ControllerContext = ControllerContext };
                 aTS_FareSettingsController.ATS_FareSettingsSystemUpdate(
-                    [new ATS_FareSettingsCreate { city = search_results[0].city, area = search_results[0].area, road = search_results[0].road, section = search_results[0].section },
+                    [new ATS_FareSettingsCreate { city = search_own_result.city, area = search_own_result.area, road = search_own_result.road, section = search_results[0].section },
                      new ATS_FareSettingsCreate { city = data.city, area = data.area, road = data.road, section = data.section }]);
 
                 tx.Complete();

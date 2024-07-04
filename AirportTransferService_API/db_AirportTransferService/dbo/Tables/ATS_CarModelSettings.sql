@@ -4,7 +4,7 @@
     [upd_userid]         VARCHAR (50)   NULL,
     [upd_time]           DATETIME       NULL,
     [cms_id]             VARCHAR (10)   NOT NULL,
-    [visible]            VARCHAR (2)    NULL,
+    [visible]            VARCHAR (2)    CONSTRAINT [DF_ATS_CarModelSettings_visible] DEFAULT ('Y') NULL,
     [name]               NVARCHAR (255) NULL,
     [max_passengers]     INT            NULL,
     [max_luggage]        INT            NULL,
@@ -12,6 +12,8 @@
     [max_service_extras] INT            NULL,
     CONSTRAINT [PK_ATS_CarModelSettings] PRIMARY KEY CLUSTERED ([cms_id] ASC)
 );
+
+
 
 
 

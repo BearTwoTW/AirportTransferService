@@ -4,7 +4,7 @@
     [upd_userid]        VARCHAR (50)    NULL,
     [upd_time]          DATETIME        NULL,
     [o_id]              VARCHAR (10)    NOT NULL,
-    [visible]           VARCHAR (2)     NULL,
+    [visible]           VARCHAR (2)     CONSTRAINT [DF_ATS_OrderMaster_visible] DEFAULT ('Y') NULL,
     [type]              VARCHAR (4)     NULL,
     [city]              NVARCHAR (255)  NULL,
     [area]              NVARCHAR (255)  NULL,
@@ -31,6 +31,8 @@
     [link]              NVARCHAR (MAX)  NULL,
     CONSTRAINT [PK_ATS_OrderMaster] PRIMARY KEY CLUSTERED ([o_id] ASC)
 );
+
+
 
 
 

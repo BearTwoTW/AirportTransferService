@@ -1,7 +1,7 @@
 import React, { forwardRef, useState, useEffect } from 'react';
-import { Button, Grid, Box } from '@mui/material';
-import { buttonSX, CusTextIconButton } from './CusButton'
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { Button, IconButton, Grid, Box } from '@mui/material';
+import { buttonSX, CusTextIconButton, CusIconButton } from './CusButton'
+import { Delete, Edit, Visibility, CloudUpload } from '@mui/icons-material';
 import PropTypes from 'prop-types';
 import Variables from "../scss/App.css";
 const status = sessionStorage.getItem("themeStatus") === null ? "LightON" : sessionStorage.getItem("themeStatus");
@@ -71,9 +71,9 @@ CusUploadImgFile.prototype = {
   multiple: PropTypes.bool,
 };
 
-
+// 含上傳功能的圖片預覽
 const CusUploadImgFilePreview = (props) => {
-  let { fileName, url, description, id, onChangeEvent, getSize, SxStyle, type, accept } = props
+  let { fileName, url, description, id, onChangeEvent, getSize, SxStyle, type, accept, uploadFunc, deleteFunc } = props
   const [propsObj, setPropsObj] = useState(null);
   const [imgSize, setImgSize] = useState({ height: 0, width: 0 })
 
@@ -127,7 +127,7 @@ const CusUploadImgFilePreview = (props) => {
 
   const handlePreview = () => {
     if (propsObj && propsObj.imagePreviewUrl) {
-      window.open(propsObj.imagePreviewUrl, '_blank'); // Open the image in a new tab
+      window.open(propsObj.imagePreviewUrl, '_blank');
     } else {
       alert('No image to preview.');
     }
@@ -174,21 +174,33 @@ const CusUploadImgFilePreview = (props) => {
               />
             </Box>
             <Box className="upload_file_overlay" onClick={(e) => e.stopPropagation()}>
-              <CusTextIconButton
-                color={"info"}
-                text={"選擇檔案"}
-                onClick={() => document.getElementById(id).click()}
-              />
-              <CusTextIconButton
-                color={"info"}
-                text={"預覽"}
-                onClick={(e) => handlePreview()}
-              />
+              {fileName ?
+                <React.Fragment>
+                  <CusTextIconButton
+                    color={"info"}
+                    text={"預覽"}
+                    onClick={(e) => handlePreview()}
+                  />
+                  <CusTextIconButton
+                    color={"error"}
+                    text={"刪除"}
+                    onClick={deleteFunc}
+                  />
+                </React.Fragment>
+                :
+                uploadFunc ?
+                  <CusTextIconButton
+                    color={"success"}
+                    text={"上傳"}
+                    onClick={uploadFunc}
+                  />
+                  : null
+              }
             </Box>
           </React.Fragment>
         ) : (
-          <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-            <CloudUploadIcon fontSize='large' />
+          <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '170px' }}>
+            <CloudUpload fontSize='large' />
             <span>點擊選擇檔案</span>
           </Box>
         )}
@@ -199,8 +211,80 @@ const CusUploadImgFilePreview = (props) => {
           {propsObj && propsObj.fileName ? propsObj.fileName : "尚未選擇檔案"}
         </span>
       </Box>
-    </React.Fragment>
+    </React.Fragment >
   );
 };
 
-export { CusUploadImgFilePreview, CusUploadImgFile };
+
+// 圖片預覽(無上傳功能, 只有預覽、編輯、刪除)
+const CusImgFilePreview = (props) => {
+  let { key, src, editFunc, deleteFunc } = props
+
+  const handlePreview = () => {
+    if (src) {
+      window.open(src, '_blank');
+    } else {
+      alert('No image to preview.');
+    }
+  };
+
+  const IconButtonSX = {
+    margin: "0 5px",
+    backgroundColor: "rgba(255,255,255,0.8)",
+    '&:hover': {
+      backgroundColor: "rgba(255,255,255,1)",
+    }
+  };
+
+  return (
+    <React.Fragment>
+      <Box key={key} sx={{ marginRight: "10px" }}>
+        <a href={"#"} style={{ position: "relative", display: "inline-block" }}>
+          <img
+            src={src}
+            style={{
+              width: "200px",
+              height: "200px",
+              objectFit: "contain",
+              border: "1px dashed rgba(0,0,0,0.12)",
+              borderRadius: "10px"
+            }}
+          />
+          <Box
+            onClick={(e) => e.stopPropagation()}
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "200px",
+              height: "200px",
+              borderRadius: "10px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "rgba(0, 0, 0, 0.3)", // 半透明背景
+              color: "white",
+              opacity: 0, // 初始透明
+              transition: "opacity 0.3s", // 過渡效果
+              '&:hover': {
+                opacity: 1, // 懸停時顯示
+              }
+            }}
+          >
+            <IconButton color={"info"} sx={IconButtonSX} onClick={editFunc}>
+              <Edit />
+            </IconButton>
+            <IconButton color={"info"} sx={IconButtonSX} onClick={(e) => handlePreview()}>
+              <Visibility />
+            </IconButton>
+            <IconButton color={"error"} sx={IconButtonSX} onClick={deleteFunc}>
+              <Delete />
+            </IconButton>
+          </Box>
+        </a>
+      </Box>
+    </React.Fragment >
+  );
+};
+
+export { CusUploadImgFilePreview, CusUploadImgFile, CusImgFilePreview };

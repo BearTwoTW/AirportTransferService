@@ -87,7 +87,7 @@ const CusInput = forwardRef((props, ref) => {
             color: Variables[status + "__Secondary"],
           },
         },
-        // shrink: true
+        shrink: props.shrink,
       }}
       autoFocus={props.autoFocus}
       className={props.className}

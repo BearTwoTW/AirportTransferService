@@ -5,7 +5,7 @@ import { Box, Divider, Typography } from '@mui/material';
 import { FacebookIcon, InstagramIcon, LineIcon } from '../CusSvgLibrary';
 import { OfficeSiteContext } from '../../store/OfficeSiteContext'
 import { WebDialog3 } from '../../components/WebSide/WebDialog';
-import { CustomerAPI } from '../../js/APITS';
+import { ATS_WebSetting } from '../../js/APITS';
 import { imageURL } from '../../js/Domain';
 import { tryCatchError } from '../../js/FunctionTS';
 
@@ -21,59 +21,49 @@ export const WebFooter3 = (props) => {
   const [dialogData, setDialogData] = useState({});
   const [imageFile, setImageFile] = useState(null);
 
-  /**
-   * [事件] 會員登出
-   */
-  const Signout = async () => {
-    const Res = await CustomerAPI.Signout({})
-    useDialog.current.handleOpen();
-    if (Res.success) {
-      setDialogData(({
-        autoClose: true,
-        DialogContent: <DialogsInner ref={useDialogInner} message={
-          <span style={{ display: "flex", alignItems: "center" }}>
-            <Error className={"text-footerInfo"} />
-            <span style={{ marginLeft: "0.5rem" }}>登出成功！</span>
-          </span>} />,
-      }));
-      // 清除 localStorage
-      localStorage.Web_username = (localStorage.isRemember === "Y" ? localStorage.Web_username : "")
-      localStorage.cus_token = "";
-      localStorage.Web_customerName = "";
-      localStorage.customer_id = "";
-      setTimeout(() => {
-        navigate("/Login")
-      }, 2000);
-    } else console.error(Res)
-  }
+  // 網頁設定資料查詢
+  const [pageSearch, setPageSearch] = useState({
+    ws_id: "",
+    title: "",
+    image: "",
+    text1: "",
+    text2: "",
+    text3: "",
+    html1: "",
+    html2: "",
+    html3: "",
+    excel: "",
+    page: 0,
+    num_per_page: 0,
+  });
+  const [LOGO, setLOGO] = useState();
+  const [data_G, setDataG] = useState();
 
-  /**查網站設定
-   * [事件] 查網站設定
-   */
-  useEffect(() => {
-    if (OfficeSiteCtx.officeSite) {
-      try {
-        setImageFile(OfficeSiteCtx.officeSite.files.find(ele => ele.type === "LOGO"))
-      } catch (e) {
-        tryCatchError(e)
-        console.error("WebNavigation3 查網站設定 錯誤")
+  /**網站設定查詢 */
+  const getWebSetting = () => {
+    ATS_WebSetting.ATS_WebSettingsSearch(pageSearch).then(res => {
+      if (res.success) {
+        setLOGO(res.data.filter(e => e.ws_id === "00001")[0].image);
+        setDataG(res.data.filter(e => e.ws_id === "00006")[0].html1);
       }
-    }
-  }, [OfficeSiteCtx.officeSite]);
+    });
+  };
+
+  // 一進頁面就查詢
+  useEffect(() => {
+    getWebSetting();
+  }, [pageSearch]);
+
   return (
     <React.Fragment>
       <Box className={"w-full flex bg-primary animate-fadeIn"}>
         <Box className={"container m-auto py-10"}>
           <Box className="flex justify-between items-center max-md:px-2.5 max-md:flex-col max-md:space-y-5">
-            <Box className="w-[250px] h-[100px]">
-              <img src="https://fakeimg.pl/250x100/?text=img"></img>
+            <Box>
+              <img className="object-cover" src={LOGO ? `${imageURL}${LOGO}` : "https://fakeimg.pl/250x100/?text=img"}></img>
             </Box>
             <Box className="flex flex-col space-y-2.5">
-              <h2>聯繫方式</h2>
-              <h3>客服資訊：</h3>
-              <h3>手機直撥 55688 (每秒0.1元)</h3>
-              <h3>市話直撥 55688</h3>
-              <h3>(資訊服務費每分鐘3元，市話通話費另計，前10秒不計費)</h3>
+              <Box dangerouslySetInnerHTML={{ __html: data_G }} />
             </Box>
           </Box>
           <Divider className={"w-full mt-8 mb-4"} />

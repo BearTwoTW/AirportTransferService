@@ -158,7 +158,7 @@ const SysNavigation = (props) => {
               </Box>
               <Typography variant="h5" className={"HeaderBar__logo"}
                 sx={{ color: theme.palette.default.contrastText, mr: "77.71px", ml: "20px" }}>
-                ECC
+                55688
               </Typography>
               <Box sx={{ paddingLeft: "10px", flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                 {props.groupData.map((ele, inx) => (

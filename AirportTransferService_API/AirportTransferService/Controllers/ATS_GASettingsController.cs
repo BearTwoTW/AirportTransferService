@@ -5,11 +5,11 @@ namespace AirportTransferService.Controllers
     /// <summary>
     /// GA設定
     /// </summary>
-    /// <param name="ATS_GASettings"></param>
+    /// <param name="ats_gasettings"></param>
     /// <param name="baseService"></param>
-    public class ATS_GASettingsController(IATS_GASettings ATS_GASettings, IBaseService baseService) : CustomControllerBase(baseService)
+    public class ATS_GASettingsController(IATS_GASettings ats_gasettings, IBaseService baseService) : CustomControllerBase(baseService)
     {
-        private readonly IATS_GASettings _ATS_GASettings = ATS_GASettings;
+        private readonly IATS_GASettings _ATS_GASettings = ats_gasettings;
 
         /// <summary>
         /// GA設定建立

@@ -56,7 +56,7 @@ namespace AirportTransferService.Controllers
             //查自己
             SearchATS_WebSettingsResult? search_own_result = _ats_websettings.SearchATS_WebSettings(
                 new SearchATS_WebSettingsParam(ws_id: data.ws_id),
-                ["ws_id", "title"], [],
+                ["ws_id"], [],
                 out _).FirstOrDefault();
             if (search_own_result == null) return new ResultObject<string> { success = false, message = "修改失敗，查無網頁設定" };
             //查要檢查重複的東西

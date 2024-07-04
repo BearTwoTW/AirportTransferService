@@ -268,7 +268,6 @@ namespace AirportTransferService.Models
         /// num_per_page
         /// </summary>
         public int num_per_page { get; } = num_per_page;
-
     }
 
     /// <summary>
@@ -365,7 +364,7 @@ namespace AirportTransferService.Models
 
             if (Object.ReferenceEquals(this, searchATS_WebSettingsResult)) return true;
 
-            return 
+            return
                 cre_userid == searchATS_WebSettingsResult.cre_userid &&
                 cre_time == searchATS_WebSettingsResult.cre_time &&
                 upd_userid == searchATS_WebSettingsResult.upd_userid &&
@@ -486,7 +485,6 @@ namespace AirportTransferService.Models
         /// </summary>
         [Display(Name = "標題")]
         public new string? title { get; set; } = "";
-
     }
 
     /// <summary>

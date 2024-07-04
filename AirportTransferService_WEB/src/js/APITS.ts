@@ -41,9 +41,14 @@ import { DDMenuItem } from "./Types";
 import * as ATS_WebSetting from "./Controller/ATS_WebSetting";
 import * as ATS_CityAreaSettings from "./Controller/ATS_CityAreaSettings";
 import * as ATS_CarModelSettings from "./Controller/ATS_CarModelSettings";
+import * as ATS_AirportTerminalSettings from "./Controller/ATS_AirportTerminalSettings";
+import * as ATS_ExtraSettings from "./Controller/ATS_ExtraSettings";
+import * as ATS_FareSettings from "./Controller/ATS_FareSettings";
+import * as ATS_GASettings from "./Controller/ATS_GASettings";
+import * as ATS_OrderMaster from "./Controller/ATS_OrderMaster";
 
 
-export { UserControlAPI, PageAPI, UserAPI, UserDutyAPI, UserLevelAPI, CommodityAPI, CurrencyAPI, CommodityTS, CompanyAPI, PromotionTS, PromotionAPI, SystemSettingAPI, FilesAPI, CustomerAPI, OrderAPI, SystemParamAPI, TaxAPI, LogisticsAPI, EC_Payment, WarehouseAPI, PermissionFunctionAPI, StockAPI, ToDoListAPI, PurchaseAPI, ImportAPI, ImportDataAPI, DashboardAPI, OfficeSiteSettingAPI, EinvInvoiceAPI, ReportAPI, OauthAPI, ATS_WebSetting, ATS_CityAreaSettings, ATS_CarModelSettings };
+export { UserControlAPI, PageAPI, UserAPI, UserDutyAPI, UserLevelAPI, CommodityAPI, CurrencyAPI, CommodityTS, CompanyAPI, PromotionTS, PromotionAPI, SystemSettingAPI, FilesAPI, CustomerAPI, OrderAPI, SystemParamAPI, TaxAPI, LogisticsAPI, EC_Payment, WarehouseAPI, PermissionFunctionAPI, StockAPI, ToDoListAPI, PurchaseAPI, ImportAPI, ImportDataAPI, DashboardAPI, OfficeSiteSettingAPI, EinvInvoiceAPI, ReportAPI, OauthAPI, ATS_WebSetting, ATS_CityAreaSettings, ATS_CarModelSettings, ATS_AirportTerminalSettings, ATS_ExtraSettings, ATS_FareSettings, ATS_GASettings, ATS_OrderMaster };
 
 /**選單代碼 */
 export const DDMenu = (() => {

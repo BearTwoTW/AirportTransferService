@@ -37,7 +37,13 @@ import * as ReportAPI from "./Controller/ReportAPI";
 import * as OauthAPI from "./Controller/OauthAPI";
 import { DDMenuItem } from "./Types";
 
-export { UserControlAPI, PageAPI, UserAPI, UserDutyAPI, UserLevelAPI, CommodityAPI, CurrencyAPI, CommodityTS, CompanyAPI, PromotionTS, PromotionAPI, SystemSettingAPI, FilesAPI, CustomerAPI, OrderAPI, SystemParamAPI, TaxAPI, LogisticsAPI, EC_Payment, WarehouseAPI, PermissionFunctionAPI, StockAPI, ToDoListAPI, PurchaseAPI, ImportAPI, ImportDataAPI, DashboardAPI, OfficeSiteSettingAPI, EinvInvoiceAPI, ReportAPI, OauthAPI };
+// ATS API
+import * as ATS_WebSetting from "./Controller/ATS_WebSetting";
+import * as ATS_CityAreaSettings from "./Controller/ATS_CityAreaSettings";
+import * as ATS_CarModelSettings from "./Controller/ATS_CarModelSettings";
+
+
+export { UserControlAPI, PageAPI, UserAPI, UserDutyAPI, UserLevelAPI, CommodityAPI, CurrencyAPI, CommodityTS, CompanyAPI, PromotionTS, PromotionAPI, SystemSettingAPI, FilesAPI, CustomerAPI, OrderAPI, SystemParamAPI, TaxAPI, LogisticsAPI, EC_Payment, WarehouseAPI, PermissionFunctionAPI, StockAPI, ToDoListAPI, PurchaseAPI, ImportAPI, ImportDataAPI, DashboardAPI, OfficeSiteSettingAPI, EinvInvoiceAPI, ReportAPI, OauthAPI, ATS_WebSetting, ATS_CityAreaSettings, ATS_CarModelSettings };
 
 /**選單代碼 */
 export const DDMenu = (() => {

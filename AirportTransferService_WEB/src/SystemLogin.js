@@ -150,6 +150,7 @@ export default function SystemLogin() {
             size={"Normal"}
             name={"username"}
             type={"text"}
+            shrink={true}
             required={true}
             error={editCheck.username}
             value={editData.username}
@@ -163,6 +164,7 @@ export default function SystemLogin() {
             size={"Normal"}
             name={"password"}
             type={"password"}
+            shrink={true}
             required={true}
             error={editCheck.password}
             value={editData.password}

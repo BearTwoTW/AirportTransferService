@@ -139,7 +139,7 @@ export const CusThemeTS = (() => {
                     root: {
                         boxShadow: "none",
                         transition: "transform .2s ease",
-                        borderRadius: "50px",
+                        borderRadius: "6px",
                         [`&:hover`]: {
                             boxShadow: "none",
                         },

@@ -6,7 +6,7 @@ import { ArrowForwardIosSlenderDownOutlined, ArrowForwardIosSlenderTopOutlined }
 import { WebIconButton3 } from './WebButton';
 import { WebDialog3 } from '../../components/WebSide/WebDialog';
 import { WebInputSelect3 } from '../WebSide/WebInput';
-import { CustomerAPI } from '../../js/APITS';
+import { ATS_WebSetting } from '../../js/APITS';
 import { OfficeSiteContext } from '../../store/OfficeSiteContext'
 import { tryCatchError } from '../../js/FunctionTS'
 import { imageURL } from '../../js/Domain';
@@ -20,21 +20,35 @@ export const WebNavigation3 = (props) => {
   const [dialogData, setDialogData] = useState({});
   const [imageFile, setImageFile] = useState(null);
 
-
-
-  /**查網站設定
-   * [事件] 查網站設定
-   */
-  useEffect(() => {
-    if (OfficeSiteCtx.officeSite) {
-      try {
-        setImageFile(OfficeSiteCtx.officeSite.files.find(ele => ele.type === "LOGO"))
-      } catch (e) {
-        tryCatchError(e)
-        console.error("WebNavigation3 查網站設定 錯誤")
+  // 網頁設定資料查詢
+  const [pageSearch, setPageSearch] = useState({
+    ws_id: "",
+    title: "",
+    image: "",
+    text1: "",
+    text2: "",
+    text3: "",
+    html1: "",
+    html2: "",
+    html3: "",
+    excel: "",
+    page: 0,
+    num_per_page: 0,
+  });
+  const [LOGO, setLOGO] = useState();
+  /**網站設定查詢 */
+  const getWebSetting = () => {
+    ATS_WebSetting.ATS_WebSettingsSearch(pageSearch).then(res => {
+      if (res.success) {
+        setLOGO(res.data.filter(e => e.ws_id === "00001")[0].image);
       }
-    }
-  }, [OfficeSiteCtx.officeSite]);
+    });
+  };
+
+  // 一進頁面就查詢
+  useEffect(() => {
+    getWebSetting();
+  }, [pageSearch]);
 
 
   /**
@@ -43,7 +57,7 @@ export const WebNavigation3 = (props) => {
   const reserve_Click = ({ type }) => {
     navigate(`/Reserve?type=${type}`)
   };
-
+  console.log("LOGO", LOGO)
   return (
     <React.Fragment>
       <header className="p-5 w-full bg-primary flex flex-col items-center top-0 z-10 fixed transition-all">
@@ -53,7 +67,7 @@ export const WebNavigation3 = (props) => {
               <Typography sx={{ cursor: "pointer" }} component="a" onClick={() => navigate("/Index")}>
                 <Box sx={{ height: "60px" }}>
                   {/* <img className={"h-full"} src={imageFile ? `${imageURL}${imageFile.path}` : ""}></img> */}
-                  <img className={"h-full"} src="https://fakeimg.pl/250x100/?text=img"></img>
+                  <img className={"h-full"} src={LOGO ? `${imageURL}${LOGO}` : "https://fakeimg.pl/250x100/?text=img"}></img>
                 </Box>
               </Typography>
             </Box>

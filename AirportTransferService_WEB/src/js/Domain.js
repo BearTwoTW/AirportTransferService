@@ -1,8 +1,8 @@
 import packageJson from '../../package.json';
 import { localStorageClear } from './Function';
 
-let ecctestDomain = packageJson.testConfig.ecctestDomain;
-let eccnetDomain = packageJson.testConfig.eccnetDomain;
+let ecctestDomain = packageJson.testConfig.atsDomain;
+let eccnetDomain = packageJson.testConfig.atsDomain;
 // let testDomain = packageJson.testConfig.testDomain;
 let domain = window.location.origin + "/api/";
 let companyFileURL = window.location.origin + "/_" + sessionStorage.company_code
@@ -41,6 +41,7 @@ if (window.location.origin.indexOf("test") !== -1) {
  * @param {object} obj 參數
  */
 const AuthorizeFetch = async (url, obj = {}) => {
+  console.log("AuthorizeFetch", domain + url)
   const response = await fetch(domain + url, {
     method: 'POST',
     headers: {

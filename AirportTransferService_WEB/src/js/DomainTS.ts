@@ -1,3 +1,4 @@
+import { Console } from "console";
 import packageJson from "../../package.json";
 import { localStorageClear } from "./FunctionTS";
 
@@ -53,6 +54,8 @@ type RequestObj = { [key: string]: any } | FormData;
  * @param {object} obj 參數
  */
 const AuthorizeFetch = async (url: string = "", obj: any = {}): Promise<ResultObj> => {
+  console.log("AuthorizeFetch", domain + url);
+
   const response = await fetch(domain + url, {
     method: "POST",
     headers: {

@@ -1,15 +1,19 @@
-﻿using AirportTransferService.Models;
-using Jose;
+﻿using Jose;
 using System.Globalization;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace AirportTransferService.App_Code
 {
+    /// <summary>
+    /// 工具類別
+    /// </summary>
     public static class Tool
     {
+        /// <summary>
+        /// 正則運算式
+        /// </summary>
         public struct RegularExp
         {
             public const string Chinese = @"^[\u4E00-\u9FA5\uF900-\uFA2D]+$";
@@ -51,6 +55,7 @@ namespace AirportTransferService.App_Code
             public const string visitor_pattern = @"[0-9][0-9][0-9]%[-]%[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]";
 
         }
+
         /// <summary>
         /// JWT解碼
         /// </summary>
@@ -386,6 +391,13 @@ namespace AirportTransferService.App_Code
         }
         #endregion
 
+        /// <summary>
+        /// SetValue
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="items"></param>
+        /// <param name="updateMethod"></param>
+        /// <returns></returns>
         public static IEnumerable<T> SetValue<T>(this IEnumerable<T> items, Action<T> updateMethod)
         {
             foreach (T item in items)
@@ -408,7 +420,9 @@ namespace AirportTransferService.App_Code
             return hash;
         }
 
-        /// <summary>hash to string</summary>
+        /// <summary>
+        /// hash to string
+        /// </summary>
         /// <param name="hash">hash</param>
         /// <param name="binary">二進次</param>
         /// <returns>hash string</returns>
@@ -706,6 +720,65 @@ namespace AirportTransferService.App_Code
         {
             string format = "yyyyMMddHHmmss";
             return date.ToString(format.Substring(0, length));
+        }
+
+        /// <summary>
+        /// 建立檔案 HttpPostedFile
+        /// </summary>
+        /// <param name="filePath">路徑</param>
+        /// <param name="fileName">檔名</param>
+        /// <param name="content">內文</param>
+        /// <returns></returns>
+        public static bool CreateFile(string filePath, string fileName, IFormFile content)
+        {
+            try
+            {
+                if (!Directory.Exists(filePath)) Directory.CreateDirectory(filePath);
+                if (File.Exists(filePath + fileName)) File.Delete(filePath + fileName);
+
+                using (Stream fileStream = new FileStream(filePath + @"\" + fileName, FileMode.Create))
+                {
+                    content.CopyTo(fileStream);
+                    fileStream.Dispose();
+                }
+
+                //DirectoryInfo di = new DirectoryInfo(filePath);
+                //FileInfo[] fileArray = di.GetFiles("*.*");
+                //SortAsFileName(ref fileArray);
+                //for (int i = 0; i < fileArray.Length; i++) if (i >= 50) File.Delete(filePath + fileArray[i].Name);
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 用base64建立檔案
+        /// </summary>
+        /// <param name="base64string"></param>
+        /// <param name="filePath"></param>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        public static bool UploadAnyFileBase64(string base64string, string filePath, string fileName)
+        {
+            try
+            {
+                if (!Directory.Exists(filePath)) Directory.CreateDirectory(filePath);
+                if (!File.Exists(filePath + fileName)) File.Delete(filePath + fileName);
+
+                byte[] imageBytes = Convert.FromBase64String(base64string);
+
+                File.WriteAllBytes(filePath + @"\" + fileName, imageBytes);
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

@@ -3,8 +3,8 @@
     [cre_time]          DATETIME        NULL,
     [upd_userid]        VARCHAR (50)    NULL,
     [upd_time]          DATETIME        NULL,
+    [o_id]              VARCHAR (10)    NOT NULL,
     [visible]           VARCHAR (2)     NULL,
-    [o_id]              VARCHAR (10)    NULL,
     [type]              VARCHAR (4)     NULL,
     [city]              NVARCHAR (255)  NULL,
     [area]              NVARCHAR (255)  NULL,
@@ -28,8 +28,11 @@
     [phone_passenger]   VARCHAR (50)    NULL,
     [email_passenger]   VARCHAR (255)   NULL,
     [price]             DECIMAL (10, 2) NULL,
-    [link]              NVARCHAR (MAX)  NULL
+    [link]              NVARCHAR (MAX)  NULL,
+    CONSTRAINT [PK_ATS_OrderMaster] PRIMARY KEY CLUSTERED ([o_id] ASC)
 );
+
+
 
 
 GO

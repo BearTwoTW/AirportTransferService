@@ -24,6 +24,14 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddControllers();
 
     #region action
+    builder.Services.AddScoped<IAllowAnonymousService, IAllowAnonymousService_IMPL>();
+    builder.Services.AddScoped<IATS_AirportTerminalSettings, IATS_AirportTerminalSettings_IMPL>();
+    builder.Services.AddScoped<IATS_CarModelSettings, IATS_CarModelSettings_IMPL>();
+    builder.Services.AddScoped<IATS_CityAreaSettings, IATS_CityAreaSettings_IMPL>();
+    builder.Services.AddScoped<IATS_ExtraSettings, IATS_ExtraSettings_IMPL>();
+    builder.Services.AddScoped<IATS_FareSettings, IATS_FareSettings_IMPL>();
+    builder.Services.AddScoped<IATS_GASettings, IATS_GASettings_IMPL>();
+    builder.Services.AddScoped<IATS_OrderMaster, IATS_OrderMaster_IMPL>();
     builder.Services.AddScoped<IATS_WebSettings, IATS_WebSettings_IMPL>();
     builder.Services.AddScoped<IDealerSetting, IDealerSetting_IMPL>();
     builder.Services.AddScoped<IFiles, IFiles_IMPL>();

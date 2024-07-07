@@ -116,7 +116,7 @@
                 from ATS_WebSettings
                 where 1=1
                 {SQL.GenerateSQLWhereQuery(param)}
-                {SQL.GenerateSQLOrderQuery<SearchATS_WebSettingsResult>(sort_columns, "order by ATS_WebSettings.cre_time desc")}
+                {SQL.GenerateSQLOrderQuery<SearchATS_WebSettingsResult>(sort_columns, "order by ATS_WebSettings.ws_id desc")}
                 {(param.page > 0 ? "offset((@page-1)) * @num_per_page ROWS fetch next @num_per_page ROWS only;" : "")}";
 
                 dt = SQL.GenerateSQLSelectResult(param, strSql, myConn, out page_count);

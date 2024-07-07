@@ -3,8 +3,8 @@
     [cre_time]   DATETIME        NULL,
     [upd_userid] VARCHAR (50)    NULL,
     [upd_time]   DATETIME        NULL,
-    [visible]    VARCHAR (2)     NULL,
-    [fs_id]      VARCHAR (10)    NULL,
+    [fs_id]      VARCHAR (10)    NOT NULL,
+    [visible]    VARCHAR (2)     CONSTRAINT [DF_ATS_FareSettings_visible] DEFAULT ('Y') NULL,
     [cms_id]     VARCHAR (10)    NULL,
     [city]       NVARCHAR (255)  NULL,
     [area]       NVARCHAR (255)  NULL,
@@ -13,8 +13,13 @@
     [airport]    NVARCHAR (255)  NULL,
     [terminal]   NVARCHAR (255)  NULL,
     [price]      DECIMAL (10, 2) NULL,
-    [link]       NVARCHAR (MAX)  NULL
+    [link]       NVARCHAR (MAX)  NULL,
+    CONSTRAINT [PK_ATS_FareSettings] PRIMARY KEY CLUSTERED ([fs_id] ASC)
 );
+
+
+
+
 
 
 GO

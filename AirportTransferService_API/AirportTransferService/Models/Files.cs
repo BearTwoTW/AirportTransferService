@@ -335,8 +335,7 @@ namespace AirportTransferService.Models
         /// <summary>
         /// 檔案流水號
         /// </summary>
-        [Required(ErrorMessage = "請輸入{0}")]
-        [Display(Name = "檔案流水號")]
+        [Display(Name = "檔案流水號"), Required(ErrorMessage = "請輸入{0}")]
         public int file_id { get; set; } = 0;
 
         /// <summary>

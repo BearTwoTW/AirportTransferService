@@ -5,11 +5,17 @@ namespace AirportTransferService.Controllers
     /// <summary>
     /// 行政區域設定
     /// </summary>
-    /// <param name="ATS_CityAreaSettings"></param>
+    /// <param name="aTS_CityAreaSettings"></param>
+    /// <param name="aTS_AirportTerminalSettings"></param>
+    /// <param name="aTS_CarModelSettings"></param>
+    /// <param name="aTS_FareSettings"></param>
     /// <param name="baseService"></param>
-    public class ATS_CityAreaSettingsController(IATS_CityAreaSettings ATS_CityAreaSettings, IBaseService baseService) : CustomControllerBase(baseService)
+    public class ATS_CityAreaSettingsController(IATS_CityAreaSettings aTS_CityAreaSettings, IATS_AirportTerminalSettings aTS_AirportTerminalSettings, IATS_CarModelSettings aTS_CarModelSettings, IATS_FareSettings aTS_FareSettings, IBaseService baseService) : CustomControllerBase(baseService)
     {
-        private readonly IATS_CityAreaSettings _ATS_CityAreaSettings = ATS_CityAreaSettings;
+        private readonly IATS_CityAreaSettings _ATS_CityAreaSettings = aTS_CityAreaSettings;
+        private readonly IATS_AirportTerminalSettings _ATS_AirportTerminalSettings = aTS_AirportTerminalSettings;
+        private readonly IATS_CarModelSettings _ATS_CarModelSettings = aTS_CarModelSettings;
+        private readonly IATS_FareSettings _ATS_FareSettings = aTS_FareSettings;
 
         /// <summary>
         /// 行政區域設定建立
@@ -21,11 +27,11 @@ namespace AirportTransferService.Controllers
         {
             DateTime cre_time = DateTime.Now;
 
-            List<SearchATS_CityAreaSettingsResult> search_results = _ATS_CityAreaSettings.SearchATS_CityAreaSettings(
+            List<SearchATS_CityAreaSettingsResult> resultCityAreaSettings = _ATS_CityAreaSettings.SearchATS_CityAreaSettings(
                 new SearchATS_CityAreaSettingsParam(),
                 ["city", "area"], [],
                 out _);
-            if (search_results.Exists(x => x.city == data.city && x.area == data.area)) return new ResultObject<string> { success = false, message = "行政區域重複" };
+            if (resultCityAreaSettings.Exists(x => x.city == data.city && x.area == data.area)) return new ResultObject<string> { success = false, message = "行政區域重複" };
 
             string id = _ATS_CityAreaSettings.CreateATS_CityAreaSettings(
                 new CreateATS_CityAreaSettingsParam(
@@ -37,6 +43,13 @@ namespace AirportTransferService.Controllers
                     area: data.area,
                     road: data.road,
                     section: data.section));
+
+            if (!string.IsNullOrEmpty(id))
+            {
+                ATS_FareSettingsController aTS_FareSettingsController = new(_ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings, _baseService) { ControllerContext = ControllerContext };
+                aTS_FareSettingsController.ATS_FareSettingsSystemCreate(
+                    new ATS_FareSettingsCreate { city = data.city, area = data.area, road = data.road, section = data.section });
+            }
 
             return new ResultObject<string> { success = true, message = "新增成功", data = id };
         }
@@ -54,7 +67,7 @@ namespace AirportTransferService.Controllers
             //查自己
             SearchATS_CityAreaSettingsResult? search_own_result = _ATS_CityAreaSettings.SearchATS_CityAreaSettings(
                 new SearchATS_CityAreaSettingsParam(cas_id: data.cas_id),
-                ["cas_id"], [],
+                ["cas_id", "city", "area", "road", "section"], [],
                 out _).FirstOrDefault();
             if (search_own_result == null) return new ResultObject<string> { success = false, message = "修改失敗，查無行政區域設定" };
             //查要檢查重複的東西
@@ -73,6 +86,7 @@ namespace AirportTransferService.Controllers
             using (TransactionScope tx = new())
             {
                 _ATS_CityAreaSettings.UpdateATS_CityAreaSettings(new UpdateATS_CityAreaSettingsParam(
+                    cre_time: Appsettings.api_datetime_param_no_pass,
                     upd_userid: jwtObject.user_id,
                     upd_time: upd_time,
                     cas_id: data.cas_id,
@@ -82,6 +96,11 @@ namespace AirportTransferService.Controllers
                     area: data.area,
                     road: data.road,
                     section: data.section));
+
+                ATS_FareSettingsController aTS_FareSettingsController = new(_ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings, _baseService) { ControllerContext = ControllerContext };
+                aTS_FareSettingsController.ATS_FareSettingsSystemUpdate(
+                    [new ATS_FareSettingsCreate { city = search_own_result.city, area = search_own_result.area, road = search_own_result.road, section = search_results[0].section },
+                     new ATS_FareSettingsCreate { city = data.city, area = data.area, road = data.road, section = data.section }]);
 
                 tx.Complete();
             }
@@ -137,7 +156,17 @@ namespace AirportTransferService.Controllers
         [HttpPost]
         public ResultObject<string> ATS_CityAreaSettingsDelete(ATS_CityAreaSettingsDelete data)
         {
+            SearchATS_CityAreaSettingsResult? search_own_result = _ATS_CityAreaSettings.SearchATS_CityAreaSettings(
+                new SearchATS_CityAreaSettingsParam(cas_id: data.cas_id),
+                ["cas_id", "city", "area", "road", "section"], [],
+                out _).FirstOrDefault();
+
             _ATS_CityAreaSettings.DeleteATS_CityAreaSettings(data.cas_id);
+
+            ATS_FareSettingsController aTS_FareSettingsController = new(_ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings, _baseService) { ControllerContext = ControllerContext };
+            aTS_FareSettingsController.ATS_FareSettingsSystemDelete(
+                               new ATS_FareSettingsCreate { city = search_own_result.city, area = search_own_result.area, road = search_own_result.road, section = search_own_result.section });
+
             return new ResultObject<string> { success = true, message = "刪除成功" };
         }
     }

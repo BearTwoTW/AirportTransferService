@@ -3,12 +3,17 @@
     [cre_time]   DATETIME       NULL,
     [upd_userid] VARCHAR (50)   NULL,
     [upd_time]   DATETIME       NULL,
-    [visible]    VARCHAR (2)    NULL,
-    [es_id]      VARCHAR (10)   NULL,
+    [es_id]      VARCHAR (10)   NOT NULL,
+    [visible]    VARCHAR (2)    CONSTRAINT [DF_ATS_ExtraSettings_visible] DEFAULT ('Y') NULL,
     [type]       VARCHAR (10)   NULL,
     [name]       NVARCHAR (255) NULL,
-    [price]      NVARCHAR (255) NULL
+    [price]      NVARCHAR (255) NULL,
+    CONSTRAINT [PK_ATS_ExtraSettings] PRIMARY KEY CLUSTERED ([es_id] ASC)
 );
+
+
+
+
 
 
 GO

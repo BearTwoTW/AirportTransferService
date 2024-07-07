@@ -3,7 +3,7 @@
     [cre_time]   DATETIME       NULL,
     [upd_userid] VARCHAR (50)   NULL,
     [upd_time]   DATETIME       NULL,
-    [ws_id]      VARCHAR (10)   NULL,
+    [ws_id]      VARCHAR (10)   NOT NULL,
     [title]      NVARCHAR (255) NULL,
     [image]      NVARCHAR (255) NULL,
     [text1]      NVARCHAR (MAX) NULL,
@@ -11,8 +11,11 @@
     [text3]      NVARCHAR (MAX) NULL,
     [html1]      NVARCHAR (MAX) NULL,
     [html2]      NVARCHAR (MAX) NULL,
-    [html3]      NVARCHAR (MAX) NULL
+    [html3]      NVARCHAR (MAX) NULL,
+    CONSTRAINT [PK_ATS_WebSettings] PRIMARY KEY CLUSTERED ([ws_id] ASC)
 );
+
+
 
 
 GO

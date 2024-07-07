@@ -3,11 +3,16 @@
     [cre_time]   DATETIME       NULL,
     [upd_userid] VARCHAR (50)   NULL,
     [upd_time]   DATETIME       NULL,
-    [visible]    VARCHAR (2)    NULL,
-    [ats_id]     VARCHAR (10)   NULL,
+    [ats_id]     VARCHAR (10)   NOT NULL,
+    [visible]    VARCHAR (2)    CONSTRAINT [DF_ATS_AirportTerminalSettings_visible] DEFAULT ('Y') NULL,
     [airport]    NVARCHAR (255) NULL,
-    [terminal]   NVARCHAR (255) NULL
+    [terminal]   NVARCHAR (255) NULL,
+    CONSTRAINT [PK_ATS_AirportTerminalSettings] PRIMARY KEY CLUSTERED ([ats_id] ASC)
 );
+
+
+
+
 
 
 GO

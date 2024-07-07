@@ -105,7 +105,6 @@ namespace AirportTransferService.Models
     /// </summary>
     /// <param name="cre_userid"></param>
     /// <param name="cre_time"></param>
-    /// <param name="ws_id"></param>
     /// <param name="title"></param>
     /// <param name="image"></param>
     /// <param name="text1"></param>
@@ -141,9 +140,11 @@ namespace AirportTransferService.Models
     /// <summary>
     /// UpdateATS_WebSettingsParam
     /// </summary>
+    /// <param name="cre_time"></param>
     /// <param name="upd_userid"></param>
     /// <param name="upd_time"></param>
     /// <param name="ws_id"></param>
+    /// <param name="cre_userid"></param>
     /// <param name="title"></param>
     /// <param name="image"></param>
     /// <param name="text1"></param>
@@ -153,9 +154,11 @@ namespace AirportTransferService.Models
     /// <param name="html2"></param>
     /// <param name="html3"></param>
     public class UpdateATS_WebSettingsParam(
+        DateTime? cre_time,
         string? upd_userid,
         DateTime? upd_time,
         string? ws_id,
+        string? cre_userid = api_string_param_no_pass,
         string? title = api_string_param_no_pass,
         string? image = api_string_param_no_pass,
         string? text1 = api_string_param_no_pass,
@@ -164,6 +167,8 @@ namespace AirportTransferService.Models
         string? html1 = api_string_param_no_pass,
         string? html2 = api_string_param_no_pass,
         string? html3 = api_string_param_no_pass) : ATS_WebSettings(
+            cre_userid: cre_userid,
+            cre_time: cre_time,
             upd_userid: upd_userid,
             upd_time: upd_time,
             ws_id: ws_id,
@@ -390,8 +395,7 @@ namespace AirportTransferService.Models
         /// <summary>
         /// 標題
         /// </summary>
-        [Required(ErrorMessage = "請輸入{0}")]
-        [Display(Name = "標題")]
+        [Display(Name = "標題"), Required(ErrorMessage = "請輸入{0}")]
         public string? title { get; set; } = "";
 
         /// <summary>
@@ -445,8 +449,7 @@ namespace AirportTransferService.Models
         /// <summary>
         /// 編號
         /// </summary>
-        [Required(ErrorMessage = "請輸入{0}")]
-        [Display(Name = "編號")]
+        [Display(Name = "編號"), Required(ErrorMessage = "請輸入{0}")]
         public string? ws_id { get; set; } = "";
     }
 
@@ -476,8 +479,7 @@ namespace AirportTransferService.Models
         /// <summary>
         /// 是否匯出
         /// </summary>
-        [YN]
-        [Display(Name = "是否匯出")]
+        [Display(Name = "是否匯出"), YN]
         public string excel { get; set; } = "N";
 
         /// <summary>
@@ -507,8 +509,7 @@ namespace AirportTransferService.Models
         /// <summary>
         /// 編號
         /// </summary>
-        [Required(ErrorMessage = "請輸入{0}")]
-        [Display(Name = "編號")]
+        [Display(Name = "編號"), Required(ErrorMessage = "請輸入{0}")]
         public string? ws_id { get; set; } = "";
     }
     #endregion

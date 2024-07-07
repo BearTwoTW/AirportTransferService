@@ -398,12 +398,13 @@ export default function Order() {
         setDialogData(({
             id: 'edit',
             DialogTitle: '修改',
-            DialogContent: <DialogsInner type={'edit'} ref={useDialogInner} getEditData={getEditData} o_id={id} />,
+            DialogContent: <DialogsInner type={'edit'} ref={useDialogInner} options={options} getEditData={getEditData} o_id={id} />,
             DialogActions: (
                 <React.Fragment>
                     <CusTextButton autoFocus onClick={dialogClose} color="default" text="取消" />
                     <CusTextButton autoFocus onClick={() => { edit_Confirm() }} color="primary" text="確認" />
-                </React.Fragment>)
+                </React.Fragment>),
+            maxWidth: 'md'
         }));
     };
 
@@ -445,7 +446,7 @@ export default function Order() {
         setDialogData(({
             id: 'del',
             DialogTitle: '刪除',
-            DialogContent: <DialogsInner type={'del'} ref={useDialogInner} name={name} id={id} />,
+            DialogContent: <DialogsInner type={'del'} ref={useDialogInner} options={options} name={name} id={id} />,
             DialogActions: (
                 <React.Fragment>
                     <CusTextButton autoFocus onClick={dialogClose} color="default" text="取消" />
@@ -655,6 +656,7 @@ export default function Order() {
                                                     { name: "乘車時間" },
                                                     { name: "訂購人姓名" },
                                                     { name: "訂購人電話" },
+                                                    { name: "訂單金額" },
                                                     { name: "操作" },
                                                 ]}
                                                 tableBody={<TableBodyContent />}
@@ -787,16 +789,24 @@ const DialogsInner = forwardRef((props, ref) => {
         let formattedValue = value;
         if (name === "date_travel") {
             formattedValue = new Date(value).toLocaleDateString('en-CA');
+            setOrderAdd(prev => ({
+                ...prev,
+                [name]: formattedValue
+            }));
         } else if (name === "time_travel") {
             const dateTravelValue = orderAdd.date_travel;
             if (dateTravelValue) {
                 formattedValue = `${dateTravelValue}T${value}:00`;
             }
+            setOrderAdd(prev => ({
+                ...prev,
+                [name]: formattedValue
+            }));
         }
 
         setOrderAdd(prev => ({
             ...prev,
-            [name]: name === "date_travel" || name === "time_travel" ? formattedValue : val
+            [name]: val
         }));
     };
 
@@ -804,6 +814,20 @@ const DialogsInner = forwardRef((props, ref) => {
     const add_HandleSelect = (e) => {
         const { name, value, key } = e.target;
         const val = value === null ? null : value[key];
+
+        if (name === "city") {
+            setOrderAdd(prev => ({
+                ...prev,
+                area: null,
+                [name]: val,
+            }));
+        } else if (name === "airport") {
+            setOrderAdd(prev => ({
+                ...prev,
+                terminal: null,
+                [name]: val,
+            }));
+        }
 
         setOrderAdd(prev => ({
             ...prev,
@@ -831,9 +855,32 @@ const DialogsInner = forwardRef((props, ref) => {
         const { name, value, key } = e.target;
         const val = value === null ? null : value[key];
 
-        setOrderAdd(prev => ({
+        if (name === "city") {
+            setEditData(prev => ({
+                ...prev,
+                updData: {
+                    ...prev.updData,
+                    area: null,
+                    [name]: val
+                }
+            }));
+        } else if (name === "airport") {
+            setEditData(prev => ({
+                ...prev,
+                updData: {
+                    ...prev.updData,
+                    terminal: null,
+                    [name]: val
+                }
+            }));
+        }
+
+        setEditData(prev => ({
             ...prev,
-            [name]: val,
+            updData: {
+                ...prev.updData,
+                [name]: val
+            }
         }));
     };
 
@@ -847,8 +894,6 @@ const DialogsInner = forwardRef((props, ref) => {
         editInitCheckState,
         setEditFieldCheck
     }));
-
-    console.log(orderAdd)
 
     if (type === "add") {
         return (

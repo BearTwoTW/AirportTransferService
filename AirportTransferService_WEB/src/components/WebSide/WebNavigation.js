@@ -57,7 +57,7 @@ export const WebNavigation3 = (props) => {
   const reserve_Click = ({ type }) => {
     navigate(`/Reserve?type=${type}`)
   };
-  console.log("LOGO", LOGO)
+
   return (
     <React.Fragment>
       <header className="p-5 w-full bg-primary flex flex-col items-center top-0 z-10 fixed transition-all">
@@ -72,7 +72,6 @@ export const WebNavigation3 = (props) => {
               </Typography>
             </Box>
             <Box className="flex space-x-10 text-info font-bold max-md:hidden">
-              <a className="cursor-pointer hover:opacity-80" onClick={onScrollToTarget}>預約流程</a>
               <a className="cursor-pointer hover:opacity-80" onClick={() => navigate("/Price")}>加價服務</a>
               <a className="cursor-pointer hover:opacity-80" onClick={() => reserve_Click({ type: "go" })}>預約及車資計算</a>
             </Box>

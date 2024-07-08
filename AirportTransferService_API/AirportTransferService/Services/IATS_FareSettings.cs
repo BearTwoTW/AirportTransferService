@@ -140,8 +140,7 @@
                     section = dt.Columns.Contains("section") ? dr["section"].ToString() : null,
                     airport = dt.Columns.Contains("airport") ? dr["airport"].ToString() : null,
                     terminal = dt.Columns.Contains("terminal") ? dr["terminal"].ToString() : null,
-                    price = dt.Columns.Contains("price") ? dr.Field<decimal>("price") : null,
-                    link = dt.Columns.Contains("link") ? dr["link"].ToString() : null
+                    price = dt.Columns.Contains("price") ? dr.Field<decimal>("price") : null
                 });
             }
             return result;

@@ -3,7 +3,7 @@ import MD5 from 'crypto-js/md5';
 import { useLocation, useNavigate } from "react-router-dom";
 import { CircularLoading } from '../../../../components/CusProgress';
 import { Grid, TableCell, TableRow, Chip, Box, Typography } from '@mui/material';
-import { HighlightOff, Add, Search, Edit, Delete } from '@mui/icons-material';
+import { HighlightOff, Add, Search, Delete, Edit } from '@mui/icons-material';
 import { CusCard } from '../../../../components/CusCard';
 import { CusInfoTitle } from '../../../../components/CusInfo';
 import { CusDialog } from '../../../../components/CusDialog';
@@ -15,30 +15,28 @@ import { NoResults } from '../../../../components/CusError';
 import { CusOutlinedSelect } from '../../../../components/CusSelect';
 import { CusTextIconButton, CusIconButton, CusTextButton } from '../../../../components/CusButton';
 import { CusDatePicker } from '../../../../components/CusDatePicker';
-import { UserAPI, OptionList, DDMenu, ATS_CarModelSettings } from '../../../../js/APITS';
+import { UserAPI, OptionList, DDMenu, ATS_ExtraSettings } from '../../../../js/APITS';
 import { useCheckLogInXPermission, get_ECC_indexedDB_factory } from '../../../../js/Function';
 import { isNullOrEmpty } from '../../../../js/FunctionTS';
 
-export default function CarModel() {
+export default function Extra() {
     // 導頁
     const navigate = useNavigate();
     const location = useLocation();
 
     //權限
-    const permission = useCheckLogInXPermission("CarModelFirst", ["Add", "Delete", "Edit"]);
+    const permission = useCheckLogInXPermission("ExtraFirst", ["Add", "Delete", "Edit"]);
 
     // 頁面資訊
     const [pageSearch, setPageSearch] = useState({
         visible: null,
-        cms_id: null,
+        es_id: null,
+        type: null,
         name: null,
-        max_passengers: null,
-        max_luggage: null,
-        max_child_seats: null,
-        max_service_extras: null,
-        excel: "",
+        price: null,
         page: 1,
         num_per_page: 10,
+        excel: "",
     });
 
     // indexedDB
@@ -49,7 +47,7 @@ export default function CarModel() {
 
     // 帳號資料
     const [isLoading, setIsLoading] = useState(true);
-    const [carModelList, setCarModelList] = useState([]);
+    const [extraList, setExtraList] = useState([]);
     const [pageCount, setPageCount] = useState(0);
 
     // Dialog
@@ -79,19 +77,19 @@ export default function CarModel() {
             }));
 
             // 存在search_set就用indexedDB的搜尋條件，不然就用預設的搜尋條件
-            searchCarModel(search_set ?? pageSearch);
+            searchExtra(search_set ?? pageSearch);
         });
         setInitDB(true);
     }, []);
 
     /**
-     * 查詢職責列表
+     * 查詢機場航廈
      */
-    const searchCarModel = async (searchPrams) => {
+    const searchExtra = async (searchPrams) => {
         setIsLoading(true);
         if (initDBRef.current) {
             try {
-                ATS_CarModelSettings.ATS_CarModelSettingsSearch(searchPrams).then(async res => {
+                ATS_ExtraSettings.ATS_ExtraSettingsSearch(searchPrams).then(async res => {
                     if (res.success) {
                         if (indexDB !== null) {
                             await indexDB.update("QueryCondition", {
@@ -105,7 +103,7 @@ export default function CarModel() {
                             });
                         }
 
-                        setCarModelList(res.data);
+                        setExtraList(res.data);
                         setPageCount(res.page);
                     }
                     setIsLoading(false);
@@ -126,12 +124,10 @@ export default function CarModel() {
         setPageSearch(prevData => ({
             ...prevData,
             visible: null,
-            cms_id: null,
+            es_id: null,
+            type: null,
             name: null,
-            max_passengers: null,
-            max_luggage: null,
-            max_child_seats: null,
-            max_service_extras: null,
+            price: null,
             page: 1,
             num_per_page: 10,
             excel: "",
@@ -139,33 +135,31 @@ export default function CarModel() {
     };
 
     useEffect(() => {
-        searchCarModel(pageSearch);
+        searchExtra(pageSearch);
     }, [pageSearch.search, pageSearch.page, pageSearch.num_per_page]);
 
     /** table body */
     const TableBodyContent = React.memo(() => {
         return (
-            carModelList.map((item, index) => (
+            extraList.map((item, index) => (
                 <TableRow
                     hover
-                    key={item.cms_id}>
+                    key={item.es_id}>
                     <TableCell>{index + 1}</TableCell>
+                    <TableCell>{item.type}</TableCell>
                     <TableCell>{item.name}</TableCell>
-                    <TableCell>{item.max_passengers}</TableCell>
-                    <TableCell>{item.max_luggage}</TableCell>
-                    <TableCell>{item.max_child_seats}</TableCell>
-                    <TableCell>{item.max_service_extras}</TableCell>
+                    <TableCell>{item.price}</TableCell>
                     <TableCell>
                         {permission.Delete
                             ?
                             <React.Fragment>
                                 <CusIconButton
-                                    onClick={(e) => edit_Click({ e: e, name: item.name, id: item.cms_id })}
+                                    onClick={(e) => edit_Click({ e: e, id: item.es_id })}
                                     color='primary'
                                     icon={<Edit />}
                                 />
                                 <CusIconButton
-                                    onClick={(e) => del_Click({ e: e, name: item.name, id: item.cms_id })}
+                                    onClick={(e) => del_Click({ e: e, id: item.es_id })}
                                     color='primary'
                                     icon={<Delete />}
                                 />
@@ -182,7 +176,7 @@ export default function CarModel() {
         useDialog.current.handleOpen();
         setDialogData(({
             id: 'add',
-            DialogTitle: '新增車型',
+            DialogTitle: '新增機場航廈',
             DialogContent: <DialogsInner type={'add'} ref={useDialogInner} />,
             DialogActions: (
                 <>
@@ -194,24 +188,22 @@ export default function CarModel() {
         }));
     };
 
-    /**確認新增行政區*/
+    /**[新建確認]加價 */
     const add_Confirm = () => {
-        const { carModelAdd, initCarModelAddCheck, setCarModelAddCheck } = useDialogInner.current;
-        if (!carModelAdd.name || !carModelAdd.max_passengers || !carModelAdd.max_luggage || !carModelAdd.max_child_seats || !carModelAdd.max_service_extras) {
-            setCarModelAddCheck({
-                name: !carModelAdd.name ? true : false,
-                max_passengers: !carModelAdd.max_passengers ? true : false,
-                max_luggage: !carModelAdd.max_luggage ? true : false,
-                max_child_seats: !carModelAdd.max_child_seats ? true : false,
-                max_service_extras: !carModelAdd.max_service_extras ? true : false,
+        const { extraAdd, initExtraAddCheck, setExtraAddCheck } = useDialogInner.current;
+        if (!extraAdd.type || !extraAdd.name || !extraAdd.price) {
+            setExtraAddCheck({
+                type: !extraAdd.type ? true : false,
+                name: !extraAdd.name ? true : false,
+                price: !extraAdd.price ? true : false,
             })
         } else {
-            setCarModelAddCheck(initCarModelAddCheck);
+            setExtraAddCheck(initExtraAddCheck);
 
-            ATS_CarModelSettings.ATS_CarModelSettingsCreate(carModelAdd).then(res => {
+            ATS_ExtraSettings.ATS_ExtraSettingsCreate(extraAdd).then(res => {
                 if (res.success) {
                     dialogClose();
-                    searchCarModel({
+                    searchExtra({
                         ...pageSearch,
                     });
                 }
@@ -223,17 +215,17 @@ export default function CarModel() {
         }
     };
 
-    /**[修改]車型 */
+    /**[修改]加價 */
     const edit_Click = ({ e, id }) => {
         e.stopPropagation();
         useDialog.current.handleOpen();
 
-        const getEditData = carModelList.filter(item => item.cms_id === id)[0];
+        const getEditData = extraList.filter(item => item.es_id === id)[0];
 
         setDialogData(({
             id: 'edit',
             DialogTitle: '修改',
-            DialogContent: <DialogsInner type={'edit'} ref={useDialogInner} getEditData={getEditData} cms_id={id} />,
+            DialogContent: <DialogsInner type={'edit'} ref={useDialogInner} getEditData={getEditData} es_id={id} />,
             DialogActions: (
                 <React.Fragment>
                     <CusTextButton autoFocus onClick={dialogClose} color="default" text="取消" />
@@ -242,7 +234,7 @@ export default function CarModel() {
         }));
     };
 
-    /**[修改確認]車型 */
+    /**[修改確認]加價 */
     const edit_Confirm = async () => {
         const { editData, editInitCheckState, setEditFieldCheck } = useDialogInner.current;
 
@@ -258,11 +250,11 @@ export default function CarModel() {
         } else {
             setEditFieldCheck(editInitCheckState);
 
-            const { success, message } = await ATS_CarModelSettings.ATS_CarModelSettingsUpdate(editData.updData);
+            const { success, message } = await ATS_ExtraSettings.ATS_ExtraSettingsUpdate(editData.updData);
 
             if (success) {
                 dialogClose();
-                searchCarModel(pageSearch);
+                searchExtra(pageSearch);
             }
 
             enqueueSnackbar(message, {
@@ -272,7 +264,7 @@ export default function CarModel() {
         }
     };
 
-    /**[刪除]車型 */
+    /**[刪除]加價 */
     const del_Click = useCallback(({ e, name, id }) => {
         e.stopPropagation();
         useDialog.current.handleOpen();
@@ -289,15 +281,13 @@ export default function CarModel() {
         }));
     }, [])
 
-    /**[確認]刪除車型 */
+    /**[確認]刪除加價 */
     const del_Confirm = useCallback((e, _id) => {
         e.stopPropagation();
-        ATS_CarModelSettings.ATS_CarModelSettingsDelete({ cms_id: _id }).then(res => {
+        ATS_ExtraSettings.ATS_ExtraSettingsDelete({ es_id: _id }).then(res => {
             if (res.success) {
                 dialogClose();
-                searchCarModel({
-                    ...pageSearch,
-                });
+                searchExtra(pageSearch);
             }
             enqueueSnackbar(res.message, {
                 variant: res.success ? "success" : "warning",
@@ -314,18 +304,6 @@ export default function CarModel() {
             ...prevParams,
             page: 1,
             [name]: value
-        }));
-    };
-
-    /**下拉選單 */
-    const search_handleSelect = (e) => {
-        const { name, key, value } = e.target
-        const val = value === null ? "" : value[key];
-
-        setPageSearch(prevParams => ({
-            ...prevParams,
-            page: 1,
-            [name]: val,
         }));
     };
 
@@ -359,50 +337,29 @@ export default function CarModel() {
                         <React.Fragment>
                             <Grid item xs={12} sm={3} lg={3}>
                                 <CusInput
+                                    id={"search--type"}
+                                    name={"type"}
+                                    label={"加價類型"}
+                                    value={pageSearch.type}
+                                    onChangeEvent={(e) => search_handleInput(e)}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={3} lg={3}>
+                                <CusInput
                                     id={"search--name"}
                                     name={"name"}
-                                    label={"車型名稱"}
+                                    label={"加價名稱"}
                                     value={pageSearch.name}
                                     onChangeEvent={(e) => search_handleInput(e)}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3} lg={3}>
                                 <CusInput
-                                    id={"search--max_passengers"}
-                                    name={"max_passengers"}
+                                    id={"search--price"}
+                                    name={"price"}
+                                    label={"加價金額"}
                                     type={"number"}
-                                    label={"乘車人數上限"}
-                                    value={pageSearch.max_passengers}
-                                    onChangeEvent={(e) => search_handleInput(e)}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
-                                    id={"search--max_luggage"}
-                                    name={"max_luggage"}
-                                    type={"number"}
-                                    label={"行李數上限"}
-                                    value={pageSearch.max_luggage}
-                                    onChangeEvent={(e) => search_handleInput(e)}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
-                                    id={"search--max_child_seats"}
-                                    name={"max_child_seats"}
-                                    type={"number"}
-                                    label={"安全座椅上限"}
-                                    value={pageSearch.max_child_seats}
-                                    onChangeEvent={(e) => search_handleInput(e)}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
-                                    id={"search--max_service_extras"}
-                                    name={"max_service_extras"}
-                                    type={"number"}
-                                    label={"服務加成項目上限"}
-                                    value={pageSearch.max_service_extras}
+                                    value={pageSearch.price}
                                     onChangeEvent={(e) => search_handleInput(e)}
                                 />
                             </Grid>
@@ -417,7 +374,7 @@ export default function CarModel() {
                                     color={"info"}
                                     text={"查詢"}
                                     startIcon={<Search />}
-                                    onClick={() => searchCarModel(pageSearch)} ㄋ
+                                    onClick={() => searchExtra(pageSearch)}
                                 />
                             </Grid>
                         </React.Fragment>
@@ -431,14 +388,14 @@ export default function CarModel() {
                                     {permission.Add
                                         ? <CusTextIconButton
                                             color={"primary"}
-                                            text={"新增車型"}
+                                            text={"新增加價項目"}
                                             startIcon={<Add />}
                                             onClick={() => add_click()}
                                         />
                                         : null}
                                 </Box>
                                 {!isLoading
-                                    ? carModelList.length > 0
+                                    ? extraList.length > 0
                                         ? <React.Fragment>
                                             <CusBasicTableTS
                                                 hasRowsPerPage={true}
@@ -449,11 +406,9 @@ export default function CarModel() {
                                                 onRowsPerPageChange={onRowsPerPageChange}
                                                 tableHead={[
                                                     { name: "排序" },
-                                                    { name: "車型名稱" },
-                                                    { name: "乘車人數上限" },
-                                                    { name: "行李數上限" },
-                                                    { name: "安全座椅上限" },
-                                                    { name: "服務加成項目上限" },
+                                                    { name: "加價類型" },
+                                                    { name: "加價名稱" },
+                                                    { name: "加價金額" },
                                                     { name: "操作" },
                                                 ]}
                                                 tableBody={<TableBodyContent />}
@@ -478,38 +433,31 @@ export default function CarModel() {
 
 /**新增modal內容*/
 const DialogsInner = forwardRef((props, ref) => {
-    const { type, name, getEditData, cms_id } = props;
-
-    // 新增車型
-    const [carModelAdd, setCarModelAdd] = useState({
+    const { type, name, getEditData, es_id } = props;
+    // 新增加價
+    const [extraAdd, setExtraAdd] = useState({
         visible: "Y",
+        type: null,
         name: null,
-        max_passengers: null,
-        max_luggage: null,
-        max_child_seats: null,
-        max_service_extras: null
+        price: null,
     });
-    const initCarModelAddCheck = {
+    const initExtraAddCheck = {
+        type: false,
         name: false,
-        max_passengers: false,
-        max_luggage: false,
-        max_child_seats: false,
-        max_service_extras: false
+        price: false,
     }
-    const [carModelAddCheck, setCarModelAddCheck] = useState(initCarModelAddCheck);
+    const [extraAddCheck, setExtraAddCheck] = useState(initExtraAddCheck);
 
-    // 編輯車型
+    // 編輯加價
     const [editData, setEditData] = useState({
         dtlData: getEditData,
-        updData: { cms_id: cms_id }
+        updData: { es_id: es_id }
     });
 
     const editInitCheckState = {
+        type: false,
         name: false,
-        max_passengers: false,
-        max_luggage: false,
-        max_child_seats: false,
-        max_service_extras: false
+        price: false,
     };
     const [editFieldCheck, setEditFieldCheck] = useState(editInitCheckState);
 
@@ -518,7 +466,7 @@ const DialogsInner = forwardRef((props, ref) => {
         const { name, value } = e.target;
         const val = value === "" ? null : value;
 
-        setCarModelAdd(prev => ({
+        setExtraAdd(prev => ({
             ...prev,
             [name]: val
         }));
@@ -541,9 +489,9 @@ const DialogsInner = forwardRef((props, ref) => {
 
     // 給父層function使用
     useImperativeHandle(ref, () => ({
-        carModelAdd,
-        initCarModelAddCheck,
-        setCarModelAddCheck,
+        extraAdd,
+        initExtraAddCheck,
+        setExtraAddCheck,
 
         editData,
         editInitCheckState,
@@ -556,55 +504,32 @@ const DialogsInner = forwardRef((props, ref) => {
                 <Grid container>
                     <Grid item xs={12}>
                         <CusInput
+                            id={"search--type"}
+                            name={"type"}
+                            label={"加價類型"}
+                            error={extraAddCheck.type}
+                            value={extraAdd.type}
+                            onChangeEvent={(e) => add_handelInput(e)}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <CusInput
                             id={"search--name"}
                             name={"name"}
-                            label={"車型名稱"}
-                            error={carModelAddCheck.name}
-                            value={carModelAdd.name}
+                            label={"加價名稱"}
+                            error={extraAddCheck.name}
+                            value={extraAdd.name}
                             onChangeEvent={(e) => add_handelInput(e)}
                         />
                     </Grid>
                     <Grid item xs={12}>
                         <CusInput
-                            id={"search--max_passengers"}
-                            name={"max_passengers"}
-                            type="number"
-                            label={"乘車人數上限"}
-                            error={carModelAddCheck.max_passengers}
-                            value={carModelAdd.max_passengers}
-                            onChangeEvent={(e) => add_handelInput(e)}
-                        />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <CusInput
-                            id={"search--max_luggage"}
-                            name={"max_luggage"}
-                            type="number"
-                            label={"行李數上限"}
-                            error={carModelAddCheck.max_luggage}
-                            value={carModelAdd.max_luggage}
-                            onChangeEvent={(e) => add_handelInput(e)}
-                        />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <CusInput
-                            id={"search--max_child_seats"}
-                            name={"max_child_seats"}
-                            type="number"
-                            label={"安全座椅上限"}
-                            error={carModelAddCheck.max_child_seats}
-                            value={carModelAdd.max_child_seats}
-                            onChangeEvent={(e) => add_handelInput(e)}
-                        />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <CusInput
-                            id={"search--max_service_extras"}
-                            name={"max_service_extras"}
-                            type="number"
-                            label={"服務加成項目上限"}
-                            error={carModelAddCheck.max_service_extras}
-                            value={carModelAdd.max_service_extras}
+                            id={"search--price"}
+                            name={"price"}
+                            label={"加價金額"}
+                            type={"number"}
+                            error={extraAddCheck.price}
+                            value={extraAdd.price}
                             onChangeEvent={(e) => add_handelInput(e)}
                         />
                     </Grid>
@@ -620,10 +545,23 @@ const DialogsInner = forwardRef((props, ref) => {
             <React.Fragment>
                 <Grid item xs={12}>
                     <CusInput
+                        id={'edit--type'}
+                        name={'type'}
+                        label={'加價類型'}
+                        type={'text'}
+                        required={true}
+                        error={editFieldCheck.type}
+                        value={data.type}
+                        onChangeEvent={(e) => edit_HandleInput(e)}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <CusInput
                         id={'edit--name'}
                         name={'name'}
-                        label={'車型名稱'}
+                        label={'加價名稱'}
                         type={'text'}
+                        required={true}
                         error={editFieldCheck.name}
                         value={data.name}
                         onChangeEvent={(e) => edit_HandleInput(e)}
@@ -631,45 +569,13 @@ const DialogsInner = forwardRef((props, ref) => {
                 </Grid>
                 <Grid item xs={12}>
                     <CusInput
-                        id={'edit--max_passengers'}
-                        name={'max_passengers'}
-                        label={'乘車人數上限'}
+                        id={'edit--price'}
+                        name={'price'}
+                        label={'加價金額'}
                         type={'number'}
-                        error={editFieldCheck.max_passengers}
-                        value={data.max_passengers}
-                        onChangeEvent={(e) => edit_HandleInput(e)}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <CusInput
-                        id={'edit--max_luggage'}
-                        name={'max_luggage'}
-                        label={'行李數上限'}
-                        type={'number'}
-                        error={editFieldCheck.max_luggage}
-                        value={data.max_luggage}
-                        onChangeEvent={(e) => edit_HandleInput(e)}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <CusInput
-                        id={'edit--max_child_seats'}
-                        name={'max_child_seats'}
-                        label={'安全座椅上限'}
-                        type={'number'}
-                        error={editFieldCheck.max_child_seats}
-                        value={data.max_child_seats}
-                        onChangeEvent={(e) => edit_HandleInput(e)}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <CusInput
-                        id={'edit--max_service_extras'}
-                        name={'max_service_extras'}
-                        label={'服務加成項目上限'}
-                        type={'number'}
-                        error={editFieldCheck.max_service_extras}
-                        value={data.max_service_extras}
+                        required={true}
+                        error={editFieldCheck.price}
+                        value={data.price}
                         onChangeEvent={(e) => edit_HandleInput(e)}
                     />
                 </Grid>

@@ -64,7 +64,7 @@ export interface ATS_AirportTerminalSettingsSearchParams {
  * @description 機場航廈設定查詢
  */
 export const ATS_AirportTerminalSettingsSearch = async (obj: ATS_AirportTerminalSettingsSearchParams): Promise<ResultObj> => {
-    return await AuthorizeFetch("/ATS_AirportTerminalSettings/ATS_AirportTerminalSettingsSearch", obj);
+    return await AuthorizeFetch("ATS_AirportTerminalSettings/ATS_AirportTerminalSettingsSearch", obj);
 };
 
 /**

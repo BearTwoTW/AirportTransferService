@@ -124,12 +124,28 @@ namespace AirportTransferService.Controllers
                     section: data.section,
                     airport: data.airport,
                     terminal: data.terminal,
-                    price: data.price,
-                    link: data.link,
                     page: data.page,
                     num_per_page: data.num_per_page),
-                ["fs_id", "visible", "cms_id", "city", "area", "road", "section", "airport", "terminal", "price", "link"], [],
+                ["fs_id", "visible", "cms_id", "city", "area", "road", "section", "airport", "terminal", "price"], [],
                 out int page_count);
+
+            if (data.distinct.Equals("Y"))
+            {
+                search_results = search_results
+                    .Where(x => string.IsNullOrEmpty(x.road) && string.IsNullOrEmpty(x.section))
+                    .GroupBy(x => new { x.city, x.area })
+                    .Select(group =>
+                    {
+                        SearchATS_FareSettingsResult cheapest = group.OrderBy(x => x.price).First();
+                        return new SearchATS_FareSettingsResult
+                        {
+                            city = cheapest.city,
+                            area = cheapest.area,
+                            price = cheapest.price
+                        };
+                    })
+                    .ToList();
+            }
 
             List<ATS_FareSettingsSearchResponse> response = [];
             foreach (SearchATS_FareSettingsResult result in search_results)

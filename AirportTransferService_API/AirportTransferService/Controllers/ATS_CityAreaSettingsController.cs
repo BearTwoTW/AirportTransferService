@@ -34,9 +34,9 @@ namespace AirportTransferService.Controllers
 
             List<SearchATS_CityAreaSettingsResult> resultCityAreaSettings = _ATS_CityAreaSettings.SearchATS_CityAreaSettings(
                 new SearchATS_CityAreaSettingsParam(),
-                ["city", "area"], [],
+                ["city", "area", "road", "section"], [],
                 out _);
-            if (resultCityAreaSettings.Exists(x => x.city == data.city && x.area == data.area)) return new ResultObject<string> { success = false, message = "行政區域重複" };
+            if (resultCityAreaSettings.Exists(x => x.city == data.city && x.area == data.area && x.road == data.road && x.section == data.section)) return new ResultObject<string> { success = false, message = "行政區域重複" };
 
             string id = _ATS_CityAreaSettings.CreateATS_CityAreaSettings(
                 new CreateATS_CityAreaSettingsParam(
@@ -134,6 +134,9 @@ namespace AirportTransferService.Controllers
                     num_per_page: data.num_per_page),
                 ["cas_id", "visible", "zip", "city", "area", "road", "section"], [],
                 out int page_count);
+
+            if (data.distinct.Equals("Y"))
+                search_results = search_results.Select(x => new SearchATS_CityAreaSettingsResult { city = x.city, area = x.area }).Distinct().ToList();
 
             List<ATS_CityAreaSettingsSearchResponse> response = [];
             foreach (SearchATS_CityAreaSettingsResult result in search_results)

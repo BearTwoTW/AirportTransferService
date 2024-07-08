@@ -4,6 +4,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using ClosedXML.Excel;
+
 namespace AirportTransferService.App_Code
 {
     /// <summary>
@@ -779,6 +781,43 @@ namespace AirportTransferService.App_Code
             {
                 return false;
             }
+        }
+
+        /// <summary>
+        /// 檔案名稱排序
+        /// </summary>
+        /// <param name="arrFi">檔案名稱陣列</param>
+        /// <returns></returns>
+        private static void SortAsFileName(ref FileInfo[] arrFi)
+        {
+            Array.Sort(arrFi, delegate (FileInfo x, FileInfo y) { return y.Name.CompareTo(x.Name); });
+        }
+
+        /// <summary>
+        /// 匯出excel
+        /// </summary>
+        /// <param name="company_code">公司代號</param>
+        /// <param name="folder">資料夾名稱</param>
+        /// <param name="name">excel名稱</param>
+        /// <param name="dt">excel內容</param>
+        /// <returns>path</returns>
+        public static string CreateExcelToServer(string company_code, string folder, string name, DataTable dt)
+        {
+            string filePath = $@"{Tool.GetParentDirectoryPath(AppDomain.CurrentDomain.SetupInformation.ApplicationBase!, 2)}\_{company_code}\ExcelStorage\{folder}\";
+            if (!Directory.Exists(filePath)) Directory.CreateDirectory(filePath);
+            string fileName = $"{DateTime.Now.ToString("yyyyMMddHHmmss")}{name}.xlsx";
+            string newFilePath = Path.Combine(filePath, fileName);
+
+            XLWorkbook workbook = new();
+            workbook.Worksheets.Add(dt, "Sheet1");
+            workbook.SaveAs(newFilePath);
+
+            DirectoryInfo di = new(filePath);
+            FileInfo[] fileArray = di.GetFiles("*.xlsx");
+            SortAsFileName(ref fileArray);
+            for (int i = 0; i < fileArray.Length; i++) if (i >= 10) File.Delete(filePath + fileArray[i].Name);
+
+            return newFilePath.Replace(Tool.GetParentDirectoryPath(AppDomain.CurrentDomain.SetupInformation.ApplicationBase!, 2) + @"\", "");
         }
     }
 }

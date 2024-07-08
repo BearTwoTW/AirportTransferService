@@ -5,11 +5,13 @@ namespace AirportTransferService.Controllers
     /// <summary>
     /// 加價設定
     /// </summary>
-    /// <param name="ATS_ExtraSettings"></param>
     /// <param name="baseService"></param>
-    public class ATS_ExtraSettingsController(IATS_ExtraSettings ATS_ExtraSettings, IBaseService baseService) : CustomControllerBase(baseService)
+    /// <param name="aTS_ExtraSettings"></param>
+    public class ATS_ExtraSettingsController(
+        IBaseService baseService,
+        IATS_ExtraSettings aTS_ExtraSettings) : CustomControllerBase(baseService)
     {
-        private readonly IATS_ExtraSettings _ATS_ExtraSettings = ATS_ExtraSettings;
+        private readonly IATS_ExtraSettings _ATS_ExtraSettings = aTS_ExtraSettings;
 
         /// <summary>
         /// 加價設定建立

@@ -5,12 +5,17 @@ namespace AirportTransferService.Controllers
     /// <summary>
     /// 車資設定
     /// </summary>
+    /// <param name="baseService"></param>
     /// <param name="aTS_FareSettings"></param>
     /// <param name="aTS_AirportTerminalSettings"></param>
     /// <param name="aTS_CarModelSettings"></param>
     /// <param name="aTS_CityAreaSettings"></param>
-    /// <param name="baseService"></param>
-    public class ATS_FareSettingsController(IATS_FareSettings aTS_FareSettings, IATS_AirportTerminalSettings aTS_AirportTerminalSettings, IATS_CarModelSettings aTS_CarModelSettings, IATS_CityAreaSettings aTS_CityAreaSettings, IBaseService baseService) : CustomControllerBase(baseService)
+    public class ATS_FareSettingsController(
+        IBaseService baseService,
+        IATS_FareSettings aTS_FareSettings,
+        IATS_AirportTerminalSettings aTS_AirportTerminalSettings,
+        IATS_CarModelSettings aTS_CarModelSettings,
+        IATS_CityAreaSettings aTS_CityAreaSettings) : CustomControllerBase(baseService)
     {
         private readonly IATS_FareSettings _ATS_FareSettings = aTS_FareSettings;
         private readonly IATS_AirportTerminalSettings _ATS_AirportTerminalSettings = aTS_AirportTerminalSettings;

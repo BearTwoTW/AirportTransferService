@@ -5,12 +5,17 @@ namespace AirportTransferService.Controllers
     /// <summary>
     /// 車型設定
     /// </summary>
+    /// <param name="baseService"></param>
     /// <param name="aTS_CarModelSettings"></param>
     /// <param name="aTS_AirportTerminalSettings"></param>
     /// <param name="aTS_CityAreaSettings"></param>
     /// <param name="aTS_FareSettings"></param>
-    /// <param name="baseService"></param>
-    public class ATS_CarModelSettingsController(IATS_CarModelSettings aTS_CarModelSettings, IATS_AirportTerminalSettings aTS_AirportTerminalSettings, IATS_CityAreaSettings aTS_CityAreaSettings, IATS_FareSettings aTS_FareSettings, IBaseService baseService) : CustomControllerBase(baseService)
+    public class ATS_CarModelSettingsController(
+        IBaseService baseService,
+        IATS_CarModelSettings aTS_CarModelSettings,
+        IATS_AirportTerminalSettings aTS_AirportTerminalSettings,
+        IATS_CityAreaSettings aTS_CityAreaSettings,
+        IATS_FareSettings aTS_FareSettings) : CustomControllerBase(baseService)
     {
         private readonly IATS_CarModelSettings _ATS_CarModelSettings = aTS_CarModelSettings;
         private readonly IATS_AirportTerminalSettings _ATS_AirportTerminalSettings = aTS_AirportTerminalSettings;
@@ -46,7 +51,7 @@ namespace AirportTransferService.Controllers
 
             if (!string.IsNullOrEmpty(id))
             {
-                ATS_FareSettingsController aTS_FareSettingsController = new(_ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings, _baseService) { ControllerContext = ControllerContext };
+                ATS_FareSettingsController aTS_FareSettingsController = new(_baseService, _ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings) { ControllerContext = ControllerContext };
                 aTS_FareSettingsController.ATS_FareSettingsSystemCreate(
                     new ATS_FareSettingsCreate { cms_id = id });
             }
@@ -149,7 +154,7 @@ namespace AirportTransferService.Controllers
         {
             _ATS_CarModelSettings.DeleteATS_CarModelSettings(data.cms_id);
 
-            ATS_FareSettingsController aTS_FareSettingsController = new(_ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings, _baseService) { ControllerContext = ControllerContext };
+            ATS_FareSettingsController aTS_FareSettingsController = new(_baseService, _ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings) { ControllerContext = ControllerContext };
             aTS_FareSettingsController.ATS_FareSettingsSystemDelete(
                 new ATS_FareSettingsCreate { cms_id = data.cms_id });
 

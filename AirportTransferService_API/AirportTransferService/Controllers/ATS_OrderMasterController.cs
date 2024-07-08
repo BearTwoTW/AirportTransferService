@@ -5,11 +5,16 @@ namespace AirportTransferService.Controllers
     /// <summary>
     /// 訂單管理
     /// </summary>
-    /// <param name="ats_ordermaster"></param>
     /// <param name="baseService"></param>
-    public class ATS_OrderMasterController(IATS_OrderMaster ats_ordermaster, IBaseService baseService) : CustomControllerBase(baseService)
+    /// <param name="aTS_OrderMaster"></param>
+    /// <param name="aTS_CarModelSettings"></param>
+    public class ATS_OrderMasterController(
+        IBaseService baseService,
+        IATS_OrderMaster aTS_OrderMaster,
+        IATS_CarModelSettings aTS_CarModelSettings) : CustomControllerBase(baseService)
     {
-        private readonly IATS_OrderMaster _ATS_OrderMaster = ats_ordermaster;
+        private readonly IATS_OrderMaster _ATS_OrderMaster = aTS_OrderMaster;
+        private readonly IATS_CarModelSettings _ATS_CarModelSettings = aTS_CarModelSettings;
 
         /// <summary>
         /// 訂單管理建立

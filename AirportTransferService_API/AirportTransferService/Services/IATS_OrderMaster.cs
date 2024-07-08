@@ -143,7 +143,7 @@
                     terminal = dt.Columns.Contains("terminal") ? dr["terminal"].ToString() : null,
                     flght_number = dt.Columns.Contains("flght_number") ? dr["flght_number"].ToString() : null,
                     date_travel = (dt.Columns.Contains("date_travel") && dr.Field<DateTime?>("date_travel") != null) ? DateOnly.FromDateTime(dr.Field<DateTime>("date_travel")) : null,
-                    time_travel = (dt.Columns.Contains("time_travel") && dr.Field<DateTime?>("time_travel") != null) ? TimeOnly.FromDateTime(dr.Field<DateTime>("time_travel")) : null,
+                    time_travel = (dt.Columns.Contains("time_travel") && dr.Field<TimeSpan?>("time_travel") != null) ? TimeOnly.FromTimeSpan(dr.Field<TimeSpan>("time_travel")) : null,
                     number_passenger = dt.Columns.Contains("number_passenger") ? dr.Field<int>("number_passenger") : null,
                     number_bags = dt.Columns.Contains("number_bags") ? dr.Field<int>("number_bags") : null,
                     cms_id = dt.Columns.Contains("cms_id") ? dr["cms_id"].ToString() : null,

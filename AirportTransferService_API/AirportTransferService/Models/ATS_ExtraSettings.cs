@@ -159,13 +159,13 @@ namespace AirportTransferService.Models
         /// <summary>
         /// visible
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_ExtraSettings.visible")]
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_ExtraSettings.visible")]
         public string? visible { get; } = visible;
 
         /// <summary>
         /// type
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_ExtraSettings.type")]
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_ExtraSettings.type")]
         public string? type { get; } = type;
 
         /// <summary>
@@ -308,13 +308,37 @@ namespace AirportTransferService.Models
     /// <summary>
     /// ATS_ExtraSettingsUpdate
     /// </summary>
-    public class ATS_ExtraSettingsUpdate : ATS_ExtraSettingsCreate
+    public class ATS_ExtraSettingsUpdate
     {
         /// <summary>
         /// 編號
         /// </summary>
         [Display(Name = "編號"), Required(ErrorMessage = "請輸入{0}")]
         public string? es_id { get; set; } = "";
+
+        /// <summary>
+        /// 是否可見
+        /// </summary>
+        [Display(Name = "是否可見")]
+        public string? visible { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 類別
+        /// </summary>
+        [Display(Name = "類別")]
+        public string? type { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 名稱
+        /// </summary>
+        [Display(Name = "名稱")]
+        public string? name { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 價錢
+        /// </summary>
+        [Display(Name = "價錢")]
+        public decimal? price { get; set; } = api_numeric_param_no_pass;
     }
 
     /// <summary>

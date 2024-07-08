@@ -407,6 +407,8 @@ namespace AirportTransferService.Models
     /// <summary>
     /// SearchATS_OrderMasterParam
     /// </summary>
+    /// <param name="cre_time_start"></param>
+    /// <param name="cre_time_end"></param>
     /// <param name="o_id"></param>
     /// <param name="visible"></param>
     /// <param name="type"></param>
@@ -418,24 +420,22 @@ namespace AirportTransferService.Models
     /// <param name="airport"></param>
     /// <param name="terminal"></param>
     /// <param name="flght_number"></param>
-    /// <param name="date_travel"></param>
-    /// <param name="time_travel"></param>
-    /// <param name="number_passenger"></param>
-    /// <param name="number_bags"></param>
+    /// <param name="date_travel_start"></param>
+    /// <param name="date_travel_end"></param>
+    /// <param name="time_travel_start"></param>
+    /// <param name="time_travel_end"></param>
     /// <param name="cms_id"></param>
-    /// <param name="signboard_title"></param>
-    /// <param name="signboard_content"></param>
     /// <param name="name_purchaser"></param>
     /// <param name="phone_purchaser"></param>
     /// <param name="email_purchaser"></param>
     /// <param name="name_passenger"></param>
     /// <param name="phone_passenger"></param>
     /// <param name="email_passenger"></param>
-    /// <param name="price"></param>
-    /// <param name="link"></param>
     /// <param name="page"></param>
     /// <param name="num_per_page"></param>
     public class SearchATS_OrderMasterParam(
+        DateTime? cre_time_start = null,
+        DateTime? cre_time_end = null,
         string? o_id = null,
         string? visible = null,
         string? type = null,
@@ -447,24 +447,32 @@ namespace AirportTransferService.Models
         string? airport = null,
         string? terminal = null,
         string? flght_number = null,
-        DateOnly? date_travel = null,
-        TimeOnly? time_travel = null,
-        int? number_passenger = null,
-        int? number_bags = null,
+        DateOnly? date_travel_start = null,
+        DateOnly? date_travel_end = null,
+        TimeOnly? time_travel_start = null,
+        TimeOnly? time_travel_end = null,
         string? cms_id = null,
-        string? signboard_title = null,
-        string? signboard_content = null,
         string? name_purchaser = null,
         string? phone_purchaser = null,
         string? email_purchaser = null,
         string? name_passenger = null,
         string? phone_passenger = null,
         string? email_passenger = null,
-        decimal? price = null,
-        string? link = null,
         int page = 0,
         int num_per_page = 0)
     {
+        /// <summary>
+        /// cre_time_start
+        /// </summary>
+        [SQLSearchCondition(SQLSearchConditionType.RangeStart, "ATS_OrderMaster.cre_time")]
+        public DateTime? cre_time_start { get; } = cre_time_start;
+
+        /// <summary>
+        /// cre_time_end
+        /// </summary>
+        [SQLSearchCondition(SQLSearchConditionType.RangeEnd, "ATS_OrderMaster.cre_time")]
+        public DateTime? cre_time_end { get; } = cre_time_end;
+
         /// <summary>
         /// o_id
         /// </summary>
@@ -474,25 +482,25 @@ namespace AirportTransferService.Models
         /// <summary>
         /// visible
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_OrderMaster.visible")]
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_OrderMaster.visible")]
         public string? visible { get; } = visible;
 
         /// <summary>
         /// type
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_OrderMaster.type")]
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_OrderMaster.type")]
         public string? type { get; } = type;
 
         /// <summary>
         /// city
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_OrderMaster.city")]
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_OrderMaster.city")]
         public string? city { get; } = city;
 
         /// <summary>
         /// area
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_OrderMaster.area")]
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_OrderMaster.area")]
         public string? area { get; } = area;
 
         /// <summary>
@@ -516,13 +524,13 @@ namespace AirportTransferService.Models
         /// <summary>
         /// airport
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_OrderMaster.airport")]
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_OrderMaster.airport")]
         public string? airport { get; } = airport;
 
         /// <summary>
         /// terminal
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_OrderMaster.terminal")]
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_OrderMaster.terminal")]
         public string? terminal { get; } = terminal;
 
         /// <summary>
@@ -532,46 +540,34 @@ namespace AirportTransferService.Models
         public string? flght_number { get; } = flght_number;
 
         /// <summary>
-        /// date_travel
+        /// date_travel_start
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_OrderMaster.date_travel")]
-        public DateOnly? date_travel { get; } = date_travel;
+        [SQLSearchCondition(SQLSearchConditionType.RangeStart, "ATS_OrderMaster.date_travel")]
+        public DateOnly? date_travel_start { get; } = date_travel_start;
 
         /// <summary>
-        /// time_travel
+        /// date_travel_end
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_OrderMaster.time_travel")]
-        public TimeOnly? time_travel { get; } = time_travel;
+        [SQLSearchCondition(SQLSearchConditionType.RangeEnd, "ATS_OrderMaster.date_travel")]
+        public DateOnly? date_travel_end { get; } = date_travel_end;
 
         /// <summary>
-        /// number_passenger
+        /// time_travel_start
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_OrderMaster.number_passenger")]
-        public int? number_passenger { get; } = number_passenger;
+        [SQLSearchCondition(SQLSearchConditionType.RangeStart, "ATS_OrderMaster.time_travel")]
+        public TimeOnly? time_travel_start { get; } = time_travel_start;
 
         /// <summary>
-        /// number_bags
+        /// time_travel_end
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_OrderMaster.number_bags")]
-        public int? number_bags { get; } = number_bags;
+        [SQLSearchCondition(SQLSearchConditionType.RangeEnd, "ATS_OrderMaster.time_travel")]
+        public TimeOnly? time_travel_end { get; } = time_travel_end;
 
         /// <summary>
         /// cms_id
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_OrderMaster.cms_id")]
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_OrderMaster.cms_id")]
         public string? cms_id { get; } = cms_id;
-
-        /// <summary>
-        /// signboard_title
-        /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_OrderMaster.signboard_title")]
-        public string? signboard_title { get; } = signboard_title;
-
-        /// <summary>
-        /// signboard_content
-        /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_OrderMaster.signboard_content")]
-        public string? signboard_content { get; } = signboard_content;
 
         /// <summary>
         /// name_purchaser
@@ -608,18 +604,6 @@ namespace AirportTransferService.Models
         /// </summary>
         [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_OrderMaster.email_passenger")]
         public string? email_passenger { get; } = email_passenger;
-
-        /// <summary>
-        /// price
-        /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_OrderMaster.price")]
-        public decimal? price { get; } = price;
-
-        /// <summary>
-        /// link
-        /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_OrderMaster.link")]
-        public string? link { get; } = link;
 
         /// <summary>
         /// page
@@ -1005,36 +989,162 @@ namespace AirportTransferService.Models
         /// </summary>
         [Display(Name = "乘客電子信箱"), Required(ErrorMessage = "請輸入{0}")]
         public string? email_passenger { get; set; } = "";
-
-        /// <summary>
-        /// 價錢
-        /// </summary>
-        [Display(Name = "價錢"), Required(ErrorMessage = "請輸入{0}")]
-        public decimal? price { get; set; } = 0;
-
-        /// <summary>
-        /// 連結
-        /// </summary>
-        [Display(Name = "連結"), Required(ErrorMessage = "請輸入{0}")]
-        public string? link { get; set; } = "";
     }
 
     /// <summary>
     /// ATS_OrderMasterUpdate
     /// </summary>
-    public class ATS_OrderMasterUpdate : ATS_OrderMasterCreate
+    public class ATS_OrderMasterUpdate
     {
         /// <summary>
         /// 編號
         /// </summary>
         [Display(Name = "編號"), Required(ErrorMessage = "請輸入{0}")]
         public string? o_id { get; set; } = "";
+
+        /// <summary>
+        /// 是否可見
+        /// </summary>
+        [Display(Name = "是否可見")]
+        public string? visible { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 類別(接機/送機)
+        /// </summary>
+        [Display(Name = "類別(接機/送機)")]
+        public string? type { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 城市
+        /// </summary>
+        [Display(Name = "城市")]
+        public string? city { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 區域
+        /// </summary>
+        [Display(Name = "區域")]
+        public string? area { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 路
+        /// </summary>
+        [Display(Name = "路")]
+        public string? road { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 段
+        /// </summary>
+        [Display(Name = "段")]
+        public string? section { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 巷弄與門牌號碼
+        /// </summary>
+        [Display(Name = "巷弄與門牌號碼")]
+        public string? address { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 機場
+        /// </summary>
+        [Display(Name = "機場")]
+        public string? airport { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 航廈
+        /// </summary>
+        [Display(Name = "航廈")]
+        public string? terminal { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 航班號碼
+        /// </summary>
+        [Display(Name = "航班號碼")]
+        public string? flght_number { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 乘車日期
+        /// </summary>
+        [Display(Name = "乘車日期")]
+        public DateOnly? date_travel { get; set; } = api_dateonly_param_no_pass;
+
+        /// <summary>
+        /// 乘車時間
+        /// </summary>
+        [Display(Name = "乘車時間")]
+        public TimeOnly? time_travel { get; set; } = api_timeonly_param_no_pass;
+
+        /// <summary>
+        /// 人數
+        /// </summary>
+        [Display(Name = "人數")]
+        public int? number_passenger { get; set; } = api_numeric_param_no_pass;
+
+        /// <summary>
+        /// 行李數
+        /// </summary>
+        [Display(Name = "行李數")]
+        public int? number_bags { get; set; } = api_numeric_param_no_pass;
+
+        /// <summary>
+        /// 車型編號
+        /// </summary>
+        [Display(Name = "車型編號")]
+        public string? cms_id { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 舉牌標題
+        /// </summary>
+        [Display(Name = "舉牌標題")]
+        public string? signboard_title { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 舉牌內容
+        /// </summary>
+        [Display(Name = "舉牌內容")]
+        public string? signboard_content { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 訂購人姓名
+        /// </summary>
+        [Display(Name = "訂購人姓名")]
+        public string? name_purchaser { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 訂購人電話
+        /// </summary>
+        [Display(Name = "訂購人電話")]
+        public string? phone_purchaser { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 訂購人電子信箱
+        /// </summary>
+        [Display(Name = "訂購人電子信箱")]
+        public string? email_purchaser { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 乘客姓名
+        /// </summary>
+        [Display(Name = "乘客姓名")]
+        public string? name_passenger { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 乘客電話
+        /// </summary>
+        [Display(Name = "乘客電話")]
+        public string? phone_passenger { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 乘客電子信箱
+        /// </summary>
+        [Display(Name = "乘客電子信箱")]
+        public string? email_passenger { get; set; } = api_string_param_no_pass;
     }
 
     /// <summary>
     /// ATS_OrderMasterSearch
     /// </summary>
-    public class ATS_OrderMasterSearch : ATS_OrderMasterCreate
+    public class ATS_OrderMasterSearch
     {
         /// <summary>
         /// 編號
@@ -1061,154 +1171,310 @@ namespace AirportTransferService.Models
         public string excel { get; set; } = "N";
 
         /// <summary>
+        /// 建立日期起
+        /// </summary>
+        [Display(Name = "建立日期起")]
+        public DateOnly? cre_date_start { get; set; }
+
+        /// <summary>
+        /// 建立日期迄
+        /// </summary>
+        [Display(Name = "建立日期迄")]
+        public DateOnly? cre_date_end { get; set; }
+
+        /// <summary>
         /// 是否可見
         /// </summary>
         [Display(Name = "是否可見")]
-        public new string? visible { get; set; } = "N";
+        public string? visible { get; set; } = "N";
 
         /// <summary>
         /// 類別(接機/送機)
         /// </summary>
         [Display(Name = "類別(接機/送機)")]
-        public new string? type { get; set; } = "";
+        public string? type { get; set; } = "";
 
         /// <summary>
         /// 城市
         /// </summary>
         [Display(Name = "城市")]
-        public new string? city { get; set; } = "";
+        public string? city { get; set; } = "";
 
         /// <summary>
         /// 區域
         /// </summary>
         [Display(Name = "區域")]
-        public new string? area { get; set; } = "";
+        public string? area { get; set; } = "";
 
         /// <summary>
         /// 路
         /// </summary>
         [Display(Name = "路")]
-        public new string? road { get; set; } = "";
+        public string? road { get; set; } = "";
 
         /// <summary>
         /// 段
         /// </summary>
         [Display(Name = "段")]
-        public new string? section { get; set; } = "";
+        public string? section { get; set; } = "";
 
         /// <summary>
         /// 巷弄與門牌號碼
         /// </summary>
         [Display(Name = "巷弄與門牌號碼")]
-        public new string? address { get; set; } = "";
+        public string? address { get; set; } = "";
 
         /// <summary>
         /// 機場
         /// </summary>
         [Display(Name = "機場")]
-        public new string? airport { get; set; } = "";
+        public string? airport { get; set; } = "";
 
         /// <summary>
         /// 航廈
         /// </summary>
         [Display(Name = "航廈")]
-        public new string? terminal { get; set; } = "";
+        public string? terminal { get; set; } = "";
 
         /// <summary>
         /// 航班號碼
         /// </summary>
         [Display(Name = "航班號碼")]
-        public new string? flght_number { get; set; } = "";
+        public string? flght_number { get; set; } = "";
 
         /// <summary>
-        /// 乘車日期
+        /// 乘車日期起
         /// </summary>
-        [Display(Name = "乘車日期")]
-        public new DateOnly? date_travel { get; set; }
+        [Display(Name = "乘車日期起")]
+        public DateOnly? date_travel_start { get; set; }
 
         /// <summary>
-        /// 乘車時間
+        /// 乘車日期迄
         /// </summary>
-        [Display(Name = "乘車時間")]
-        public new TimeOnly? time_travel { get; set; }
+        [Display(Name = "乘車日期迄")]
+        public DateOnly? date_travel_end { get; set; }
 
         /// <summary>
-        /// 人數
+        /// 乘車時間起
         /// </summary>
-        [Display(Name = "人數")]
-        public new int? number_passenger { get; set; } = 0;
+        [Display(Name = "乘車時間起")]
+        public TimeOnly? time_travel_start { get; set; }
 
         /// <summary>
-        /// 行李數
+        /// 乘車時間迄
         /// </summary>
-        [Display(Name = "行李數")]
-        public new int? number_bags { get; set; } = 0;
+        [Display(Name = "乘車時間迄")]
+        public TimeOnly? time_travel_end { get; set; }
 
         /// <summary>
         /// 車型編號
         /// </summary>
         [Display(Name = "車型編號")]
-        public new string? cms_id { get; set; } = "";
+        public string? cms_id { get; set; } = "";
 
         /// <summary>
         /// 訂購人姓名
         /// </summary>
         [Display(Name = "訂購人姓名")]
-        public new string? name_purchaser { get; set; } = "";
+        public string? name_purchaser { get; set; } = "";
 
         /// <summary>
         /// 訂購人電話
         /// </summary>
         [Display(Name = "訂購人電話")]
-        public new string? phone_purchaser { get; set; } = "";
+        public string? phone_purchaser { get; set; } = "";
 
         /// <summary>
         /// 訂購人電子信箱
         /// </summary>
         [Display(Name = "訂購人電子信箱")]
-        public new string? email_purchaser { get; set; } = "";
+        public string? email_purchaser { get; set; } = "";
 
         /// <summary>
         /// 乘客姓名
         /// </summary>
         [Display(Name = "乘客姓名")]
-        public new string? name_passenger { get; set; } = "";
+        public string? name_passenger { get; set; } = "";
 
         /// <summary>
         /// 乘客電話
         /// </summary>
         [Display(Name = "乘客電話")]
-        public new string? phone_passenger { get; set; } = "";
+        public string? phone_passenger { get; set; } = "";
 
         /// <summary>
         /// 乘客電子信箱
         /// </summary>
         [Display(Name = "乘客電子信箱")]
-        public new string? email_passenger { get; set; } = "";
-
-        /// <summary>
-        /// 價錢
-        /// </summary>
-        [Display(Name = "價錢")]
-        public new decimal? price { get; set; } = 0;
-
-        /// <summary>
-        /// 連結
-        /// </summary>
-        [Display(Name = "連結")]
-        public new string? link { get; set; } = "";
+        public string? email_passenger { get; set; } = "";
     }
 
     /// <summary>
-    /// ATS_OrderMasterSearchResult
+    /// ATS_OrderMasterSearchResponse
     /// </summary>
-    public class ATS_OrderMasterSearchResponse : ATS_OrderMasterCreate
+    public class ATS_OrderMasterSearchResponse
     {
         /// <summary>
         /// 編號
         /// </summary>
         [Display(Name = "編號")]
-        public string? o_id { get; set; } = "";
+        public string? o_id { get; set; }
+
+        /// <summary>
+        /// 是否可見
+        /// </summary>
+        [Display(Name = "是否可見")]
+        public string? visible { get; set; }
+
+        /// <summary>
+        /// 類別(接機/送機)
+        /// </summary>
+        [Display(Name = "類別(接機/送機)")]
+        public string? type { get; set; }
+
+        /// <summary>
+        /// 城市
+        /// </summary>
+        [Display(Name = "城市")]
+        public string? city { get; set; }
+
+        /// <summary>
+        /// 區域
+        /// </summary>
+        [Display(Name = "區域")]
+        public string? area { get; set; }
+
+        /// <summary>
+        /// 路
+        /// </summary>
+        [Display(Name = "路")]
+        public string? road { get; set; }
+
+        /// <summary>
+        /// 段
+        /// </summary>
+        [Display(Name = "段")]
+        public string? section { get; set; }
+
+        /// <summary>
+        /// 巷弄與門牌號碼
+        /// </summary>
+        [Display(Name = "巷弄與門牌號碼")]
+        public string? address { get; set; }
+
+        /// <summary>
+        /// 機場
+        /// </summary>
+        [Display(Name = "機場")]
+        public string? airport { get; set; }
+
+        /// <summary>
+        /// 航廈
+        /// </summary>
+        [Display(Name = "航廈")]
+        public string? terminal { get; set; }
+
+        /// <summary>
+        /// 航班號碼
+        /// </summary>
+        [Display(Name = "航班號碼")]
+        public string? flght_number { get; set; }
+
+        /// <summary>
+        /// 乘車日期
+        /// </summary>
+        [Display(Name = "乘車日期")]
+        public DateOnly? date_travel { get; set; }
+
+        /// <summary>
+        /// 乘車時間
+        /// </summary>
+        [Display(Name = "乘車時間")]
+        public TimeOnly? time_travel { get; set; }
+
+        /// <summary>
+        /// 人數
+        /// </summary>
+        [Display(Name = "人數")]
+        public int? number_passenger { get; set; }
+
+        /// <summary>
+        /// 行李數
+        /// </summary>
+        [Display(Name = "行李數")]
+        public int? number_bags { get; set; }
+
+        /// <summary>
+        /// 車型編號
+        /// </summary>
+        [Display(Name = "車型編號")]
+        public string? cms_id { get; set; }
+
+        /// <summary>
+        /// 車型編號
+        /// </summary>
+        [Display(Name = "車型名稱")]
+        public string? cms_name { get; set; }
+
+        /// <summary>
+        /// 舉牌標題
+        /// </summary>
+        [Display(Name = "舉牌標題")]
+        public string? signboard_title { get; set; }
+
+        /// <summary>
+        /// 舉牌內容
+        /// </summary>
+        [Display(Name = "舉牌內容")]
+        public string? signboard_content { get; set; }
+
+        /// <summary>
+        /// 訂購人姓名
+        /// </summary>
+        [Display(Name = "訂購人姓名")]
+        public string? name_purchaser { get; set; }
+
+        /// <summary>
+        /// 訂購人電話
+        /// </summary>
+        [Display(Name = "訂購人電話")]
+        public string? phone_purchaser { get; set; }
+
+        /// <summary>
+        /// 訂購人電子信箱
+        /// </summary>
+        [Display(Name = "訂購人電子信箱")]
+        public string? email_purchaser { get; set; }
+
+        /// <summary>
+        /// 乘客姓名
+        /// </summary>
+        [Display(Name = "乘客姓名")]
+        public string? name_passenger { get; set; }
+
+        /// <summary>
+        /// 乘客電話
+        /// </summary>
+        [Display(Name = "乘客電話")]
+        public string? phone_passenger { get; set; }
+
+        /// <summary>
+        /// 乘客電子信箱
+        /// </summary>
+        [Display(Name = "乘客電子信箱")]
+        public string? email_passenger { get; set; }
+
+        /// <summary>
+        /// 價錢
+        /// </summary>
+        [Display(Name = "價錢")]
+        public decimal? price { get; set; }
+
+        /// <summary>
+        /// 連結
+        /// </summary>
+        [Display(Name = "連結")]
+        public string? link { get; set; }
     }
 
     /// <summary>

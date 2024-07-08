@@ -189,7 +189,7 @@ namespace AirportTransferService.Models
         /// <summary>
         /// visible
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_CityAreaSettings.visible")]
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_CityAreaSettings.visible")]
         public string? visible { get; } = visible;
 
         /// <summary>
@@ -328,6 +328,15 @@ namespace AirportTransferService.Models
                 road == searchATS_CityAreaSettingsResult.road &&
                 section == searchATS_CityAreaSettingsResult.section;
         }
+
+        /// <summary>
+        /// GetHashCode
+        /// </summary>
+        /// <returns></returns>
+        public override int GetHashCode()
+        {
+            return (city?.GetHashCode() ?? 0) ^ (area?.GetHashCode() ?? 0);
+        }
     }
 
     #region API
@@ -376,13 +385,49 @@ namespace AirportTransferService.Models
     /// <summary>
     /// ATS_CityAreaSettingsUpdate
     /// </summary>
-    public class ATS_CityAreaSettingsUpdate : ATS_CityAreaSettingsCreate
+    public class ATS_CityAreaSettingsUpdate
     {
         /// <summary>
         /// 編號
         /// </summary>
         [Display(Name = "編號"), Required(ErrorMessage = "請輸入{0}")]
         public string? cas_id { get; set; } = "";
+
+        /// <summary>
+        /// 是否可見
+        /// </summary>
+        [Display(Name = "是否可見")]
+        public string? visible { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 郵遞區號
+        /// </summary>
+        [Display(Name = "郵遞區號")]
+        public string? zip { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 城市
+        /// </summary>
+        [Display(Name = "城市")]
+        public string? city { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 區域
+        /// </summary>
+        [Display(Name = "區域")]
+        public string? area { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 路
+        /// </summary>
+        [Display(Name = "路")]
+        public string? road { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 段
+        /// </summary>
+        [Display(Name = "段")]
+        public string? section { get; set; } = api_string_param_no_pass;
     }
 
     /// <summary>
@@ -413,6 +458,12 @@ namespace AirportTransferService.Models
         /// </summary>
         [Display(Name = "是否匯出"), YN]
         public string excel { get; set; } = "N";
+
+        /// <summary>
+        /// 是否過濾重複
+        /// </summary>
+        [Display(Name = "是否過濾重複"), YN]
+        public string distinct { get; set; } = "N";
 
         /// <summary>
         /// 城市

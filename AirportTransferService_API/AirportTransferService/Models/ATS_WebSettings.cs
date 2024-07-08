@@ -444,13 +444,61 @@ namespace AirportTransferService.Models
     /// <summary>
     /// ATS_WebSettingsUpdate
     /// </summary>
-    public class ATS_WebSettingsUpdate : ATS_WebSettingsCreate
+    public class ATS_WebSettingsUpdate
     {
         /// <summary>
         /// 編號
         /// </summary>
         [Display(Name = "編號"), Required(ErrorMessage = "請輸入{0}")]
         public string? ws_id { get; set; } = "";
+
+        /// <summary>
+        /// 標題
+        /// </summary>
+        [Display(Name = "標題")]
+        public string? title { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 圖片連結
+        /// </summary>
+        [Display(Name = "圖片連結")]
+        public string? image { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 文字1
+        /// </summary>
+        [Display(Name = "文字1")]
+        public string? text1 { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 文字2
+        /// </summary>
+        [Display(Name = "文字2")]
+        public string? text2 { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 文字3
+        /// </summary>
+        [Display(Name = "文字3")]
+        public string? text3 { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// html1
+        /// </summary>
+        [Display(Name = "html1")]
+        public string? html1 { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// html2
+        /// </summary>
+        [Display(Name = "html2")]
+        public string? html2 { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// html3
+        /// </summary>
+        [Display(Name = "html3")]
+        public string? html3 { get; set; } = api_string_param_no_pass;
     }
 
     /// <summary>

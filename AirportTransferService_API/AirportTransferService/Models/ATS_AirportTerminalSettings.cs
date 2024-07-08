@@ -144,7 +144,7 @@ namespace AirportTransferService.Models
         /// <summary>
         /// visible
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_AirportTerminalSettings.visible")]
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_AirportTerminalSettings.visible")]
         public string? visible { get; } = visible;
 
         /// <summary>
@@ -274,13 +274,31 @@ namespace AirportTransferService.Models
     /// <summary>
     /// ATS_AirportTerminalSettingsUpdate
     /// </summary>
-    public class ATS_AirportTerminalSettingsUpdate : ATS_AirportTerminalSettingsCreate
+    public class ATS_AirportTerminalSettingsUpdate
     {
         /// <summary>
         /// 編號
         /// </summary>
         [Display(Name = "編號"), Required(ErrorMessage = "請輸入{0}")]
         public string? ats_id { get; set; } = "";
+
+        /// <summary>
+        /// 是否可見
+        /// </summary>
+        [Display(Name = "是否可見")]
+        public string? visible { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 機場
+        /// </summary>
+        [Display(Name = "機場")]
+        public string? airport { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 航廈
+        /// </summary>
+        [Display(Name = "航廈")]
+        public string? terminal { get; set; } = api_string_param_no_pass;
     }
 
     /// <summary>

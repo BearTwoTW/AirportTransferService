@@ -5,12 +5,17 @@ namespace AirportTransferService.Controllers
     /// <summary>
     /// 行政區域設定
     /// </summary>
+    /// <param name="baseService"></param>
     /// <param name="aTS_CityAreaSettings"></param>
     /// <param name="aTS_AirportTerminalSettings"></param>
     /// <param name="aTS_CarModelSettings"></param>
     /// <param name="aTS_FareSettings"></param>
-    /// <param name="baseService"></param>
-    public class ATS_CityAreaSettingsController(IATS_CityAreaSettings aTS_CityAreaSettings, IATS_AirportTerminalSettings aTS_AirportTerminalSettings, IATS_CarModelSettings aTS_CarModelSettings, IATS_FareSettings aTS_FareSettings, IBaseService baseService) : CustomControllerBase(baseService)
+    public class ATS_CityAreaSettingsController(
+        IBaseService baseService,
+        IATS_CityAreaSettings aTS_CityAreaSettings,
+        IATS_AirportTerminalSettings aTS_AirportTerminalSettings,
+        IATS_CarModelSettings aTS_CarModelSettings,
+        IATS_FareSettings aTS_FareSettings) : CustomControllerBase(baseService)
     {
         private readonly IATS_CityAreaSettings _ATS_CityAreaSettings = aTS_CityAreaSettings;
         private readonly IATS_AirportTerminalSettings _ATS_AirportTerminalSettings = aTS_AirportTerminalSettings;
@@ -29,9 +34,9 @@ namespace AirportTransferService.Controllers
 
             List<SearchATS_CityAreaSettingsResult> resultCityAreaSettings = _ATS_CityAreaSettings.SearchATS_CityAreaSettings(
                 new SearchATS_CityAreaSettingsParam(),
-                ["city", "area"], [],
+                ["city", "area", "road", "section"], [],
                 out _);
-            if (resultCityAreaSettings.Exists(x => x.city == data.city && x.area == data.area)) return new ResultObject<string> { success = false, message = "行政區域重複" };
+            if (resultCityAreaSettings.Exists(x => x.city == data.city && x.area == data.area && x.road == data.road && x.section == data.section)) return new ResultObject<string> { success = false, message = "行政區域重複" };
 
             string id = _ATS_CityAreaSettings.CreateATS_CityAreaSettings(
                 new CreateATS_CityAreaSettingsParam(
@@ -46,7 +51,7 @@ namespace AirportTransferService.Controllers
 
             if (!string.IsNullOrEmpty(id))
             {
-                ATS_FareSettingsController aTS_FareSettingsController = new(_ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings, _baseService) { ControllerContext = ControllerContext };
+                ATS_FareSettingsController aTS_FareSettingsController = new(_baseService, _ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings) { ControllerContext = ControllerContext };
                 aTS_FareSettingsController.ATS_FareSettingsSystemCreate(
                     new ATS_FareSettingsCreate { city = data.city, area = data.area, road = data.road, section = data.section });
             }
@@ -97,7 +102,7 @@ namespace AirportTransferService.Controllers
                     road: data.road,
                     section: data.section));
 
-                ATS_FareSettingsController aTS_FareSettingsController = new(_ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings, _baseService) { ControllerContext = ControllerContext };
+                ATS_FareSettingsController aTS_FareSettingsController = new(_baseService, _ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings) { ControllerContext = ControllerContext };
                 aTS_FareSettingsController.ATS_FareSettingsSystemUpdate(
                     [new ATS_FareSettingsCreate { city = search_own_result.city, area = search_own_result.area, road = search_own_result.road, section = search_results[0].section },
                      new ATS_FareSettingsCreate { city = data.city, area = data.area, road = data.road, section = data.section }]);
@@ -129,6 +134,9 @@ namespace AirportTransferService.Controllers
                     num_per_page: data.num_per_page),
                 ["cas_id", "visible", "zip", "city", "area", "road", "section"], [],
                 out int page_count);
+
+            if (data.distinct.Equals("Y"))
+                search_results = search_results.Select(x => new SearchATS_CityAreaSettingsResult { city = x.city, area = x.area }).Distinct().ToList();
 
             List<ATS_CityAreaSettingsSearchResponse> response = [];
             foreach (SearchATS_CityAreaSettingsResult result in search_results)
@@ -163,7 +171,7 @@ namespace AirportTransferService.Controllers
 
             _ATS_CityAreaSettings.DeleteATS_CityAreaSettings(data.cas_id);
 
-            ATS_FareSettingsController aTS_FareSettingsController = new(_ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings, _baseService) { ControllerContext = ControllerContext };
+            ATS_FareSettingsController aTS_FareSettingsController = new(_baseService, _ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings) { ControllerContext = ControllerContext };
             aTS_FareSettingsController.ATS_FareSettingsSystemDelete(
                                new ATS_FareSettingsCreate { city = search_own_result.city, area = search_own_result.area, road = search_own_result.road, section = search_own_result.section });
 

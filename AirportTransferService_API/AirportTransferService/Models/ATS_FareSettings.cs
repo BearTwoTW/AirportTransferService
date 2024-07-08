@@ -19,7 +19,6 @@ namespace AirportTransferService.Models
     /// <param name="airport"></param>
     /// <param name="terminal"></param>
     /// <param name="price"></param>
-    /// <param name="link"></param>
     public class ATS_FareSettings(
         string? cre_userid = null,
         DateTime? cre_time = null,
@@ -34,8 +33,7 @@ namespace AirportTransferService.Models
         string? section = null,
         string? airport = null,
         string? terminal = null,
-        decimal? price = null,
-        string? link = null)
+        decimal? price = null)
     {
         /// <summary>
         /// cre_userid
@@ -107,11 +105,6 @@ namespace AirportTransferService.Models
         /// price
         /// </summary>
         public decimal? price { get; } = price;
-
-        /// <summary>
-        /// link
-        /// </summary>
-        public string? link { get; } = link;
     }
 
     /// <summary>
@@ -128,7 +121,6 @@ namespace AirportTransferService.Models
     /// <param name="airport"></param>
     /// <param name="terminal"></param>
     /// <param name="price"></param>
-    /// <param name="link"></param>
     public class CreateATS_FareSettingsParam(
         string? cre_userid,
         DateTime? cre_time,
@@ -140,8 +132,7 @@ namespace AirportTransferService.Models
         string? section,
         string? airport,
         string? terminal,
-        decimal? price,
-        string? link) : ATS_FareSettings(
+        decimal? price) : ATS_FareSettings(
             cre_userid: cre_userid,
             cre_time: cre_time,
             visible: visible,
@@ -152,8 +143,7 @@ namespace AirportTransferService.Models
             section: section,
             airport: airport,
             terminal: terminal,
-            price: price,
-            link: link)
+            price: price)
     {
     }
 
@@ -174,7 +164,6 @@ namespace AirportTransferService.Models
     /// <param name="airport"></param>
     /// <param name="terminal"></param>
     /// <param name="price"></param>
-    /// <param name="link"></param>
     public class UpdateATS_FareSettingsParam(
         DateTime? cre_time,
         string? upd_userid,
@@ -189,8 +178,7 @@ namespace AirportTransferService.Models
         string? section = api_string_param_no_pass,
         string? airport = api_string_param_no_pass,
         string? terminal = api_string_param_no_pass,
-        decimal? price = api_numeric_param_no_pass,
-        string? link = api_string_param_no_pass) : ATS_FareSettings(
+        decimal? price = api_numeric_param_no_pass) : ATS_FareSettings(
             cre_userid: cre_userid,
             cre_time: cre_time,
             upd_userid: upd_userid,
@@ -204,8 +192,7 @@ namespace AirportTransferService.Models
             section: section,
             airport: airport,
             terminal: terminal,
-            price: price,
-            link: link)
+            price: price)
     {
     }
 
@@ -221,8 +208,6 @@ namespace AirportTransferService.Models
     /// <param name="section"></param>
     /// <param name="airport"></param>
     /// <param name="terminal"></param>
-    /// <param name="price"></param>
-    /// <param name="link"></param>
     /// <param name="page"></param>
     /// <param name="num_per_page"></param>
     public class SearchATS_FareSettingsParam(
@@ -235,8 +220,6 @@ namespace AirportTransferService.Models
         string? section = null,
         string? airport = null,
         string? terminal = null,
-        decimal? price = null,
-        string? link = null,
         int page = 0,
         int num_per_page = 0)
     {
@@ -249,13 +232,13 @@ namespace AirportTransferService.Models
         /// <summary>
         /// visible
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_FareSettings.visible")]
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_FareSettings.visible")]
         public string? visible { get; } = visible;
 
         /// <summary>
         /// cms_id
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_FareSettings.cms_id")]
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_FareSettings.cms_id")]
         public string? cms_id { get; } = cms_id;
 
         /// <summary>
@@ -293,18 +276,6 @@ namespace AirportTransferService.Models
         /// </summary>
         [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_FareSettings.terminal")]
         public string? terminal { get; } = terminal;
-
-        /// <summary>
-        /// price
-        /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_FareSettings.price")]
-        public decimal? price { get; } = price;
-
-        /// <summary>
-        /// link
-        /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_FareSettings.link")]
-        public string? link { get; } = link;
 
         /// <summary>
         /// page
@@ -407,12 +378,6 @@ namespace AirportTransferService.Models
         public decimal? price { get; set; }
 
         /// <summary>
-        /// link
-        /// </summary>
-        [SQLSource("ATS_FareSettings.link")]
-        public string? link { get; set; }
-
-        /// <summary>
         /// Equals
         /// </summary>
         /// <param name="searchATS_FareSettingsResult"></param>
@@ -437,8 +402,16 @@ namespace AirportTransferService.Models
                 section == searchATS_FareSettingsResult.section &&
                 airport == searchATS_FareSettingsResult.airport &&
                 terminal == searchATS_FareSettingsResult.terminal &&
-                price == searchATS_FareSettingsResult.price &&
-                link == searchATS_FareSettingsResult.link;
+                price == searchATS_FareSettingsResult.price;
+        }
+
+        /// <summary>
+        /// GetHashCode
+        /// </summary>
+        /// <returns></returns>
+        public override int GetHashCode()
+        {
+            return (city?.GetHashCode() ?? 0) ^ (area?.GetHashCode() ?? 0);
         }
     }
 
@@ -501,12 +474,6 @@ namespace AirportTransferService.Models
         /// </summary>
         [Display(Name = "價錢"), Required(ErrorMessage = "請輸入{0}")]
         public decimal? price { get; set; } = 0;
-
-        /// <summary>
-        /// 連結
-        /// </summary>
-        [Display(Name = "連結"), Required(ErrorMessage = "請輸入{0}")]
-        public string? link { get; set; } = "";
     }
 
     /// <summary>
@@ -523,20 +490,14 @@ namespace AirportTransferService.Models
         /// <summary>
         /// 是否可見
         /// </summary>
-        [Display(Name = "是否可見"), Required(ErrorMessage = "請輸入{0}")]
-        public string? visible { get; set; } = "";
+        [Display(Name = "是否可見")]
+        public string? visible { get; set; } = api_string_param_no_pass;
 
         /// <summary>
         /// 價錢
         /// </summary>
-        [Display(Name = "價錢"), Required(ErrorMessage = "請輸入{0}")]
-        public decimal? price { get; set; } = 0;
-
-        /// <summary>
-        /// 連結
-        /// </summary>
-        [Display(Name = "連結"), Required(ErrorMessage = "請輸入{0}")]
-        public string? link { get; set; } = "";
+        [Display(Name = "價錢")]
+        public decimal? price { get; set; } = api_numeric_param_no_pass;
     }
 
     /// <summary>
@@ -567,6 +528,12 @@ namespace AirportTransferService.Models
         /// </summary>
         [Display(Name = "是否匯出"), YN]
         public string excel { get; set; } = "N";
+
+        /// <summary>
+        /// 是否過濾重複
+        /// </summary>
+        [Display(Name = "是否過濾重複"), YN]
+        public string distinct { get; set; } = "N";
 
         /// <summary>
         /// 是否可見
@@ -603,18 +570,6 @@ namespace AirportTransferService.Models
         /// </summary>
         [Display(Name = "航廈")]
         public new string? terminal { get; set; } = "";
-
-        /// <summary>
-        /// 價錢
-        /// </summary>
-        [Display(Name = "價錢")]
-        public new decimal? price { get; set; } = 0;
-
-        /// <summary>
-        /// 連結
-        /// </summary>
-        [Display(Name = "連結")]
-        public new string? link { get; set; } = "";
     }
 
     /// <summary>

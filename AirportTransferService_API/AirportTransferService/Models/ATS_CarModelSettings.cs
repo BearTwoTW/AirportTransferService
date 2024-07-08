@@ -189,7 +189,7 @@ namespace AirportTransferService.Models
         /// <summary>
         /// visible
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_CarModelSettings.visible")]
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_CarModelSettings.visible")]
         public string? visible { get; } = visible;
 
         /// <summary>
@@ -376,13 +376,49 @@ namespace AirportTransferService.Models
     /// <summary>
     /// ATS_CarModelSettingsUpdate
     /// </summary>
-    public class ATS_CarModelSettingsUpdate : ATS_CarModelSettingsCreate
+    public class ATS_CarModelSettingsUpdate
     {
         /// <summary>
         /// 編號
         /// </summary>
         [Display(Name = "編號"), Required(ErrorMessage = "請輸入{0}")]
         public string? cms_id { get; set; } = "";
+
+        /// <summary>
+        /// 是否可見
+        /// </summary>
+        [Display(Name = "是否可見")]
+        public string? visible { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 名稱
+        /// </summary>
+        [Display(Name = "名稱")]
+        public string? name { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 乘車人數上限
+        /// </summary>
+        [Display(Name = "乘車人數上限")]
+        public int? max_passengers { get; set; } = api_numeric_param_no_pass;
+
+        /// <summary>
+        /// 行李數上限
+        /// </summary>
+        [Display(Name = "行李數上限")]
+        public int? max_luggage { get; set; } = api_numeric_param_no_pass;
+
+        /// <summary>
+        /// 安全座椅上限
+        /// </summary>
+        [Display(Name = "安全座椅上限")]
+        public int? max_child_seats { get; set; } = api_numeric_param_no_pass;
+
+        /// <summary>
+        /// 服務加成項目上限
+        /// </summary>
+        [Display(Name = "服務加成項目上限")]
+        public int? max_service_extras { get; set; } = api_numeric_param_no_pass;
     }
 
     /// <summary>

@@ -5,12 +5,17 @@ namespace AirportTransferService.Controllers
     /// <summary>
     /// 車資設定
     /// </summary>
+    /// <param name="baseService"></param>
     /// <param name="aTS_FareSettings"></param>
     /// <param name="aTS_AirportTerminalSettings"></param>
     /// <param name="aTS_CarModelSettings"></param>
     /// <param name="aTS_CityAreaSettings"></param>
-    /// <param name="baseService"></param>
-    public class ATS_FareSettingsController(IATS_FareSettings aTS_FareSettings, IATS_AirportTerminalSettings aTS_AirportTerminalSettings, IATS_CarModelSettings aTS_CarModelSettings, IATS_CityAreaSettings aTS_CityAreaSettings, IBaseService baseService) : CustomControllerBase(baseService)
+    public class ATS_FareSettingsController(
+        IBaseService baseService,
+        IATS_FareSettings aTS_FareSettings,
+        IATS_AirportTerminalSettings aTS_AirportTerminalSettings,
+        IATS_CarModelSettings aTS_CarModelSettings,
+        IATS_CityAreaSettings aTS_CityAreaSettings) : CustomControllerBase(baseService)
     {
         private readonly IATS_FareSettings _ATS_FareSettings = aTS_FareSettings;
         private readonly IATS_AirportTerminalSettings _ATS_AirportTerminalSettings = aTS_AirportTerminalSettings;
@@ -23,7 +28,7 @@ namespace AirportTransferService.Controllers
         /// <param name="data"></param>
         /// <returns></returns>
         //[HttpPost] TODO: 車資設定由系統產生
-        [NonAction] 
+        [NonAction]
         public ResultObject<string> ATS_FareSettingsCreate(ATS_FareSettingsCreate data)
         {
             DateTime cre_time = DateTime.Now;
@@ -47,8 +52,7 @@ namespace AirportTransferService.Controllers
                     section: data.section,
                     airport: data.airport,
                     terminal: data.terminal,
-                    price: data.price,
-                    link: data.link));
+                    price: data.price));
 
             return new ResultObject<string> { success = true, message = "新增成功", data = id };
         }
@@ -91,8 +95,7 @@ namespace AirportTransferService.Controllers
                     upd_time: upd_time,
                     fs_id: data.fs_id,
                     visible: data.visible,
-                    price: data.price,
-                    link: data.link));
+                    price: data.price));
 
                 tx.Complete();
             }
@@ -119,12 +122,28 @@ namespace AirportTransferService.Controllers
                     section: data.section,
                     airport: data.airport,
                     terminal: data.terminal,
-                    price: data.price,
-                    link: data.link,
                     page: data.page,
                     num_per_page: data.num_per_page),
-                ["fs_id", "visible", "cms_id", "city", "area", "road", "section", "airport", "terminal", "price", "link"], [],
+                ["fs_id", "visible", "cms_id", "city", "area", "road", "section", "airport", "terminal", "price"], [],
                 out int page_count);
+
+            if (data.distinct.Equals("Y"))
+            {
+                search_results = search_results
+                    .Where(x => string.IsNullOrEmpty(x.road) && string.IsNullOrEmpty(x.section))
+                    .GroupBy(x => new { x.city, x.area })
+                    .Select(group =>
+                    {
+                        SearchATS_FareSettingsResult cheapest = group.OrderBy(x => x.price).First();
+                        return new SearchATS_FareSettingsResult
+                        {
+                            city = cheapest.city,
+                            area = cheapest.area,
+                            price = cheapest.price
+                        };
+                    })
+                    .ToList();
+            }
 
             List<ATS_FareSettingsSearchResponse> response = [];
             foreach (SearchATS_FareSettingsResult result in search_results)
@@ -140,8 +159,7 @@ namespace AirportTransferService.Controllers
                     section = result.section,
                     airport = result.airport,
                     terminal = result.terminal,
-                    price = result.price,
-                    link = result.link
+                    price = result.price ?? 0
                 });
             }
 
@@ -179,7 +197,7 @@ namespace AirportTransferService.Controllers
                   out _)
                 : [new SearchATS_AirportTerminalSettingsResult() { airport = data.airport, terminal = data.terminal }];
             //取得所有車型
-            List<SearchATS_CarModelSettingsResult> car_model_settings = 
+            List<SearchATS_CarModelSettingsResult> car_model_settings =
                 string.IsNullOrEmpty(data.cms_id)
                 ? _ATS_CarModelSettings.SearchATS_CarModelSettings(
                   new SearchATS_CarModelSettingsParam(),
@@ -211,8 +229,7 @@ namespace AirportTransferService.Controllers
                       section: z.section,
                       airport: x.airport,
                       terminal: x.terminal,
-                      price: null,
-                      link: null)))).ToList()
+                      price: null)))).ToList()
                 : [];
 
             //取得所有車資設定
@@ -223,7 +240,7 @@ namespace AirportTransferService.Controllers
             //將不存在的車資設定新增
             createATS_FareSettingsParams.ForEach(x =>
             {
-                if (!search_results.Exists(y => 
+                if (!search_results.Exists(y =>
                 y.cms_id == x.cms_id &&
                 y.city == x.city &&
                 y.area == x.area &&

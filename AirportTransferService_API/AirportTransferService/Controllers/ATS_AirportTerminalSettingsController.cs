@@ -6,13 +6,17 @@ namespace AirportTransferService.Controllers
     /// <summary>
     /// 機場航廈設定
     /// </summary>
-    /// <param name="aTS_AirportTerminalSettings"></param>
+    /// <param name="baseService"></param>
     /// <param name="aTS_AirportTerminalSettings"></param>
     /// <param name="aTS_CarModelSettings"></param>
     /// <param name="aTS_CityAreaSettings"></param>
     /// <param name="aTS_FareSettings"></param>
-    /// <param name="baseService"></param>
-    public class ATS_AirportTerminalSettingsController(IATS_AirportTerminalSettings aTS_AirportTerminalSettings, IATS_CarModelSettings aTS_CarModelSettings, IATS_CityAreaSettings aTS_CityAreaSettings, IATS_FareSettings aTS_FareSettings, IBaseService baseService) : CustomControllerBase(baseService)
+    public class ATS_AirportTerminalSettingsController(
+        IBaseService baseService,
+        IATS_AirportTerminalSettings aTS_AirportTerminalSettings,
+        IATS_CarModelSettings aTS_CarModelSettings,
+        IATS_CityAreaSettings aTS_CityAreaSettings,
+        IATS_FareSettings aTS_FareSettings) : CustomControllerBase(baseService)
     {
         private readonly IATS_AirportTerminalSettings _ATS_AirportTerminalSettings = aTS_AirportTerminalSettings;
         private readonly IATS_CarModelSettings _ATS_CarModelSettings = aTS_CarModelSettings;
@@ -45,7 +49,7 @@ namespace AirportTransferService.Controllers
 
             if (!string.IsNullOrEmpty(id))
             {
-                ATS_FareSettingsController aTS_FareSettingsController = new(_ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings, _baseService) { ControllerContext = ControllerContext };
+                ATS_FareSettingsController aTS_FareSettingsController = new(_baseService, _ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings) { ControllerContext = ControllerContext };
                 aTS_FareSettingsController.ATS_FareSettingsSystemCreate(
                     new ATS_FareSettingsCreate { airport = data.airport, terminal = data.terminal });
             }
@@ -90,7 +94,7 @@ namespace AirportTransferService.Controllers
                     airport: data.airport,
                     terminal: data.terminal));
 
-                ATS_FareSettingsController aTS_FareSettingsController = new(_ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings, _baseService) { ControllerContext = ControllerContext };
+                ATS_FareSettingsController aTS_FareSettingsController = new(_baseService, _ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings) { ControllerContext = ControllerContext };
                 aTS_FareSettingsController.ATS_FareSettingsSystemUpdate(
                     [new ATS_FareSettingsCreate { airport = search_own_result.airport, terminal = search_own_result.terminal },
                      new ATS_FareSettingsCreate { airport = data.airport, terminal = data.terminal }]);
@@ -150,7 +154,7 @@ namespace AirportTransferService.Controllers
 
             _ATS_AirportTerminalSettings.DeleteATS_AirportTerminalSettings(data.ats_id);
 
-            ATS_FareSettingsController aTS_FareSettingsController = new(_ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings, _baseService) { ControllerContext = ControllerContext };
+            ATS_FareSettingsController aTS_FareSettingsController = new(_baseService, _ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings) { ControllerContext = ControllerContext };
             aTS_FareSettingsController.ATS_FareSettingsSystemDelete(
                 new ATS_FareSettingsCreate { airport = search_own_result.airport, terminal = search_own_result.terminal });
 

@@ -5,11 +5,13 @@ namespace AirportTransferService.Controllers
     /// <summary>
     /// 網頁設定
     /// </summary>
-    /// <param name="ats_websettings"></param>
     /// <param name="baseService"></param>
-    public class ATS_WebSettingsController(IATS_WebSettings ats_websettings, IBaseService baseService) : CustomControllerBase(baseService)
+    /// <param name="aTS_WebSettings"></param>
+    public class ATS_WebSettingsController(
+        IBaseService baseService,
+        IATS_WebSettings aTS_WebSettings) : CustomControllerBase(baseService)
     {
-        private readonly IATS_WebSettings _ats_websettings = ats_websettings;
+        private readonly IATS_WebSettings _ATS_WebSettings = aTS_WebSettings;
 
         /// <summary>
         /// 網頁設定建立
@@ -21,13 +23,13 @@ namespace AirportTransferService.Controllers
         {
             DateTime cre_time = DateTime.Now;
 
-            List<SearchATS_WebSettingsResult> search_results = _ats_websettings.SearchATS_WebSettings(
+            List<SearchATS_WebSettingsResult> search_results = _ATS_WebSettings.SearchATS_WebSettings(
                 new SearchATS_WebSettingsParam(),
                 ["title"], [],
                 out _);
             if (search_results.Exists(x => x.title == data.title)) return new ResultObject<string> { success = false, message = "名稱重複" };
 
-            string id = _ats_websettings.CreateATS_WebSettings(
+            string id = _ATS_WebSettings.CreateATS_WebSettings(
                 new CreateATS_WebSettingsParam(
                     cre_userid: jwtObject.user_id,
                     cre_time: cre_time,
@@ -54,13 +56,13 @@ namespace AirportTransferService.Controllers
             DateTime upd_time = DateTime.Now;
 
             //查自己
-            SearchATS_WebSettingsResult? search_own_result = _ats_websettings.SearchATS_WebSettings(
+            SearchATS_WebSettingsResult? search_own_result = _ATS_WebSettings.SearchATS_WebSettings(
                 new SearchATS_WebSettingsParam(ws_id: data.ws_id),
                 ["ws_id"], [],
                 out _).FirstOrDefault();
             if (search_own_result == null) return new ResultObject<string> { success = false, message = "修改失敗，查無網頁設定" };
             //查要檢查重複的東西
-            List<SearchATS_WebSettingsResult> search_results = _ats_websettings.SearchATS_WebSettings(
+            List<SearchATS_WebSettingsResult> search_results = _ATS_WebSettings.SearchATS_WebSettings(
                 new SearchATS_WebSettingsParam(),
                 ["ws_id", "title"], [],
                 out _);
@@ -70,7 +72,7 @@ namespace AirportTransferService.Controllers
 
             using (TransactionScope tx = new())
             {
-                _ats_websettings.UpdateATS_WebSettings(new UpdateATS_WebSettingsParam(
+                _ATS_WebSettings.UpdateATS_WebSettings(new UpdateATS_WebSettingsParam(
                     cre_time: Appsettings.api_datetime_param_no_pass,
                     upd_userid: jwtObject.user_id,
                     upd_time: upd_time,
@@ -98,7 +100,7 @@ namespace AirportTransferService.Controllers
         [HttpPost]
         public ResultObject<List<ATS_WebSettingsSearchResponse>> ATS_WebSettingsSearch(ATS_WebSettingsSearch data)
         {
-            List<SearchATS_WebSettingsResult> search_results = _ats_websettings.SearchATS_WebSettings(
+            List<SearchATS_WebSettingsResult> search_results = _ATS_WebSettings.SearchATS_WebSettings(
                 new SearchATS_WebSettingsParam(
                     ws_id: data.ws_id,
                     title: data.title,
@@ -142,7 +144,7 @@ namespace AirportTransferService.Controllers
         [HttpPost]
         public ResultObject<string> ATS_WebSettingsDelete(ATS_WebSettingsDelete data)
         {
-            _ats_websettings.DeleteATS_WebSettings(data.ws_id);
+            _ATS_WebSettings.DeleteATS_WebSettings(data.ws_id);
             return new ResultObject<string> { success = true, message = "刪除成功" };
         }
     }

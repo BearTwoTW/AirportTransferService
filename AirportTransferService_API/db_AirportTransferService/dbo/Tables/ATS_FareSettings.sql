@@ -12,8 +12,7 @@
     [section]    NVARCHAR (255)  NULL,
     [airport]    NVARCHAR (255)  NULL,
     [terminal]   NVARCHAR (255)  NULL,
-    [price]      DECIMAL (10, 2) NULL,
-    [link]       NVARCHAR (MAX)  NULL,
+    [price]      DECIMAL (10, 2) CONSTRAINT [DF_ATS_FareSettings_price] DEFAULT ((0)) NULL,
     CONSTRAINT [PK_ATS_FareSettings] PRIMARY KEY CLUSTERED ([fs_id] ASC)
 );
 
@@ -22,8 +21,10 @@
 
 
 
+
+
 GO
-EXECUTE sp_addextendedproperty @name = N'MS_Description', @value = N'連結', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'ATS_FareSettings', @level2type = N'COLUMN', @level2name = N'link';
+
 
 
 GO

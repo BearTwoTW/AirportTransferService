@@ -313,13 +313,37 @@ namespace AirportTransferService.Models
     /// <summary>
     /// ATS_GASettingsUpdate
     /// </summary>
-    public class ATS_GASettingsUpdate : ATS_GASettingsCreate
+    public class ATS_GASettingsUpdate
     {
         /// <summary>
         /// 編號
         /// </summary>
         [Display(Name = "編號"), Required(ErrorMessage = "請輸入{0}")]
         public string? gas_id { get; set; } = "";
+
+        /// <summary>
+        /// 追蹤碼
+        /// </summary>
+        [Display(Name = "追蹤碼")]
+        public string? tracking_code { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 關鍵字
+        /// </summary>
+        [Display(Name = "關鍵字")]
+        public string? keyword { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 簡介
+        /// </summary>
+        [Display(Name = "簡介")]
+        public string? summary { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 描述性URL
+        /// </summary>
+        [Display(Name = "描述性URL")]
+        public string? descriptive_url { get; set; } = api_string_param_no_pass;
     }
 
     /// <summary>

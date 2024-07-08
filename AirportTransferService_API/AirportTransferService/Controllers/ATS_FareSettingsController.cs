@@ -28,7 +28,7 @@ namespace AirportTransferService.Controllers
         /// <param name="data"></param>
         /// <returns></returns>
         //[HttpPost] TODO: 車資設定由系統產生
-        [NonAction] 
+        [NonAction]
         public ResultObject<string> ATS_FareSettingsCreate(ATS_FareSettingsCreate data)
         {
             DateTime cre_time = DateTime.Now;
@@ -52,8 +52,7 @@ namespace AirportTransferService.Controllers
                     section: data.section,
                     airport: data.airport,
                     terminal: data.terminal,
-                    price: data.price,
-                    link: data.link));
+                    price: data.price));
 
             return new ResultObject<string> { success = true, message = "新增成功", data = id };
         }
@@ -96,8 +95,7 @@ namespace AirportTransferService.Controllers
                     upd_time: upd_time,
                     fs_id: data.fs_id,
                     visible: data.visible,
-                    price: data.price,
-                    link: data.link));
+                    price: data.price));
 
                 tx.Complete();
             }
@@ -161,8 +159,7 @@ namespace AirportTransferService.Controllers
                     section = result.section,
                     airport = result.airport,
                     terminal = result.terminal,
-                    price = result.price,
-                    link = result.link
+                    price = result.price ?? 0
                 });
             }
 
@@ -200,7 +197,7 @@ namespace AirportTransferService.Controllers
                   out _)
                 : [new SearchATS_AirportTerminalSettingsResult() { airport = data.airport, terminal = data.terminal }];
             //取得所有車型
-            List<SearchATS_CarModelSettingsResult> car_model_settings = 
+            List<SearchATS_CarModelSettingsResult> car_model_settings =
                 string.IsNullOrEmpty(data.cms_id)
                 ? _ATS_CarModelSettings.SearchATS_CarModelSettings(
                   new SearchATS_CarModelSettingsParam(),
@@ -232,8 +229,7 @@ namespace AirportTransferService.Controllers
                       section: z.section,
                       airport: x.airport,
                       terminal: x.terminal,
-                      price: null,
-                      link: null)))).ToList()
+                      price: null)))).ToList()
                 : [];
 
             //取得所有車資設定
@@ -244,7 +240,7 @@ namespace AirportTransferService.Controllers
             //將不存在的車資設定新增
             createATS_FareSettingsParams.ForEach(x =>
             {
-                if (!search_results.Exists(y => 
+                if (!search_results.Exists(y =>
                 y.cms_id == x.cms_id &&
                 y.city == x.city &&
                 y.area == x.area &&

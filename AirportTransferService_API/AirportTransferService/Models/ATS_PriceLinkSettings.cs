@@ -3,7 +3,7 @@
 namespace AirportTransferService.Models
 {
     /// <summary>
-    /// ATS_PriceLineSettings
+    /// ATS_PriceLinkSettings
     /// </summary>
     /// <param name="cre_userid"></param>
     /// <param name="cre_time"></param>
@@ -13,7 +13,7 @@ namespace AirportTransferService.Models
     /// <param name="visible"></param>
     /// <param name="price"></param>
     /// <param name="link"></param>
-    public class ATS_PriceLineSettings(
+    public class ATS_PriceLinkSettings(
         string? cre_userid = null,
         DateTime? cre_time = null,
         string? upd_userid = null,
@@ -66,19 +66,19 @@ namespace AirportTransferService.Models
     }
 
     /// <summary>
-    /// CreateATS_PriceLineSettingsParam
+    /// CreateATS_PriceLinkSettingsParam
     /// </summary>
     /// <param name="cre_userid"></param>
     /// <param name="cre_time"></param>
     /// <param name="visible"></param>
     /// <param name="price"></param>
     /// <param name="link"></param>
-    public class CreateATS_PriceLineSettingsParam(
+    public class CreateATS_PriceLinkSettingsParam(
         string? cre_userid,
         DateTime? cre_time,
         string? visible,
         decimal? price,
-        string? link) : ATS_PriceLineSettings(
+        string? link) : ATS_PriceLinkSettings(
             cre_userid: cre_userid,
             cre_time: cre_time,
             visible: visible,
@@ -88,7 +88,7 @@ namespace AirportTransferService.Models
     }
 
     /// <summary>
-    /// UpdateATS_PriceLineSettingsParam
+    /// UpdateATS_PriceLinkSettingsParam
     /// </summary>
     /// <param name="cre_time"></param>
     /// <param name="upd_userid"></param>
@@ -98,7 +98,7 @@ namespace AirportTransferService.Models
     /// <param name="visible"></param>
     /// <param name="price"></param>
     /// <param name="link"></param>
-    public class UpdateATS_PriceLineSettingsParam(
+    public class UpdateATS_PriceLinkSettingsParam(
         DateTime? cre_time,
         string? upd_userid,
         DateTime? upd_time,
@@ -106,7 +106,7 @@ namespace AirportTransferService.Models
         string? cre_userid = api_string_param_no_pass,
         string? visible = api_string_param_no_pass,
         decimal? price = api_numeric_param_no_pass,
-        string? link = api_string_param_no_pass) : ATS_PriceLineSettings(
+        string? link = api_string_param_no_pass) : ATS_PriceLinkSettings(
             cre_userid: cre_userid,
             cre_time: cre_time,
             upd_userid: upd_userid,
@@ -119,7 +119,7 @@ namespace AirportTransferService.Models
     }
 
     /// <summary>
-    /// SearchATS_PriceLineSettingsParam
+    /// SearchATS_PriceLinkSettingsParam
     /// </summary>
     /// <param name="pls_id"></param>
     /// <param name="visible"></param>
@@ -127,7 +127,7 @@ namespace AirportTransferService.Models
     /// <param name="link"></param>
     /// <param name="page"></param>
     /// <param name="num_per_page"></param>
-    public class SearchATS_PriceLineSettingsParam(
+    public class SearchATS_PriceLinkSettingsParam(
         string? pls_id = null,
         string? visible = null,
         decimal? price = null,
@@ -138,25 +138,25 @@ namespace AirportTransferService.Models
         /// <summary>
         /// pls_id
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_PriceLineSettings.pls_id")]
+        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_PriceLinkSettings.pls_id")]
         public string? pls_id { get; } = pls_id;
 
         /// <summary>
         /// visible
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_PriceLineSettings.visible")]
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_PriceLinkSettings.visible")]
         public string? visible { get; } = visible;
 
         /// <summary>
         /// price
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_PriceLineSettings.price")]
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_PriceLinkSettings.price")]
         public decimal? price { get; } = price;
 
         /// <summary>
         /// link
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_PriceLineSettings.link")]
+        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_PriceLinkSettings.link")]
         public string? link { get; } = link;
 
         /// <summary>
@@ -171,86 +171,86 @@ namespace AirportTransferService.Models
     }
 
     /// <summary>
-    /// SearchATS_PriceLineSettingsResult
+    /// SearchATS_PriceLinkSettingsResult
     /// </summary>
-    public class SearchATS_PriceLineSettingsResult : IEquatable<SearchATS_PriceLineSettingsResult>
+    public class SearchATS_PriceLinkSettingsResult : IEquatable<SearchATS_PriceLinkSettingsResult>
     {
         /// <summary>
         /// cre_userid
         /// </summary>
-        [SQLSource("ATS_PriceLineSettings.cre_userid")]
+        [SQLSource("ATS_PriceLinkSettings.cre_userid")]
         public string? cre_userid { get; set; }
 
         /// <summary>
         /// cre_time
         /// </summary>
-        [SQLSource("ATS_PriceLineSettings.cre_time")]
+        [SQLSource("ATS_PriceLinkSettings.cre_time")]
         public DateTime? cre_time { get; set; }
 
         /// <summary>
         /// upd_userid
         /// </summary>
-        [SQLSource("ATS_PriceLineSettings.upd_userid")]
+        [SQLSource("ATS_PriceLinkSettings.upd_userid")]
         public string? upd_userid { get; set; }
 
         /// <summary>
         /// upd_time
         /// </summary>
-        [SQLSource("ATS_PriceLineSettings.upd_time")]
+        [SQLSource("ATS_PriceLinkSettings.upd_time")]
         public DateTime? upd_time { get; set; }
 
         /// <summary>
         /// pls_id
         /// </summary>
-        [SQLSource("ATS_PriceLineSettings.pls_id")]
+        [SQLSource("ATS_PriceLinkSettings.pls_id")]
         public string? pls_id { get; set; }
 
         /// <summary>
         /// visible
         /// </summary>
-        [SQLSource("ATS_PriceLineSettings.visible")]
+        [SQLSource("ATS_PriceLinkSettings.visible")]
         public string? visible { get; set; }
 
         /// <summary>
         /// price
         /// </summary>
-        [SQLSource("ATS_PriceLineSettings.price")]
+        [SQLSource("ATS_PriceLinkSettings.price")]
         public decimal? price { get; set; }
 
         /// <summary>
         /// link
         /// </summary>
-        [SQLSource("ATS_PriceLineSettings.link")]
+        [SQLSource("ATS_PriceLinkSettings.link")]
         public string? link { get; set; }
 
         /// <summary>
         /// Equals
         /// </summary>
-        /// <param name="searchATS_PriceLineSettingsResult"></param>
+        /// <param name="searchATS_PriceLinkSettingsResult"></param>
         /// <returns></returns>
-        public bool Equals(SearchATS_PriceLineSettingsResult? searchATS_PriceLineSettingsResult)
+        public bool Equals(SearchATS_PriceLinkSettingsResult? searchATS_PriceLinkSettingsResult)
         {
-            if (searchATS_PriceLineSettingsResult is null) return false;
+            if (searchATS_PriceLinkSettingsResult is null) return false;
 
-            if (Object.ReferenceEquals(this, searchATS_PriceLineSettingsResult)) return true;
+            if (Object.ReferenceEquals(this, searchATS_PriceLinkSettingsResult)) return true;
 
             return
-                cre_userid == searchATS_PriceLineSettingsResult.cre_userid &&
-                cre_time == searchATS_PriceLineSettingsResult.cre_time &&
-                upd_userid == searchATS_PriceLineSettingsResult.upd_userid &&
-                upd_time == searchATS_PriceLineSettingsResult.upd_time &&
-                pls_id == searchATS_PriceLineSettingsResult.pls_id &&
-                visible == searchATS_PriceLineSettingsResult.visible &&
-                price == searchATS_PriceLineSettingsResult.price &&
-                link == searchATS_PriceLineSettingsResult.link;
+                cre_userid == searchATS_PriceLinkSettingsResult.cre_userid &&
+                cre_time == searchATS_PriceLinkSettingsResult.cre_time &&
+                upd_userid == searchATS_PriceLinkSettingsResult.upd_userid &&
+                upd_time == searchATS_PriceLinkSettingsResult.upd_time &&
+                pls_id == searchATS_PriceLinkSettingsResult.pls_id &&
+                visible == searchATS_PriceLinkSettingsResult.visible &&
+                price == searchATS_PriceLinkSettingsResult.price &&
+                link == searchATS_PriceLinkSettingsResult.link;
         }
     }
 
     #region API
     /// <summary>
-    /// ATS_PriceLineSettingsCreate
+    /// ATS_PriceLinkSettingsCreate
     /// </summary>
-    public class ATS_PriceLineSettingsCreate
+    public class ATS_PriceLinkSettingsCreate
     {
         /// <summary>
         /// 是否可見
@@ -272,9 +272,9 @@ namespace AirportTransferService.Models
     }
 
     /// <summary>
-    /// ATS_PriceLineSettingsUpdate
+    /// ATS_PriceLinkSettingsUpdate
     /// </summary>
-    public class ATS_PriceLineSettingsUpdate
+    public class ATS_PriceLinkSettingsUpdate
     {
         /// <summary>
         /// 編號
@@ -302,9 +302,9 @@ namespace AirportTransferService.Models
     }
 
     /// <summary>
-    /// ATS_PriceLineSettingsSearch
+    /// ATS_PriceLinkSettingsSearch
     /// </summary>
-    public class ATS_PriceLineSettingsSearch
+    public class ATS_PriceLinkSettingsSearch
     {
         /// <summary>
         /// 編號
@@ -350,9 +350,9 @@ namespace AirportTransferService.Models
     }
 
     /// <summary>
-    /// ATS_PriceLineSettingsSearchResult
+    /// ATS_PriceLinkSettingsSearchResult
     /// </summary>
-    public class ATS_PriceLineSettingsSearchResponse : ATS_PriceLineSettingsCreate
+    public class ATS_PriceLinkSettingsSearchResponse : ATS_PriceLinkSettingsCreate
     {
         /// <summary>
         /// 編號
@@ -362,9 +362,9 @@ namespace AirportTransferService.Models
     }
 
     /// <summary>
-    /// ATS_PriceLineSettingsDelete
+    /// ATS_PriceLinkSettingsDelete
     /// </summary>
-    public class ATS_PriceLineSettingsDelete
+    public class ATS_PriceLinkSettingsDelete
     {
         /// <summary>
         /// 編號

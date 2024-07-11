@@ -117,10 +117,10 @@ namespace AirportTransferService.Controllers
                     cms_id: data.cms_id,
                     visible: data.visible,
                     name: data.name,
-                    max_passengers: data.max_passengers,
-                    max_luggage: data.max_luggage,
-                    max_child_seats: data.max_child_seats,
-                    max_service_extras: data.max_service_extras,
+                    max_passengers_start: data.max_passengers,
+                    max_passengers_end: 100, // 沒有上限，暫時先給100
+                    max_luggage_start: data.max_luggage,
+                    max_luggage_end: 100, // 沒有上限，暫時先給100
                     page: data.page,
                     num_per_page: data.num_per_page),
                 ["cms_id", "visible", "name", "max_passengers", "max_luggage", "max_child_seats", "max_service_extras"], [],

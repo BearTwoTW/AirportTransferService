@@ -163,8 +163,10 @@ namespace AirportTransferService.Models
     /// <param name="cms_id"></param>
     /// <param name="visible"></param>
     /// <param name="name"></param>
-    /// <param name="max_passengers"></param>
-    /// <param name="max_luggage"></param>
+    /// <param name="max_passengers_start"></param>
+    /// <param name="max_passengers_end"></param>
+    /// <param name="max_luggage_start"></param>
+    /// <param name="max_luggage_end"></param>
     /// <param name="max_child_seats"></param>
     /// <param name="max_service_extras"></param>
     /// <param name="page"></param>
@@ -173,10 +175,12 @@ namespace AirportTransferService.Models
         string? cms_id = null,
         string? visible = null,
         string? name = null,
-        int? max_passengers = null,
-        int? max_luggage = null,
-        int? max_child_seats = null,
-        int? max_service_extras = null,
+        int? max_passengers_start = null,
+        int? max_passengers_end = null,
+        int? max_luggage_start = null,
+        int? max_luggage_end = null,
+        //int? max_child_seats = null,
+        //int? max_service_extras = null,
         int page = 0,
         int num_per_page = 0)
     {
@@ -199,28 +203,42 @@ namespace AirportTransferService.Models
         public string? name { get; } = name;
 
         /// <summary>
-        /// max_passengers
+        /// max_passengers_start
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_CarModelSettings.max_passengers")]
-        public int? max_passengers { get; } = max_passengers;
+        [SQLSearchCondition(SQLSearchConditionType.RangeStart, "ATS_CarModelSettings.max_passengers")]
+        public int? max_passengers_start { get; } = max_passengers_start;
 
         /// <summary>
-        /// max_luggage
+        /// max_passengers_end
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_CarModelSettings.max_luggage")]
-        public int? max_luggage { get; } = max_luggage;
+        [SQLSearchCondition(SQLSearchConditionType.RangeEnd, "ATS_CarModelSettings.max_passengers")]
+        public int? max_passengers_end { get; } = max_passengers_end;
+
 
         /// <summary>
-        /// max_child_seats
+        /// max_luggage_start
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_CarModelSettings.max_child_seats")]
-        public int? max_child_seats { get; } = max_child_seats;
+        [SQLSearchCondition(SQLSearchConditionType.RangeStart, "ATS_CarModelSettings.max_luggage")]
+        public int? max_luggage_start { get; } = max_luggage_start;
 
         /// <summary>
-        /// max_service_extras
+        /// max_luggage_end
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_CarModelSettings.max_service_extras")]
-        public int? max_service_extras { get; } = max_service_extras;
+        [SQLSearchCondition(SQLSearchConditionType.RangeEnd, "ATS_CarModelSettings.max_luggage")]
+        public int? max_luggage_end { get; } = max_luggage_end;
+
+        // TODO: 不給查，但是有可能跟上面一樣要查範圍，先註解
+        ///// <summary>
+        ///// max_child_seats
+        ///// </summary>
+        //[SQLSearchCondition(SQLSearchConditionType., "ATS_CarModelSettings.max_child_seats")]
+        //public int? max_child_seats { get; } = max_child_seats;
+
+        ///// <summary>
+        ///// max_service_extras
+        ///// </summary>
+        //[SQLSearchCondition(SQLSearchConditionType.Like, "ATS_CarModelSettings.max_service_extras")]
+        //public int? max_service_extras { get; } = max_service_extras;
 
         /// <summary>
         /// page
@@ -424,7 +442,7 @@ namespace AirportTransferService.Models
     /// <summary>
     /// ATS_CarModelSettingsSearch
     /// </summary>
-    public class ATS_CarModelSettingsSearch : ATS_CarModelSettingsCreate
+    public class ATS_CarModelSettingsSearch
     {
         /// <summary>
         /// 編號
@@ -450,11 +468,29 @@ namespace AirportTransferService.Models
         [Display(Name = "是否匯出"), YN]
         public string excel { get; set; } = "N";
 
+        //// <summary>
+        /// 是否可見
+        /// </summary>
+        [Display(Name = "是否可見"), YN]
+        public string? visible { get; set; } = "Y";
+
         /// <summary>
         /// 名稱
         /// </summary>
         [Display(Name = "名稱")]
-        public new string? name { get; set; } = "";
+        public string? name { get; set; } = "";
+
+        /// <summary>
+        /// 乘車人數上限
+        /// </summary>
+        [Display(Name = "乘車人數上限")]
+        public int? max_passengers { get; set; } = 0;
+
+        /// <summary>
+        /// 行李數上限
+        /// </summary>
+        [Display(Name = "行李數上限")]
+        public int? max_luggage { get; set; } = 0;
     }
 
     /// <summary>

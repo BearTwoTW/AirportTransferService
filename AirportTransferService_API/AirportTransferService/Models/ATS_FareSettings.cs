@@ -503,7 +503,7 @@ namespace AirportTransferService.Models
     /// <summary>
     /// ATS_FareSettingsSearch
     /// </summary>
-    public class ATS_FareSettingsSearch : ATS_FareSettingsCreate
+    public class ATS_FareSettingsSearch
     {
         /// <summary>
         /// 編號
@@ -538,38 +538,50 @@ namespace AirportTransferService.Models
         /// <summary>
         /// 是否可見
         /// </summary>
-        [Display(Name = "是否可見")]
-        public new string? visible { get; set; } = "";
+        [Display(Name = "是否可見"), YN]
+        public string? visible { get; set; } = "Y";
 
         /// <summary>
         /// 車型編號
         /// </summary>
         [Display(Name = "車型編號")]
-        public new string? cms_id { get; set; } = "";
+        public string? cms_id { get; set; } = "";
 
         /// <summary>
         /// 城市
         /// </summary>
         [Display(Name = "城市")]
-        public new string? city { get; set; } = "";
+        public string? city { get; set; } = "";
 
         /// <summary>
         /// 區域
         /// </summary>
         [Display(Name = "區域")]
-        public new string? area { get; set; } = "";
+        public string? area { get; set; } = "";
+
+        /// <summary>
+        /// 路
+        /// </summary>
+        [Display(Name = "路")]
+        public string? road { get; set; } = "";
+
+        /// <summary>
+        /// 段
+        /// </summary>
+        [Display(Name = "段")]
+        public string? section { get; set; } = "";
 
         /// <summary>
         /// 機場
         /// </summary>
         [Display(Name = "機場")]
-        public new string? airport { get; set; } = "";
+        public string? airport { get; set; } = "";
 
         /// <summary>
         /// 航廈
         /// </summary>
         [Display(Name = "航廈")]
-        public new string? terminal { get; set; } = "";
+        public string? terminal { get; set; } = "";
     }
 
     /// <summary>

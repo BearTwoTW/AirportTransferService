@@ -272,7 +272,6 @@ export default function Reserve() {
   // [事件]預約送機 & 預約接機 打開 Modal
   const reserve_next = ({ e, type, orderAdd, signboard, extra, sameDetail, price }) => {
     useDialog.current.handleOpen();
-    console.log(orderAdd)
     setDialogData({
       id: type,
       maxWidth: "md",
@@ -319,6 +318,25 @@ export default function Reserve() {
     })
   }
 
+  // [事件]預約送機 & 預約接機 打開 Modal 超出限制提醒
+  const reserve_error = ({ e, type, message }) => {
+    useDialog.current.handleOpen();
+    setDialogData({
+      id: type,
+      DialogTitle: "預約提醒",
+      DialogContent: <DialogsInner type={type} ref={useDialogInner} message={message} />,
+      DialogActions: (
+        <React.Fragment>
+          <Button color="secondary" variant='outlined' onClick={dialogClose}>
+            關閉
+          </Button>
+          <Button color="primary" variant='contained' onClick={dialogClose}>
+            確定
+          </Button>
+        </React.Fragment>)
+    });
+  }
+
   /**關閉Dialog  */
   const dialogClose = () => {
     useDialog.current.handleClose();
@@ -352,6 +370,7 @@ export default function Reserve() {
               index={0}
               options={options}
               reserve_next={reserve_next}
+              reserve_error={reserve_error}
               ref={useTabContent.current[0]}
             />
             <LeaveTabPanel
@@ -359,6 +378,7 @@ export default function Reserve() {
               index={1}
               options={options}
               reserve_next={reserve_next}
+              reserve_error={reserve_error}
               ref={useTabContent.current[1]}
             />
           </Box>
@@ -373,7 +393,7 @@ export default function Reserve() {
 
 /** [內容]送機 */
 const GoTabPanel = forwardRef((props, ref) => {
-  const { value, index, options, reserve_next } = props
+  const { value, index, options, reserve_next, reserve_error } = props
 
   // 新增訂單
   const [orderAdd, setOrderAdd] = useState({
@@ -610,12 +630,12 @@ const GoTabPanel = forwardRef((props, ref) => {
       ATS_OrderMaster.ATS_OrderMasterCreate(orderAdd).then(async res => {
         if (res.success) {
           reserve_next({ e: e, type: type, orderAdd: orderAdd, signboard: signboard, extra: extra, sameDetail: sameDetail, price: res.data })
+        } else {
+          reserve_error({ e: e, type: "error", message: res.message })
         }
       })
     }
   };
-
-  console.log(orderAdd)
 
   return (
     <TabPanel value={value} index={index}>
@@ -983,7 +1003,7 @@ const GoTabPanel = forwardRef((props, ref) => {
 
 /** [內容]送機 */
 const LeaveTabPanel = forwardRef((props, ref) => {
-  const { value, index, options, reserve_next } = props
+  const { value, index, options, reserve_next, reserve_error } = props
 
   // 新增訂單
   const [orderAdd, setOrderAdd] = useState({
@@ -1220,11 +1240,12 @@ const LeaveTabPanel = forwardRef((props, ref) => {
       ATS_OrderMaster.ATS_OrderMasterCreate(orderAdd).then(async res => {
         if (res.success) {
           reserve_next({ e: e, type: type, orderAdd: orderAdd, signboard: signboard, extra: extra, sameDetail: sameDetail, price: res.data })
+        } else {
+          reserve_error({ e: e, type: "error", message: res.message })
         }
       })
     }
   };
-  console.log(orderAdd)
 
   return (
     <TabPanel value={value} index={index}>
@@ -1592,15 +1613,12 @@ const LeaveTabPanel = forwardRef((props, ref) => {
 
 /** [內容]Dialog*/
 const DialogsInner = forwardRef((props, ref) => {
-  const { type, orderAdd, options, signboard, extra, sameDetail, price } = props;
-
-  // 日期格式yyyy-mm-dd
-  const date_travel = new Date(orderAdd.date_travel).toISOString().split('T')[0];
-  // 車型名稱
-  const car_model = options.carModelOptions.some(item => item.cms_id === orderAdd.cms_id) ? options.carModelOptions.find(item => item.cms_id === orderAdd.cms_id).name : null;
-
-
+  const { type, orderAdd, options, signboard, extra, sameDetail, price, message } = props;
   if (type === "go") {
+    // 日期格式yyyy-mm-dd
+    const date_travel = new Date(orderAdd.date_travel).toISOString().split('T')[0];
+    // 車型名稱
+    const car_model = options.carModelOptions.some(item => item.cms_id === orderAdd.cms_id) ? options.carModelOptions.find(item => item.cms_id === orderAdd.cms_id).name : null;
     return (
       <React.Fragment>
         <Grid container spacing={2} className="p-2.5">
@@ -1748,6 +1766,10 @@ const DialogsInner = forwardRef((props, ref) => {
       </React.Fragment>
     )
   } else if (type === "leave") {
+    // 日期格式yyyy-mm-dd
+    const date_travel = new Date(orderAdd.date_travel).toISOString().split('T')[0];
+    // 車型名稱
+    const car_model = options.carModelOptions.some(item => item.cms_id === orderAdd.cms_id) ? options.carModelOptions.find(item => item.cms_id === orderAdd.cms_id).name : null;
     return (
       <React.Fragment>
         <Grid container spacing={2} className="p-2.5">
@@ -1891,6 +1913,14 @@ const DialogsInner = forwardRef((props, ref) => {
         </Grid>
         <Box className="p-2.5 pt-0">
           <Typography variant="h6" color="secondary" className="text-right">{`總金額: ${price}`} </Typography>
+        </Box>
+      </React.Fragment>
+    )
+  } else if (type === "error") {
+    return (
+      <React.Fragment>
+        <Box className="p-2.5">
+          <Typography variant="body">{message}</Typography>
         </Box>
       </React.Fragment>
     )

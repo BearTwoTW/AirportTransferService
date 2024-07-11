@@ -7,14 +7,31 @@ namespace AirportTransferService.Controllers
     /// </summary>
     /// <param name="baseService"></param>
     /// <param name="aTS_OrderMaster"></param>
+    /// <param name="aTS_AirportTerminalSettings"></param>
     /// <param name="aTS_CarModelSettings"></param>
+    /// <param name="aTS_ExtraSettings"></param>
+    /// <param name="aTS_FareSettings"></param>
+    /// <param name="aTS_OrderDetail"></param>
+    /// <param name="aTS_PriceLinkSettings"></param>
     public class ATS_OrderMasterController(
         IBaseService baseService,
         IATS_OrderMaster aTS_OrderMaster,
-        IATS_CarModelSettings aTS_CarModelSettings) : CustomControllerBase(baseService)
+        IATS_AirportTerminalSettings aTS_AirportTerminalSettings,
+        IATS_CarModelSettings aTS_CarModelSettings,
+        IATS_ExtraSettings aTS_ExtraSettings,
+        IATS_FareSettings aTS_FareSettings,
+        IATS_OrderDetail aTS_OrderDetail,
+        IATS_PriceLinkSettings aTS_PriceLinkSettings) : CustomControllerBase(baseService)
     {
         private readonly IATS_OrderMaster _ATS_OrderMaster = aTS_OrderMaster;
+        private readonly IATS_AirportTerminalSettings _ATS_AirportTerminalSettings = aTS_AirportTerminalSettings;
         private readonly IATS_CarModelSettings _ATS_CarModelSettings = aTS_CarModelSettings;
+        private readonly IATS_ExtraSettings _ATS_ExtraSettings = aTS_ExtraSettings;
+        private readonly IATS_FareSettings _ATS_FareSettings = aTS_FareSettings;
+        private readonly IATS_OrderDetail _ATS_OrderDetail = aTS_OrderDetail;
+        private readonly IATS_PriceLinkSettings _ATS_PriceLinkSettings = aTS_PriceLinkSettings;
+
+
 
         /// <summary>
         /// 訂單管理建立
@@ -27,52 +44,213 @@ namespace AirportTransferService.Controllers
             DateTime cre_time = DateTime.Now;
 
             // date_travel+time_travel 轉為 DateTime 要大於 48 小時
-            if (data.date_travel!.Value.ToDateTime((TimeOnly)data.time_travel!) < DateTime.Now.AddHours(48)) return new ResultObject<string> { success = false, message = "預約時間需大於 48 小時" };
+            try
+            {
+                if (data.date_travel!.Value.ToDateTime((TimeOnly)data.time_travel!) < DateTime.Now.AddHours(48))
+                    return new ResultObject<string> { success = false, message = "預約時間需大於 48 小時" };
+            }
+            catch (Exception e) { return new ResultObject<string> { success = false, message = "預約日期時間格式錯誤", data = JsonConvert.SerializeObject(e) }; }
 
+            // TODO: 重複條件要問一下
             List<SearchATS_OrderMasterResult> search_results = _ATS_OrderMaster.SearchATS_OrderMaster(
                 new SearchATS_OrderMasterParam(),
                 ["o_id"], [],
                 out _);
-            // TODO: 重複條件要問一下
             //if (resultSearchATS_OrderMaster.Exists(x => x.title == data.title)) return new ResultObject<string> { success = false, message = "名稱重複" };
 
-            // TODO: 這裡要還要接收前台給的加購項目 List 新增到 ATS_OrderDetailCreate
-            // TODO: 這裡要把車資加上加購項目的價格算出來，放到 price
-            // TODO: 然後拿 price 查出 link，放到 link
-            decimal price = 0;
-            string link = "";
+            // 檢查類別
+            if (!Enum.TryParse(data.type, out OrderType _)) return new ResultObject<string> { success = false, message = "類別(接機/送機)錯誤" };
 
-            string id = _ATS_OrderMaster.CreateATS_OrderMaster(
-                new CreateATS_OrderMasterParam(
-                    cre_userid: jwtObject.user_id,
-                    cre_time: cre_time,
-                    visible: data.visible,
-                    type: data.type,
+            // 檢查車資
+            List<SearchATS_FareSettingsResult> resultSearchATS_FareSettings = ExecuteSearchATS_FareSettings(
+                new SearchATS_FareSettingsParam(
+                    visible: "Y",
+                    cms_id: data.cms_id,
                     city: data.city,
                     area: data.area,
                     road: data.road,
                     section: data.section,
-                    address: data.address,
                     airport: data.airport,
-                    terminal: data.terminal,
-                    flght_number: data.flght_number,
-                    date_travel: data.date_travel,
-                    time_travel: data.time_travel,
-                    number_passenger: data.number_passenger,
-                    number_bags: data.number_bags,
+                    terminal: data.terminal));
+            if (resultSearchATS_FareSettings.Count == 0) return new ResultObject<string> { success = false, message = "車資不存在" };
+            if ((resultSearchATS_FareSettings[0].price ?? 0) == 0) return new ResultObject<string> { success = false, message = "車資尚未設定" };
+            decimal? price = resultSearchATS_FareSettings[0].price;
+
+            // 檢查機場
+            List<SearchATS_AirportTerminalSettingsResult> resultSearchATS_AirportTerminalSettings = _ATS_AirportTerminalSettings.SearchATS_AirportTerminalSettings(
+                new SearchATS_AirportTerminalSettingsParam(
+                    visible: "Y",
+                    airport: data.airport,
+                    terminal: data.terminal),
+                ["ats_id"], [],
+                out _);
+            if (resultSearchATS_AirportTerminalSettings.Count == 0) return new ResultObject<string> { success = false, message = "機場不存在" };
+
+            // 檢查加購項目
+            int count_total_combine = 0;
+            List<(SearchATS_ExtraSettingsResult result, int count)> exists_es_ids = [];
+            if (data.es_ids != null && data.es_ids.Count > 0)
+            {
+                foreach (ExtraItem item in data.es_ids)
+                {
+                    List<SearchATS_ExtraSettingsResult> resultSearchATS_ExtraSettings = _ATS_ExtraSettings.SearchATS_ExtraSettings(
+                        new SearchATS_ExtraSettingsParam(
+                            es_id: item.es_id,
+                            visible: "Y"),
+                        ["es_id", "visible", "type", "name", "price"], [],
+                        out _);
+                    if (resultSearchATS_ExtraSettings.Count == 0) return new ResultObject<string> { success = false, message = "加購項目不存在" };
+
+                    // 如果類型是"合併"，就統計數量
+                    count_total_combine += Enum.Parse<ExtraType>(resultSearchATS_ExtraSettings[0].type!) == ExtraType.合併 ? item.count : 0;
+                    exists_es_ids.Add((resultSearchATS_ExtraSettings[0], item.count));
+                }
+            }
+
+            // 檢查車型
+            List<SearchATS_CarModelSettingsResult> resultSearchATS_CarModelSettings = _ATS_CarModelSettings.SearchATS_CarModelSettings(
+                new SearchATS_CarModelSettingsParam(
                     cms_id: data.cms_id,
-                    signboard_title: data.signboard_title,
-                    signboard_content: data.signboard_content,
-                    name_purchaser: data.name_purchaser,
-                    phone_purchaser: data.phone_purchaser,
-                    email_purchaser: data.email_purchaser,
-                    name_passenger: data.name_passenger,
-                    phone_passenger: data.phone_passenger,
-                    email_passenger: data.email_passenger,
-                    price: price,
-                    link: link));
+                    visible: "Y"),
+                ["cms_id", "max_passengers", "max_luggage", "max_child_seats", "max_service_extras"], [],
+                out _);
+            if (resultSearchATS_CarModelSettings.Count == 0) return new ResultObject<string> { success = false, message = "車型不存在" };
+            if (data.number_passenger > resultSearchATS_CarModelSettings[0].max_passengers) return new ResultObject<string> { success = false, message = "乘車人數超過車型限制" };
+            if (data.number_bags > resultSearchATS_CarModelSettings[0].max_luggage) return new ResultObject<string> { success = false, message = "行李數超過車型限制" };
+            if (count_total_combine > resultSearchATS_CarModelSettings[0].max_child_seats) return new ResultObject<string> { success = false, message = "安全座椅數量超過車型限制" };
+
+            if (data.calculation!.Equals("Y")) return new ResultObject<string> { success = true, message = "計算價錢成功", data = price.ToString() };
+
+            string id = "";
+            using (TransactionScope tx = new())
+            {
+                // 建立訂單
+                id = _ATS_OrderMaster.CreateATS_OrderMaster(
+                    new CreateATS_OrderMasterParam(
+                        cre_userid: jwtObject.user_id,
+                        cre_time: cre_time,
+                        visible: data.visible,
+                        type: data.type,
+                        city: data.city,
+                        area: data.area,
+                        road: data.road,
+                        section: data.section,
+                        address: data.address,
+                        airport: data.airport,
+                        terminal: data.terminal,
+                        flght_number: data.flght_number,
+                        date_travel: data.date_travel,
+                        time_travel: data.time_travel,
+                        number_passenger: data.number_passenger,
+                        number_bags: data.number_bags,
+                        cms_id: data.cms_id,
+                        signboard_title: data.signboard_title,
+                        signboard_content: data.signboard_content,
+                        name_purchaser: data.name_purchaser,
+                        phone_purchaser: data.phone_purchaser,
+                        email_purchaser: data.email_purchaser,
+                        name_passenger: data.name_passenger,
+                        phone_passenger: data.phone_passenger,
+                        email_passenger: data.email_passenger,
+                        price: 0,
+                        link: ""));
+                if (string.IsNullOrEmpty(id)) return new ResultObject<string> { success = false, message = "新增失敗" };
+
+                // 如果有加購項目
+                if (exists_es_ids != null && exists_es_ids.Count > 0)
+                {
+                    foreach ((SearchATS_ExtraSettingsResult result, int? count) in exists_es_ids)
+                    {
+                        // 建立訂單明細
+                        _ATS_OrderDetail.CreateATS_OrderDetail(new CreateATS_OrderDetailParam(
+                                cre_userid: jwtObject.user_id,
+                                cre_time: cre_time,
+                                visible: "Y",
+                                o_id: id,
+                                es_id: result.es_id,
+                                es_type: result.type,
+                                es_name: result.name,
+                                es_price: result.price,
+                                count: count,
+                                total_price: (count ?? 0) * (result.price ?? 0)));
+                        price += (count ?? 0) * (result.price ?? 0);
+                    }
+                }
+
+                // 拿價錢查連結
+                List<SearchATS_PriceLinkSettingsResult> resultSearchATS_PriceLinkSettings = _ATS_PriceLinkSettings.SearchATS_PriceLinkSettings(
+                    new SearchATS_PriceLinkSettingsParam(price: price),
+                    ["link"], [],
+                    out _);
+                if (resultSearchATS_PriceLinkSettings.Count == 0) return new ResultObject<string> { success = false, message = "價錢連結不存在" };
+
+                // 更新訂單價錢和連結
+                _ATS_OrderMaster.UpdateATS_OrderMaster(new UpdateATS_OrderMasterParam(
+                        cre_time: Appsettings.api_datetime_param_no_pass,
+                        upd_userid: jwtObject.user_id,
+                        upd_time: cre_time,
+                        o_id: id,
+                        date_travel: Appsettings.api_dateonly_param_no_pass,
+                        time_travel: Appsettings.api_timeonly_param_no_pass,
+                        price: price,
+                        link: resultSearchATS_PriceLinkSettings[0].link));
+
+                tx.Complete();
+            }
 
             return new ResultObject<string> { success = true, message = "新增成功", data = id };
+        }
+
+        /// <summary>
+        /// 車資查詢 遞迴
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        [NonAction]
+        private List<SearchATS_FareSettingsResult> ExecuteSearchATS_FareSettings(SearchATS_FareSettingsParam data)
+        {
+            List<SearchATS_FareSettingsResult> result = _ATS_FareSettings.SearchATS_FareSettings(
+                new SearchATS_FareSettingsParam(
+                    visible: "Y",
+                    cms_id: data.cms_id,
+                    city: data.city,
+                    area: data.area,
+                    road: data.road,
+                    section: data.section,
+                    airport: data.airport,
+                    terminal: data.terminal),
+                ["price"], [],
+                out _);
+
+            // 如果查詢有結果，返回結果
+            if (result.Count != 0) return result;
+
+            // 如果 section 不為空，嘗試將 section 設為空並再次查詢
+            if (!string.IsNullOrEmpty(data.section))
+            {
+                return ExecuteSearchATS_FareSettings(new SearchATS_FareSettingsParam(
+                    visible: "Y",
+                    cms_id: data.cms_id,
+                    city: data.city,
+                    area: data.area,
+                    road: data.road,
+                    airport: data.airport,
+                    terminal: data.terminal));
+            }
+
+            // 如果 road 不為空，嘗試將 road 設為空並再次查詢
+            if (!string.IsNullOrEmpty(data.road))
+            {
+                return ExecuteSearchATS_FareSettings(new SearchATS_FareSettingsParam(
+                    visible: "Y",
+                    cms_id: data.cms_id,
+                    city: data.city,
+                    area: data.area,
+                    airport: data.airport,
+                    terminal: data.terminal));
+            }
+
+            return result;
         }
 
         /// <summary>

@@ -3,19 +3,21 @@ import MD5 from 'crypto-js/md5';
 import { useLocation, useNavigate } from "react-router-dom";
 import { CircularLoading } from '../../../../components/CusProgress';
 import { Grid, TableCell, TableRow, Chip, Box, Typography } from '@mui/material';
-import { HighlightOff, Add, Search, Delete, Edit } from '@mui/icons-material';
+import { HighlightOff, Add, Search, Delete, Edit, CloudUpload } from '@mui/icons-material';
 import { CusCard } from '../../../../components/CusCard';
 import { CusInfoTitle } from '../../../../components/CusInfo';
+import { CusFileImport } from '../../../../components/CusButtonTS';
 import { CusDialog } from '../../../../components/CusDialog';
 import { useSnackbar } from 'notistack';
 import { CusInput } from '../../../../components/CusInput';
 import { CusSpan } from '../../../../components/CusSpanTS';
 import { CusBasicTableTS, PaginationActionsTS } from '../../../../components/CusTableTS';
+import { CusBackdropLoading } from '../../../../components/CusProgressTS';
 import { NoResults } from '../../../../components/CusError';
 import { CusOutlinedSelect } from '../../../../components/CusSelect';
 import { CusTextIconButton, CusIconButton, CusTextButton } from '../../../../components/CusButton';
 import { CusDatePicker } from '../../../../components/CusDatePicker';
-import { UserAPI, OptionList, DDMenu, ATS_FareSettings } from '../../../../js/APITS';
+import { UserAPI, OptionList, DDMenu, ATS_FareSettings, ImportData } from '../../../../js/APITS';
 import { useCheckLogInXPermission, get_ECC_indexedDB_factory } from '../../../../js/Function';
 import { isNullOrEmpty } from '../../../../js/FunctionTS';
 
@@ -38,8 +40,6 @@ export default function Fare() {
         area: null,
         airport: null,
         terminal: null,
-        price: null,
-        link: null,
         page: 1,
         num_per_page: 10,
         excel: "",
@@ -55,6 +55,7 @@ export default function Fare() {
     const [isLoading, setIsLoading] = useState(true);
     const [fareList, setFareList] = useState([]);
     const [pageCount, setPageCount] = useState(0);
+    const [backdropOpen, setBackdropOpen] = useState(false);
 
     // Dialog
     const useDialog = useRef();
@@ -231,6 +232,64 @@ export default function Fare() {
         }
     };
 
+    /**
+     * @description [匯入]匯入車資
+     */
+    const import_Click = () => {
+        useDialog.current.handleOpen();
+
+        setDialogData(({
+            id: "import",
+            maxWidth: "sm",
+            DialogTitle: "匯入車資",
+            DialogContent: <DialogsInner
+                type={"import"}
+                ref={useDialogInner}
+            />,
+            DialogActions: (
+                <React.Fragment>
+                    <CusTextButton autoFocus onClick={dialogClose} color="default" text="取消" />
+                    <CusTextButton autoFocus onClick={import_Confirm} color="primary" text="上傳檔案" />
+                </React.Fragment>)
+        }));
+    };
+
+    /**
+     * @description [匯入確認]匯入車資
+     */
+    const import_Confirm = () => {
+        const { file } = useDialogInner.current;
+
+        if (file) {
+            let importData = new FormData();
+            importData.append(file.name, file);
+
+            setBackdropOpen(true);
+
+            // 延遲兩秒才call api，看起來比較有在等待的感覺?
+            setTimeout(() => {
+                ImportData.ImportFare(importData).then(res => {
+                    if (res.success) {
+                        dialogClose();
+                        searchFare(pageSearch);
+                    }
+
+                    setBackdropOpen(false);
+
+                    enqueueSnackbar(res.message, {
+                        variant: res.success ? "success" : "warning",
+                        persist: !res.success
+                    });
+                });
+            }, 2000);
+        } else {
+            enqueueSnackbar("請選擇檔案", {
+                variant: "warning",
+                persist: true
+            });
+        }
+    };
+
     /**輸入框*/
     const search_handleInput = (e) => {
         const { name, value } = e.target
@@ -346,6 +405,15 @@ export default function Fare() {
                     <CusCard content={
                         <React.Fragment>
                             <Grid item xs={12}>
+                                <Box display="flex" justifyContent="flex-end">
+                                    <CusTextIconButton
+                                        color={"secondary"}
+                                        variant={"outlined"}
+                                        text={"匯入車資"}
+                                        startIcon={<CloudUpload />}
+                                        onClick={import_Click}
+                                    />
+                                </Box>
                                 {!isLoading
                                     ? fareList.length > 0
                                         ? <React.Fragment>
@@ -383,6 +451,7 @@ export default function Fare() {
                 </Grid>
             </Grid>
             <CusDialog ref={useDialog} info={dialogData} />
+            <CusBackdropLoading open={backdropOpen} text={"匯入中"} />
         </React.Fragment>
     );
 };
@@ -390,7 +459,7 @@ export default function Fare() {
 /**新增modal內容*/
 const DialogsInner = forwardRef((props, ref) => {
     const { type, name, getEditData, fs_id } = props;
-
+    const [file, setFile] = useState(null);
     // 編輯加價
     const [editData, setEditData] = useState({
         dtlData: getEditData,
@@ -417,11 +486,27 @@ const DialogsInner = forwardRef((props, ref) => {
         }));
     };
 
+    /**
+     * @description 選擇檔案
+     * @param {*} e 
+     */
+    const addFile_Handler = (e) => {
+        setFile(e.target.files[0]);
+    };
+
+    /**
+     * @description 清除檔案
+     */
+    const clearFile_Handler = () => {
+        setFile(null);
+    };
+
     // 給父層function使用
     useImperativeHandle(ref, () => ({
         editData,
         editInitCheckState,
-        setEditFieldCheck
+        setEditFieldCheck,
+        file // 上傳車資列表
     }));
     if (type === 'edit') {
         let data = {
@@ -444,5 +529,33 @@ const DialogsInner = forwardRef((props, ref) => {
                 </Grid>
             </React.Fragment>
         )
+    } else if (type === "import") {
+        return (
+            <React.Fragment>
+                <Grid container>
+                    <Grid item xs={12}>
+                        <Typography gutterBottom>
+                            <CusSpan text={"※ 匯入相關事項"} color="error" />
+                        </Typography>
+                        <Typography gutterBottom>
+                            1. 請務必參照提供的 Excel 檔案格式上傳
+                        </Typography>
+                        <Typography gutterBottom>
+                            2. 請先建立車型機場、車型再匯入資料
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={9}>
+                        <CusFileImport
+                            buttonName="選擇檔案"
+                            file={file}
+                            color={"info"}
+                            variant={"outlined"}
+                            addFile={(e) => addFile_Handler(e)}
+                            clearFile={clearFile_Handler}
+                        />
+                    </Grid>
+                </Grid>
+            </React.Fragment>
+        );
     }
 });

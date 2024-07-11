@@ -3,36 +3,38 @@ import MD5 from 'crypto-js/md5';
 import { useLocation, useNavigate } from "react-router-dom";
 import { CircularLoading } from '../../../../components/CusProgress';
 import { Grid, TableCell, TableRow, Chip, Box, Typography } from '@mui/material';
-import { HighlightOff, Add, Search, Delete, Edit } from '@mui/icons-material';
+import { HighlightOff, Add, Search, Delete, Edit, CloudUpload } from '@mui/icons-material';
 import { CusCard } from '../../../../components/CusCard';
 import { CusInfoTitle } from '../../../../components/CusInfo';
+import { CusFileImport } from '../../../../components/CusButtonTS';
 import { CusDialog } from '../../../../components/CusDialog';
 import { useSnackbar } from 'notistack';
 import { CusInput } from '../../../../components/CusInput';
 import { CusSpan } from '../../../../components/CusSpanTS';
 import { CusBasicTableTS, PaginationActionsTS } from '../../../../components/CusTableTS';
+import { CusBackdropLoading } from '../../../../components/CusProgressTS';
 import { NoResults } from '../../../../components/CusError';
 import { CusOutlinedSelect } from '../../../../components/CusSelect';
 import { CusTextIconButton, CusIconButton, CusTextButton } from '../../../../components/CusButton';
 import { CusDatePicker } from '../../../../components/CusDatePicker';
-import { UserAPI, OptionList, DDMenu, ATS_ExtraSettings } from '../../../../js/APITS';
+import { UserAPI, OptionList, DDMenu, ATS_PriceLinkSettings, ImportData } from '../../../../js/APITS';
 import { useCheckLogInXPermission, get_ECC_indexedDB_factory } from '../../../../js/Function';
 import { isNullOrEmpty } from '../../../../js/FunctionTS';
 
-export default function Extra() {
+export default function PriceLink() {
     // 導頁
     const navigate = useNavigate();
     const location = useLocation();
 
     //權限
-    const permission = useCheckLogInXPermission("ExtraFirst", ["Add", "Delete", "Edit"]);
+    const permission = useCheckLogInXPermission("PriceLinkFirst", ["Add", "Delete", "Edit"]);
 
     // 頁面資訊
     const [pageSearch, setPageSearch] = useState({
         visible: null,
-        es_id: null,
-        type: null,
-        name: null,
+        pls_id: null,
+        price: null,
+        link: null,
         page: 1,
         num_per_page: 10,
         excel: "",
@@ -46,8 +48,9 @@ export default function Extra() {
 
     // 帳號資料
     const [isLoading, setIsLoading] = useState(true);
-    const [extraList, setExtraList] = useState([]);
+    const [priceLinkList, setPriceLinkList] = useState([]);
     const [pageCount, setPageCount] = useState(0);
+    const [backdropOpen, setBackdropOpen] = useState(false);
 
     // Dialog
     const useDialog = useRef();
@@ -76,19 +79,19 @@ export default function Extra() {
             }));
 
             // 存在search_set就用indexedDB的搜尋條件，不然就用預設的搜尋條件
-            searchExtra(search_set ?? pageSearch);
+            searchPriceLink(search_set ?? pageSearch);
         });
         setInitDB(true);
     }, []);
 
     /**
-     * 查詢機場航廈
+     * 查詢車資
      */
-    const searchExtra = async (searchPrams) => {
+    const searchPriceLink = async (searchPrams) => {
         setIsLoading(true);
         if (initDBRef.current) {
             try {
-                ATS_ExtraSettings.ATS_ExtraSettingsSearch(searchPrams).then(async res => {
+                ATS_PriceLinkSettings.ATS_PriceLinkSettingsSearch(searchPrams).then(async res => {
                     if (res.success) {
                         if (indexDB !== null) {
                             await indexDB.update("QueryCondition", {
@@ -102,7 +105,7 @@ export default function Extra() {
                             });
                         }
 
-                        setExtraList(res.data);
+                        setPriceLinkList(res.data);
                         setPageCount(res.page);
                     }
                     setIsLoading(false);
@@ -123,9 +126,9 @@ export default function Extra() {
         setPageSearch(prevData => ({
             ...prevData,
             visible: null,
-            es_id: null,
-            type: null,
-            name: null,
+            pls_id: null,
+            price: null,
+            link: null,
             page: 1,
             num_per_page: 10,
             excel: "",
@@ -133,31 +136,30 @@ export default function Extra() {
     };
 
     useEffect(() => {
-        searchExtra(pageSearch);
+        searchPriceLink(pageSearch);
     }, [pageSearch.search, pageSearch.page, pageSearch.num_per_page]);
 
     /** table body */
     const TableBodyContent = React.memo(() => {
         return (
-            extraList.map((item, index) => (
+            priceLinkList.map((item, index) => (
                 <TableRow
                     hover
-                    key={item.es_id}>
+                    key={item.pls_id}>
                     <TableCell>{index + 1}</TableCell>
-                    <TableCell>{item.type}</TableCell>
-                    <TableCell>{item.name}</TableCell>
                     <TableCell>{item.price}</TableCell>
+                    <TableCell>{item.link}</TableCell>
                     <TableCell>
                         {permission.Delete
                             ?
                             <React.Fragment>
                                 <CusIconButton
-                                    onClick={(e) => edit_Click({ e: e, id: item.es_id })}
+                                    onClick={(e) => edit_Click({ e: e, id: item.pls_id })}
                                     color='primary'
                                     icon={<Edit />}
                                 />
                                 <CusIconButton
-                                    onClick={(e) => del_Click({ e: e, id: item.es_id })}
+                                    onClick={(e) => del_Click({ e: e, id: item.pls_id })}
                                     color='primary'
                                     icon={<Delete />}
                                 />
@@ -174,7 +176,7 @@ export default function Extra() {
         useDialog.current.handleOpen();
         setDialogData(({
             id: 'add',
-            DialogTitle: '新增機場航廈',
+            DialogTitle: '新增價錢連結',
             DialogContent: <DialogsInner type={'add'} ref={useDialogInner} />,
             DialogActions: (
                 <>
@@ -186,22 +188,21 @@ export default function Extra() {
         }));
     };
 
-    /**[新建確認]加價 */
+    /**[新建確認]價錢連結 */
     const add_Confirm = () => {
-        const { extraAdd, initExtraAddCheck, setExtraAddCheck } = useDialogInner.current;
-        if (!extraAdd.type || !extraAdd.name || !extraAdd.price) {
-            setExtraAddCheck({
-                type: !extraAdd.type ? true : false,
-                name: !extraAdd.name ? true : false,
-                price: !extraAdd.price ? true : false,
+        const { priceLinkAdd, initPriceLinkAddCheck, setPriceLinkAddCheck } = useDialogInner.current;
+        if (!priceLinkAdd.price || !priceLinkAdd.link) {
+            setPriceLinkAddCheck({
+                price: !priceLinkAdd.price ? true : false,
+                link: !priceLinkAdd.link ? true : false,
             })
         } else {
-            setExtraAddCheck(initExtraAddCheck);
+            setPriceLinkAddCheck(initPriceLinkAddCheck);
 
-            ATS_ExtraSettings.ATS_ExtraSettingsCreate(extraAdd).then(res => {
+            ATS_PriceLinkSettings.ATS_PriceLinkSettingsCreate(priceLinkAdd).then(res => {
                 if (res.success) {
                     dialogClose();
-                    searchExtra({
+                    searchPriceLink({
                         ...pageSearch,
                     });
                 }
@@ -213,17 +214,17 @@ export default function Extra() {
         }
     };
 
-    /**[修改]加價 */
+    /**[修改]價錢連結 */
     const edit_Click = ({ e, id }) => {
         e.stopPropagation();
         useDialog.current.handleOpen();
 
-        const getEditData = extraList.filter(item => item.es_id === id)[0];
+        const getEditData = priceLinkList.filter(item => item.pls_id === id)[0];
 
         setDialogData(({
             id: 'edit',
             DialogTitle: '修改',
-            DialogContent: <DialogsInner type={'edit'} ref={useDialogInner} getEditData={getEditData} es_id={id} />,
+            DialogContent: <DialogsInner type={'edit'} ref={useDialogInner} getEditData={getEditData} pls_id={id} />,
             DialogActions: (
                 <React.Fragment>
                     <CusTextButton autoFocus onClick={dialogClose} color="default" text="取消" />
@@ -232,7 +233,7 @@ export default function Extra() {
         }));
     };
 
-    /**[修改確認]加價 */
+    /**[修改確認]價錢連結 */
     const edit_Confirm = async () => {
         const { editData, editInitCheckState, setEditFieldCheck } = useDialogInner.current;
 
@@ -248,11 +249,11 @@ export default function Extra() {
         } else {
             setEditFieldCheck(editInitCheckState);
 
-            const { success, message } = await ATS_ExtraSettings.ATS_ExtraSettingsUpdate(editData.updData);
+            const { success, message } = await ATS_PriceLinkSettings.ATS_PriceLinkSettingsUpdate(editData.updData);
 
             if (success) {
                 dialogClose();
-                searchExtra(pageSearch);
+                searchPriceLink(pageSearch);
             }
 
             enqueueSnackbar(message, {
@@ -262,7 +263,7 @@ export default function Extra() {
         }
     };
 
-    /**[刪除]加價 */
+    /**[刪除]價錢連結 */
     const del_Click = useCallback(({ e, name, id }) => {
         e.stopPropagation();
         useDialog.current.handleOpen();
@@ -279,13 +280,13 @@ export default function Extra() {
         }));
     }, [])
 
-    /**[確認]刪除加價 */
+    /**[確認]價錢連結 */
     const del_Confirm = useCallback((e, _id) => {
         e.stopPropagation();
-        ATS_ExtraSettings.ATS_ExtraSettingsDelete({ es_id: _id }).then(res => {
+        ATS_PriceLinkSettings.ATS_PriceLinkSettingsDelete({ pls_id: _id }).then(res => {
             if (res.success) {
                 dialogClose();
-                searchExtra(pageSearch);
+                searchPriceLink(pageSearch);
             }
             enqueueSnackbar(res.message, {
                 variant: res.success ? "success" : "warning",
@@ -293,6 +294,64 @@ export default function Extra() {
             });
         });
     }, []);
+
+    /**
+     * @description [匯入]匯入價錢連結
+     */
+    const import_Click = () => {
+        useDialog.current.handleOpen();
+
+        setDialogData(({
+            id: "import",
+            maxWidth: "sm",
+            DialogTitle: "匯入價錢連結",
+            DialogContent: <DialogsInner
+                type={"import"}
+                ref={useDialogInner}
+            />,
+            DialogActions: (
+                <React.Fragment>
+                    <CusTextButton autoFocus onClick={dialogClose} color="default" text="取消" />
+                    <CusTextButton autoFocus onClick={import_Confirm} color="primary" text="上傳檔案" />
+                </React.Fragment>)
+        }));
+    };
+
+    /**
+     * @description [匯入確認]匯入價錢連結
+     */
+    const import_Confirm = () => {
+        const { file } = useDialogInner.current;
+
+        if (file) {
+            let importData = new FormData();
+            importData.append(file.name, file);
+
+            setBackdropOpen(true);
+
+            // 延遲兩秒才call api，看起來比較有在等待的感覺?
+            setTimeout(() => {
+                ImportData.ImportPriceLink(importData).then(res => {
+                    if (res.success) {
+                        dialogClose();
+                        searchPriceLink(pageSearch);
+                    }
+
+                    setBackdropOpen(false);
+
+                    enqueueSnackbar(res.message, {
+                        variant: res.success ? "success" : "warning",
+                        persist: !res.success
+                    });
+                });
+            }, 2000);
+        } else {
+            enqueueSnackbar("請選擇檔案", {
+                variant: "warning",
+                persist: true
+            });
+        }
+    };
 
     /**輸入框*/
     const search_handleInput = (e) => {
@@ -335,29 +394,20 @@ export default function Extra() {
                         <React.Fragment>
                             <Grid item xs={12} sm={3} lg={3}>
                                 <CusInput
-                                    id={"search--type"}
-                                    name={"type"}
-                                    label={"加價類型"}
-                                    value={pageSearch.type}
-                                    onChangeEvent={(e) => search_handleInput(e)}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
-                                    id={"search--name"}
-                                    name={"name"}
-                                    label={"加價名稱"}
-                                    value={pageSearch.name}
-                                    onChangeEvent={(e) => search_handleInput(e)}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
                                     id={"search--price"}
                                     name={"price"}
-                                    label={"加價金額"}
+                                    label={"價錢"}
                                     type={"number"}
                                     value={pageSearch.price}
+                                    onChangeEvent={(e) => search_handleInput(e)}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={3} lg={3}>
+                                <CusInput
+                                    id={"search--link"}
+                                    name={"link"}
+                                    label={"連結"}
+                                    value={pageSearch.link}
                                     onChangeEvent={(e) => search_handleInput(e)}
                                 />
                             </Grid>
@@ -372,7 +422,7 @@ export default function Extra() {
                                     color={"info"}
                                     text={"查詢"}
                                     startIcon={<Search />}
-                                    onClick={() => searchExtra(pageSearch)}
+                                    onClick={() => searchPriceLink(pageSearch)}
                                 />
                             </Grid>
                         </React.Fragment>
@@ -382,7 +432,14 @@ export default function Extra() {
                     <CusCard content={
                         <React.Fragment>
                             <Grid item xs={12}>
-                                <Box display={"flex"} justifyContent={"flex-end"}>
+                                <Box display="flex" justifyContent="flex-end">
+                                    <CusTextIconButton
+                                        color={"secondary"}
+                                        variant={"outlined"}
+                                        text={"匯入價錢連結"}
+                                        startIcon={<CloudUpload />}
+                                        onClick={import_Click}
+                                    />
                                     {permission.Add
                                         ? <CusTextIconButton
                                             color={"primary"}
@@ -393,7 +450,7 @@ export default function Extra() {
                                         : null}
                                 </Box>
                                 {!isLoading
-                                    ? extraList.length > 0
+                                    ? priceLinkList.length > 0
                                         ? <React.Fragment>
                                             <CusBasicTableTS
                                                 hasRowsPerPage={true}
@@ -404,9 +461,8 @@ export default function Extra() {
                                                 onRowsPerPageChange={onRowsPerPageChange}
                                                 tableHead={[
                                                     { name: "排序" },
-                                                    { name: "加價類型" },
-                                                    { name: "加價名稱" },
-                                                    { name: "加價金額" },
+                                                    { name: "價錢" },
+                                                    { name: "連結" },
                                                     { name: "操作" },
                                                 ]}
                                                 tableBody={<TableBodyContent />}
@@ -425,37 +481,37 @@ export default function Extra() {
                 </Grid>
             </Grid>
             <CusDialog ref={useDialog} info={dialogData} />
+            <CusBackdropLoading open={backdropOpen} text={"匯入中"} />
         </React.Fragment>
     );
 };
 
 /**新增modal內容*/
 const DialogsInner = forwardRef((props, ref) => {
-    const { type, name, getEditData, es_id } = props;
-    // 新增加價
-    const [extraAdd, setExtraAdd] = useState({
+    const { type, name, getEditData, pls_id } = props;
+    const [file, setFile] = useState(null);
+
+    // 新增價錢連結
+    const [priceLinkAdd, setPriceLinkAdd] = useState({
         visible: "Y",
-        type: null,
-        name: null,
         price: null,
+        link: null,
     });
-    const initExtraAddCheck = {
-        type: false,
-        name: false,
+    const initPriceLinkAddCheck = {
         price: false,
+        link: false,
     }
-    const [extraAddCheck, setExtraAddCheck] = useState(initExtraAddCheck);
+    const [priceLinkAddCheck, setPriceLinkAddCheck] = useState(initPriceLinkAddCheck);
 
     // 編輯加價
     const [editData, setEditData] = useState({
         dtlData: getEditData,
-        updData: { es_id: es_id }
+        updData: { pls_id: pls_id }
     });
 
     const editInitCheckState = {
-        type: false,
-        name: false,
         price: false,
+        link: false,
     };
     const [editFieldCheck, setEditFieldCheck] = useState(editInitCheckState);
 
@@ -464,7 +520,7 @@ const DialogsInner = forwardRef((props, ref) => {
         const { name, value } = e.target;
         const val = value === "" ? null : value;
 
-        setExtraAdd(prev => ({
+        setPriceLinkAdd(prev => ({
             ...prev,
             [name]: val
         }));
@@ -485,15 +541,31 @@ const DialogsInner = forwardRef((props, ref) => {
         }));
     };
 
+    /**
+     * @description 選擇檔案
+     * @param {*} e 
+     */
+    const addFile_Handler = (e) => {
+        setFile(e.target.files[0]);
+    };
+
+    /**
+     * @description 清除檔案
+     */
+    const clearFile_Handler = () => {
+        setFile(null);
+    };
+
     // 給父層function使用
     useImperativeHandle(ref, () => ({
-        extraAdd,
-        initExtraAddCheck,
-        setExtraAddCheck,
+        priceLinkAdd,
+        initPriceLinkAddCheck,
+        setPriceLinkAddCheck,
 
         editData,
         editInitCheckState,
-        setEditFieldCheck
+        setEditFieldCheck,
+        file // 上傳車資列表
     }));
 
     if (type === "add") {
@@ -502,32 +574,21 @@ const DialogsInner = forwardRef((props, ref) => {
                 <Grid container>
                     <Grid item xs={12}>
                         <CusInput
-                            id={"search--type"}
-                            name={"type"}
-                            label={"加價類型"}
-                            error={extraAddCheck.type}
-                            value={extraAdd.type}
-                            onChangeEvent={(e) => add_handelInput(e)}
-                        />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <CusInput
-                            id={"search--name"}
-                            name={"name"}
-                            label={"加價名稱"}
-                            error={extraAddCheck.name}
-                            value={extraAdd.name}
-                            onChangeEvent={(e) => add_handelInput(e)}
-                        />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <CusInput
                             id={"search--price"}
                             name={"price"}
-                            label={"加價金額"}
-                            type={"number"}
-                            error={extraAddCheck.price}
-                            value={extraAdd.price}
+                            label={"價錢"}
+                            error={priceLinkAddCheck.price}
+                            value={priceLinkAdd.price}
+                            onChangeEvent={(e) => add_handelInput(e)}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <CusInput
+                            id={"search--link"}
+                            name={"link"}
+                            label={"連結"}
+                            error={priceLinkAddCheck.link}
+                            value={priceLinkAdd.link}
                             onChangeEvent={(e) => add_handelInput(e)}
                         />
                     </Grid>
@@ -543,42 +604,52 @@ const DialogsInner = forwardRef((props, ref) => {
             <React.Fragment>
                 <Grid item xs={12}>
                     <CusInput
-                        id={'edit--type'}
-                        name={'type'}
-                        label={'加價類型'}
-                        type={'text'}
-                        required={true}
-                        error={editFieldCheck.type}
-                        value={data.type}
-                        onChangeEvent={(e) => edit_HandleInput(e)}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <CusInput
-                        id={'edit--name'}
-                        name={'name'}
-                        label={'加價名稱'}
-                        type={'text'}
-                        required={true}
-                        error={editFieldCheck.name}
-                        value={data.name}
-                        onChangeEvent={(e) => edit_HandleInput(e)}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <CusInput
                         id={'edit--price'}
                         name={'price'}
-                        label={'加價金額'}
+                        label={'價錢'}
                         type={'number'}
                         required={true}
                         error={editFieldCheck.price}
                         value={data.price}
                         onChangeEvent={(e) => edit_HandleInput(e)}
                     />
+                    <CusInput
+                        id={'edit--link'}
+                        name={'link'}
+                        label={'連結'}
+                        required={true}
+                        error={editFieldCheck.link}
+                        value={data.link}
+                        onChangeEvent={(e) => edit_HandleInput(e)}
+                    />
                 </Grid>
             </React.Fragment>
         )
+    } else if (type === "import") {
+        return (
+            <React.Fragment>
+                <Grid container>
+                    <Grid item xs={12}>
+                        <Typography gutterBottom>
+                            <CusSpan text={"※ 匯入相關事項"} color="error" />
+                        </Typography>
+                        <Typography gutterBottom>
+                            1. 請務必參照提供的 Excel 檔案格式上傳
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={9}>
+                        <CusFileImport
+                            buttonName="選擇檔案"
+                            file={file}
+                            color={"info"}
+                            variant={"outlined"}
+                            addFile={(e) => addFile_Handler(e)}
+                            clearFile={clearFile_Handler}
+                        />
+                    </Grid>
+                </Grid>
+            </React.Fragment>
+        );
     } else if (type === "del") {
         return (
             <Typography component={"p"}>

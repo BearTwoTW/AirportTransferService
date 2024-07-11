@@ -23,6 +23,8 @@
 
 
 
+
+
 GO
 
 
@@ -82,3 +84,13 @@ EXECUTE sp_addextendedproperty @name = N'MS_Description', @value = N'新增日�
 GO
 EXECUTE sp_addextendedproperty @name = N'MS_Description', @value = N'新增帳號編號', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'ATS_FareSettings', @level2type = N'COLUMN', @level2name = N'cre_userid';
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'車資設定',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'ATS_FareSettings',
+    @level2type = NULL,
+    @level2name = NULL

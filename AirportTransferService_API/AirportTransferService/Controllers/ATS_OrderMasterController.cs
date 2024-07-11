@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AirportTransferService.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AirportTransferService.Controllers
 {
@@ -13,6 +14,7 @@ namespace AirportTransferService.Controllers
     /// <param name="aTS_FareSettings"></param>
     /// <param name="aTS_OrderDetail"></param>
     /// <param name="aTS_PriceLinkSettings"></param>
+    /// <param name="systemSettings"></param>
     public class ATS_OrderMasterController(
         IBaseService baseService,
         IATS_OrderMaster aTS_OrderMaster,
@@ -21,7 +23,8 @@ namespace AirportTransferService.Controllers
         IATS_ExtraSettings aTS_ExtraSettings,
         IATS_FareSettings aTS_FareSettings,
         IATS_OrderDetail aTS_OrderDetail,
-        IATS_PriceLinkSettings aTS_PriceLinkSettings) : CustomControllerBase(baseService)
+        IATS_PriceLinkSettings aTS_PriceLinkSettings,
+        ISystemSettings systemSettings) : CustomControllerBase(baseService)
     {
         private readonly IATS_OrderMaster _ATS_OrderMaster = aTS_OrderMaster;
         private readonly IATS_AirportTerminalSettings _ATS_AirportTerminalSettings = aTS_AirportTerminalSettings;
@@ -30,8 +33,7 @@ namespace AirportTransferService.Controllers
         private readonly IATS_FareSettings _ATS_FareSettings = aTS_FareSettings;
         private readonly IATS_OrderDetail _ATS_OrderDetail = aTS_OrderDetail;
         private readonly IATS_PriceLinkSettings _ATS_PriceLinkSettings = aTS_PriceLinkSettings;
-
-
+        private readonly ISystemSettings _systemSettings = systemSettings;
 
         /// <summary>
         /// 訂單管理建立
@@ -106,6 +108,26 @@ namespace AirportTransferService.Controllers
                     exists_es_ids.Add((resultSearchATS_ExtraSettings[0], item.count));
                 }
             }
+
+            // 夜間加成
+            List<SearchSystemSettingResult> SearchSystemSetting_result = _systemSettings.SearchSystemSetting(new SearchSystemSettingParam(), ["value_json", "ssm_name"], out _);
+            SearchSystemSettingResult? SearchSystemSetting_target = SearchSystemSetting_result.Where(x => (x.ssm_name ?? "").Equals("夜間加成")).FirstOrDefault();
+            if (SearchSystemSetting_target == null || SearchSystemSetting_target.value_json == null) return new ResultObject<string> { success = false, message = "系統設定遺失" };
+            List<DictionaryKeyValue> keyValues = JsonConvert.DeserializeObject<List<DictionaryKeyValue>>(SearchSystemSetting_target.value_json) ?? [];
+            if (keyValues.Count == 0) return new ResultObject<string> { success = false, message = "夜間加成設定遺失" };
+            try
+            {
+                TimeOnly timeStart = new(
+                    Convert.ToInt32(keyValues.Where(x => x.key.Equals("時間小時起")).FirstOrDefault()?.value ?? "23"),
+                    Convert.ToInt32(keyValues.Where(x => x.key.Equals("時間分鐘起")).FirstOrDefault()?.value ?? "0"));
+                TimeOnly timeEnd = new(
+                    Convert.ToInt32(keyValues.Where(x => x.key.Equals("時間小時迄")).FirstOrDefault()?.value ?? "5"),
+                    Convert.ToInt32(keyValues.Where(x => x.key.Equals("時間分鐘迄")).FirstOrDefault()?.value ?? "59"));
+
+                if (IsTimeInRange(timeStart, timeEnd, data.time_travel))
+                    price += Convert.ToDecimal(keyValues.Where(x => x.key.Equals("金額")).FirstOrDefault()?.value ?? "200");
+            }
+            catch (Exception e) { return new ResultObject<string> { success = false, message = "夜間加成日期時間格式錯誤", data = JsonConvert.SerializeObject(e) }; }
 
             // 檢查車型
             List<SearchATS_CarModelSettingsResult> resultSearchATS_CarModelSettings = _ATS_CarModelSettings.SearchATS_CarModelSettings(
@@ -251,6 +273,22 @@ namespace AirportTransferService.Controllers
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// 時間是否在範圍內
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        [NonAction]
+        private static bool IsTimeInRange(TimeOnly start, TimeOnly end, TimeOnly? target)
+        {
+            if (start <= end)
+                return target >= start && target <= end; // 範圍在同一天
+            else
+                return target >= start || target <= end; // 範圍跨越午夜
         }
 
         /// <summary>

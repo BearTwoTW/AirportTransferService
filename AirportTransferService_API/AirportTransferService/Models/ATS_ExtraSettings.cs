@@ -146,7 +146,6 @@ namespace AirportTransferService.Models
         string? visible = null,
         string? type = null,
         string? name = null,
-        decimal? price = null,
         int page = 0,
         int num_per_page = 0)
     {
@@ -173,12 +172,6 @@ namespace AirportTransferService.Models
         /// </summary>
         [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_ExtraSettings.name")]
         public string? name { get; } = name;
-
-        /// <summary>
-        /// price
-        /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_ExtraSettings.price")]
-        public decimal? price { get; } = price;
 
         /// <summary>
         /// page
@@ -344,7 +337,7 @@ namespace AirportTransferService.Models
     /// <summary>
     /// ATS_ExtraSettingsSearch
     /// </summary>
-    public class ATS_ExtraSettingsSearch : ATS_ExtraSettingsCreate
+    public class ATS_ExtraSettingsSearch
     {
         /// <summary>
         /// 編號
@@ -374,25 +367,19 @@ namespace AirportTransferService.Models
         /// 是否可見
         /// </summary>
         [Display(Name = "是否可見")]
-        public new string? visible { get; set; } = "N";
+        public string? visible { get; set; } = "N";
 
         /// <summary>
         /// 類別
         /// </summary>
         [Display(Name = "類別")]
-        public new string? type { get; set; } = "";
+        public string? type { get; set; } = "";
 
         /// <summary>
         /// 名稱
         /// </summary>
         [Display(Name = "名稱")]
-        public new string? name { get; set; } = "";
-
-        /// <summary>
-        /// 價錢
-        /// </summary>
-        [Display(Name = "價錢")]
-        public new decimal? price { get; set; } = 0;
+        public string? name { get; set; } = "";
     }
 
     /// <summary>

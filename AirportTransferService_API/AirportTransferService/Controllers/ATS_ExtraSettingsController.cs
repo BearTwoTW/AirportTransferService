@@ -98,7 +98,6 @@ namespace AirportTransferService.Controllers
                     visible: data.visible,
                     type: data.type,
                     name: data.name,
-                    price: data.price,
                     page: data.page,
                     num_per_page: data.num_per_page),
                 ["es_id", "visible", "type", "name", "price"], [],

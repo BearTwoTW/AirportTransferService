@@ -806,4 +806,42 @@
             return ValidationResult.Success;
         }
     }
+
+    /// <summary>
+    /// 類別(接機/送機)
+    /// </summary>
+    public enum
+        OrderType
+    {
+        /// <summary>
+        /// 接機
+        /// </summary>
+        接機,
+
+        /// <summary>
+        /// 送機
+        /// </summary>
+        送機
+    }
+
+    /// <summary>
+    /// 加購類型
+    /// </summary>
+    public enum ExtraType
+    {
+        /// <summary>
+        /// 額外服務
+        /// </summary>
+        舉牌,
+                  
+        /// <summary>
+        /// 額外費用
+        /// </summary>
+        合併,
+
+        /// <summary>
+        /// 其它
+        /// </summary>
+        其它
+    }
 }

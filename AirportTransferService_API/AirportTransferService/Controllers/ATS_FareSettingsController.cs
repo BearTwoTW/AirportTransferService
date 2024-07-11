@@ -109,7 +109,7 @@ namespace AirportTransferService.Controllers
         /// <param name="data"></param>
         /// <returns></returns>
         [HttpPost]
-        public ResultObject<List<ATS_FareSettingsSearchResponse>> ATS_FareSettingsSearch(ATS_FareSettingsSearch data)
+        public ResultObject<object> ATS_FareSettingsSearch(ATS_FareSettingsSearch data)
         {
             List<SearchATS_FareSettingsResult> search_results = _ATS_FareSettings.SearchATS_FareSettings(
                 new SearchATS_FareSettingsParam(
@@ -145,6 +145,52 @@ namespace AirportTransferService.Controllers
                     .ToList();
             }
 
+            if (data.excel.Equals("Y") && !data.distinct.Equals("Y"))
+            {
+                // 取得所有車型名稱
+                List<SearchATS_CarModelSettingsResult> resultSearchATS_CarModelSettings = _ATS_CarModelSettings.SearchATS_CarModelSettings(
+                    new SearchATS_CarModelSettingsParam(),
+                    ["cms_id", "name"], [],
+                    out _);
+
+                // 建立DataTable欄位
+                DataTable dt_excel = new();
+                dt_excel.Columns.Add("城市", typeof(string));
+                dt_excel.Columns.Add("區域", typeof(string));
+                dt_excel.Columns.Add("路", typeof(string));
+                dt_excel.Columns.Add("段", typeof(string));
+                foreach(SearchATS_CarModelSettingsResult item in resultSearchATS_CarModelSettings.OrderBy(x => x.cms_id))
+                {
+                    dt_excel.Columns.Add(item.name, typeof(decimal));
+                }
+
+                // 處理資料
+                IEnumerable<DataRow> groupedResults = search_results
+                    .GroupBy(x => new { x.city, x.area, x.road, x.section }).OrderBy(x => x.Key.city).ThenBy(x => x.Key.area).ThenBy(x => x.Key.road).ThenBy(x => x.Key.section)
+                    .Select(g => 
+                    {
+                        DataRow row = dt_excel.NewRow();
+                        row["城市"] = g.Key.city;
+                        row["區域"] = g.Key.area;
+                        row["路"] = g.Key.road;
+                        row["段"] = g.Key.section;
+                        foreach (SearchATS_CarModelSettingsResult item in resultSearchATS_CarModelSettings)
+                        {
+                            var price = g.Where(x => x.cms_id == item.cms_id).Select(x => x.price).FirstOrDefault();
+                            row[item.name!] = price;
+                        }
+                        return row;
+                    });
+
+                foreach (DataRow row in groupedResults)
+                {
+                    dt_excel.Rows.Add(row);
+                }
+
+                string path = Tool.CreateExcelToServer(jwtObject.company_code, "FareSettings", jwtObject.user_id, dt_excel);
+                return new ResultObject<object> { success = true, data = path };
+            }
+
             List<ATS_FareSettingsSearchResponse> response = [];
             foreach (SearchATS_FareSettingsResult result in search_results)
             {
@@ -163,7 +209,7 @@ namespace AirportTransferService.Controllers
                 });
             }
 
-            return new ResultObject<List<ATS_FareSettingsSearchResponse>> { success = true, data = response, page = page_count };
+            return new ResultObject<object> { success = true, data = response, page = page_count };
         }
 
         /// <summary>

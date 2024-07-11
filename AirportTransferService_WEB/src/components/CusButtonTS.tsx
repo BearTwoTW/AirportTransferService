@@ -192,6 +192,7 @@ const buttonGroupSX = {
  */
 export type CusFileImportProps = {
     buttonName: string;
+    variant: "outlined" | "contained"
     color: "inherit" | "primary" | "secondary" | "success" | "error" | "info" | "warning" | undefined;
     file: File | null;
     addFile: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -203,7 +204,7 @@ export type CusFileImportProps = {
  * @param props 
  */
 export const CusFileImport = (props: CusFileImportProps) => {
-    const { buttonName, color, file, addFile, clearFile } = props;
+    const { buttonName, variant, color, file, addFile, clearFile } = props;
 
     // 檔案匯入的input太醜，所以要隱藏input
     const VisuallyHiddenInput = styled('input')({
@@ -223,6 +224,7 @@ export const CusFileImport = (props: CusFileImportProps) => {
             <Button
                 component="label"
                 sx={buttonSX}
+                variant={variant}
                 color={color}
             >
                 {buttonName}

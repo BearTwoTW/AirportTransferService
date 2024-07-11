@@ -14,6 +14,9 @@ const CusOutlinedSelect = (props) => {
           sx: {
             padding: "4px",
             borderRadius: "15px",
+            '.MuiAutocomplete-clearIndicator': {
+              display: 'none',
+            },
           },
         },
         popupIndicator: {

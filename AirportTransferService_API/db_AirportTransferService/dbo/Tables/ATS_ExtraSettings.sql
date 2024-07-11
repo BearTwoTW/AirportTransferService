@@ -7,7 +7,7 @@
     [visible]    VARCHAR (2)    CONSTRAINT [DF_ATS_ExtraSettings_visible] DEFAULT ('Y') NULL,
     [type]       VARCHAR (10)   NULL,
     [name]       NVARCHAR (255) NULL,
-    [price]      NVARCHAR (255) CONSTRAINT [DF_ATS_ExtraSettings_price] DEFAULT ((0)) NULL,
+    [price]      DECIMAL (10)   CONSTRAINT [DF_ATS_ExtraSettings_price] DEFAULT ((0)) NULL,
     CONSTRAINT [PK_ATS_ExtraSettings] PRIMARY KEY CLUSTERED ([es_id] ASC)
 );
 

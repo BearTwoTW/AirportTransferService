@@ -855,7 +855,7 @@ namespace AirportTransferService.Models
         /// <summary>
         /// 是否可見
         /// </summary>
-        [Display(Name = "是否可見"), Required(ErrorMessage = "請輸入{0}")]
+        [Display(Name = "是否可見")]
         public string? visible { get; set; } = "N";
 
         /// <summary>
@@ -879,13 +879,13 @@ namespace AirportTransferService.Models
         /// <summary>
         /// 路
         /// </summary>
-        [Display(Name = "路"), Required(ErrorMessage = "請輸入{0}")]
+        [Display(Name = "路")]
         public string? road { get; set; } = "";
 
         /// <summary>
         /// 段
         /// </summary>
-        [Display(Name = "段"), Required(ErrorMessage = "請輸入{0}")]
+        [Display(Name = "段")]
         public string? section { get; set; } = "";
 
         /// <summary>
@@ -989,6 +989,36 @@ namespace AirportTransferService.Models
         /// </summary>
         [Display(Name = "乘客電子信箱"), Required(ErrorMessage = "請輸入{0}")]
         public string? email_passenger { get; set; } = "";
+
+        /// <summary>
+        /// 加購項目
+        /// </summary>
+        [Display(Name = "加購項目")]
+        public List<ExtraItem>? es_ids { get; set; } = [];
+
+        /// <summary>
+        /// 是否試算
+        /// </summary>
+        [Display(Name = "是否試算")]
+        public string? calculation { get; set; } = "Y";
+    }
+
+    /// <summary>
+    /// 加購項目
+    /// </summary>
+    public class ExtraItem
+    {
+        /// <summary>
+        /// es_id
+        /// </summary>
+        [Display(Name = "es_id")]
+        public string es_id { get; set; } = "";
+        
+        /// <summary>
+        /// count
+        /// </summary>
+        [Display(Name = "count")]
+        public int count { get; set; } = 0;
     }
 
     /// <summary>

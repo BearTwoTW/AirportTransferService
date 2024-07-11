@@ -395,5 +395,7 @@
     <Build Include="dbo\Tables\ATS_CityAreaSettings.sql" />
     <Build Include="dbo\Tables\ATS_CarModelSettings.sql" />
     <Build Include="dbo\Tables\ATS_AirportTerminalSettings.sql" />
+    <Build Include="dbo\Tables\ATS_PriceLinkSettings.sql" />
+    <Build Include="dbo\Tables\ATS_OrderDetail.sql" />
   </ItemGroup>
 </Project>

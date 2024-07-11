@@ -11,18 +11,21 @@ namespace AirportTransferService.Controllers
     /// <param name="aTS_CarModelSettings"></param>
     /// <param name="aTS_CityAreaSettings"></param>
     /// <param name="aTS_FareSettings"></param>
+    /// <param name="aTS_PriceLinkSettings"></param>
     [ApiController]
     public class ImportDataController(
         IBaseService baseService,
         IATS_AirportTerminalSettings aTS_AirportTerminalSettings,
         IATS_CarModelSettings aTS_CarModelSettings,
         IATS_CityAreaSettings aTS_CityAreaSettings,
-        IATS_FareSettings aTS_FareSettings) : CustomControllerBase(baseService)
+        IATS_FareSettings aTS_FareSettings,
+        IATS_PriceLinkSettings aTS_PriceLinkSettings) : CustomControllerBase(baseService)
     {
         private readonly IATS_AirportTerminalSettings _ATS_AirportTerminalSettings = aTS_AirportTerminalSettings;
         private readonly IATS_CarModelSettings _ATS_CarModelSettings = aTS_CarModelSettings;
         private readonly IATS_CityAreaSettings _ATS_CityAreaSettings = aTS_CityAreaSettings;
         private readonly IATS_FareSettings _ATS_FareSettings = aTS_FareSettings;
+        private readonly IATS_PriceLinkSettings _ATS_PriceLinkSettings = aTS_PriceLinkSettings;
 
         /// <summary>
         /// 匯入車資
@@ -148,6 +151,107 @@ namespace AirportTransferService.Controllers
                                                 price: listCarModelFare.Find(y => y.cmd_id == x.cms_id).price));
                                     }
                                 });
+
+                                tx.Complete();
+                            }
+                        }
+                    }
+                }
+            }
+            return new ResultObject() { success = true, message = "匯入成功" };
+        }
+
+        /// <summary>
+        /// 匯入價錢連結
+        /// </summary>
+        /// <returns></returns>
+#if DEBUG
+        [AllowAnonymous]
+#endif
+        [HttpPost]
+        public ResultObject ImportPriceLink()
+        {
+            IFormFileCollection? files = Request.Form.Files.Count > 0 ? Request.Form.Files : null;
+            if (files == null || files.Count == 0) return new ResultObject() { success = false, message = "無法讀取檔案：The files is null or files count == 0." };
+            else if (files != null && files.Count > 0)
+            {
+                IFormFile Inputfile = files[0];
+                Stream FileStream = Inputfile.OpenReadStream();
+
+                if (Inputfile == null || FileStream == null) return new ResultObject() { success = false, message = "無法讀取檔檔案：The Inputfile or FileStream is null." };
+                else if (Inputfile != null && FileStream != null)
+                {
+                    IExcelDataReader reader;
+                    if (Inputfile.FileName.EndsWith(".xls"))
+                        reader = ExcelReaderFactory.CreateBinaryReader(FileStream);
+                    else if (Inputfile.FileName.EndsWith(".xlsx"))
+                        reader = ExcelReaderFactory.CreateOpenXmlReader(FileStream);
+                    else
+                        return new ResultObject { success = false, message = "無法讀取檔檔案：The file format is not supported." };
+
+                    DataSet dsexcelRecords = reader.AsDataSet(new ExcelDataSetConfiguration()
+                    {
+                        ConfigureDataTable = (_) => new ExcelDataTableConfiguration()
+                        {
+                            UseHeaderRow = true
+                        }
+                    });
+                    reader.Close();
+
+                    if (dsexcelRecords == null || dsexcelRecords.Tables.Count == 0) return new ResultObject { success = false, message = "無法讀取檔檔案：工作表數量不足" };
+                    else if (dsexcelRecords != null && dsexcelRecords.Tables.Count > 0)
+                    {
+                        DataTable dtPriceLink = dsexcelRecords.Tables[0];
+                        List<string> column = ["價錢", "連結"];
+
+                        // 欄位檢查
+                        foreach (string item in column)
+                        {
+                            if (!dtPriceLink.Columns.Contains(item)) return new ResultObject { success = false, message = String.Format("欄位必須包含{0}", item) };
+                        }
+
+                        // 檢查資料型態
+                        if (dtPriceLink.AsEnumerable().ToList().Exists(x => !decimal.TryParse(x["價錢"].ToString(), out _))) return new ResultObject { success = false, message = String.Format("{0}必須為數字", "價錢") };
+                        if (dtPriceLink.AsEnumerable().ToList().Exists(x => string.IsNullOrWhiteSpace(x["連結"].ToString()))) return new ResultObject { success = false, message = String.Format("{0}不得為空白", "連結") };
+
+                        // 塞資料
+                        foreach (DataRow row in dtPriceLink.Rows)
+                        {
+                            using (TransactionScope tx = new())
+                            {
+                                decimal price = (dtPriceLink.Columns.Contains("價錢") && !DBNull.Value.Equals(dtPriceLink.Columns.Contains("價錢"))) ? Convert.ToDecimal(row["價錢"]) : 0;
+                                string link = (dtPriceLink.Columns.Contains("連結") && !DBNull.Value.Equals(dtPriceLink.Columns.Contains("連結"))) ? row["連結"].ToString() ?? "" : "";
+                                // 先查出價錢連結設定
+                                List<SearchATS_PriceLinkSettingsResult> resultSearchATS_PriceLinkSettings = _ATS_PriceLinkSettings.SearchATS_PriceLinkSettings(
+                                    new SearchATS_PriceLinkSettingsParam(
+                                        price: price,
+                                        page: 0,
+                                        num_per_page: 0),
+                                    ["pls_id", "price"], [],
+                                    out int _);
+                                // 如果有符合的價錢，就更新連結
+                               if (resultSearchATS_PriceLinkSettings.Count > 0)
+                                {
+                                    _ATS_PriceLinkSettings.UpdateATS_PriceLinkSettings(
+                                        new UpdateATS_PriceLinkSettingsParam(
+                                            cre_time: Appsettings.api_datetime_param_no_pass,
+                                            upd_userid: jwtObject.user_id,
+                                            upd_time: DateTime.Now,
+                                            pls_id: resultSearchATS_PriceLinkSettings[0].pls_id,
+                                            visible: Appsettings.api_string_param_no_pass,
+                                            price: Appsettings.api_numeric_param_no_pass,
+                                            link: link));
+                                }
+                                else
+                                {
+                                    _ATS_PriceLinkSettings.CreateATS_PriceLinkSettings(
+                                        new CreateATS_PriceLinkSettingsParam(
+                                            cre_time: DateTime.Now,
+                                            cre_userid: jwtObject.user_id,
+                                            visible: "Y",
+                                            price: price,
+                                            link: link));
+                                }
 
                                 tx.Complete();
                             }

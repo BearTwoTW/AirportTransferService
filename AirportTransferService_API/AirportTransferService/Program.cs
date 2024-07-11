@@ -19,7 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 {
     builder.Services.AddControllers();
 
@@ -31,7 +31,9 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddScoped<IATS_ExtraSettings, IATS_ExtraSettings_IMPL>();
     builder.Services.AddScoped<IATS_FareSettings, IATS_FareSettings_IMPL>();
     builder.Services.AddScoped<IATS_GASettings, IATS_GASettings_IMPL>();
+    builder.Services.AddScoped<IATS_OrderDetail, IATS_OrderDetail_IMPL>();
     builder.Services.AddScoped<IATS_OrderMaster, IATS_OrderMaster_IMPL>();
+    builder.Services.AddScoped<IATS_PriceLinkSettings, IATS_PriceLinkSettings_IMPL>();
     builder.Services.AddScoped<IATS_WebSettings, IATS_WebSettings_IMPL>();
     builder.Services.AddScoped<IDealerSetting, IDealerSetting_IMPL>();
     builder.Services.AddScoped<IFiles, IFiles_IMPL>();

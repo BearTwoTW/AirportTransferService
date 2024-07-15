@@ -43,8 +43,10 @@ export default function Order() {
         airport: null,
         terminal: null,
         flght_number: null,
-        date_travel: null,
-        time_travel: null,
+        date_travel_start: null,
+        date_travel_end: null,
+        time_travel_start: null,
+        time_travel_end: null,
         number_passenger: null,
         number_bags: null,
         cms_id: null,
@@ -256,8 +258,10 @@ export default function Order() {
             airport: null,
             terminal: null,
             flght_number: null,
-            date_travel: null,
-            time_travel: null,
+            date_travel_start: null,
+            date_travel_end: null,
+            time_travel_start: null,
+            time_travel_end: null,
             number_passenger: null,
             number_bags: null,
             cms_id: null,
@@ -299,14 +303,16 @@ export default function Order() {
                     <TableCell>{item.phone_purchaser}</TableCell>
                     <TableCell>{item.price}</TableCell>
                     <TableCell>
+                        {permission.Edit ?
+                            <CusIconButton
+                                onClick={(e) => edit_Click({ e: e, id: item.o_id })}
+                                color='primary'
+                                icon={<Edit />}
+                            />
+                            : null}
                         {permission.Delete
                             ?
                             <React.Fragment>
-                                <CusIconButton
-                                    onClick={(e) => edit_Click({ e: e, id: item.o_id })}
-                                    color='primary'
-                                    icon={<Edit />}
-                                />
                                 <CusIconButton
                                     onClick={(e) => del_Click({ e: e, id: item.o_id })}
                                     color='primary'
@@ -474,15 +480,40 @@ export default function Order() {
     const search_handleInput = (e) => {
         const { name, value } = e.target
         let formattedValue = value;
-        if (name === "date_travel") {
+        if (name === "date_travel_start" || name === "date_travel_end") {
             formattedValue = new Date(value).toLocaleDateString('en-CA');
         }
 
         setPageSearch(prevParams => ({
             ...prevParams,
             page: 1,
-            [name]: name === "date_travel" ? formattedValue : value
+            [name]: name === "date_travel_start" || name === "date_travel_end" ? formattedValue : value
         }));
+    };
+
+    /**[事件]下拉選單 */
+    const search_handleSelect = (e) => {
+        const { id, name, value, key } = e.target;
+        const val = value === null ? null : value[key];
+
+        if (name === "city") {
+            setPageSearch(prev => ({
+                ...prev,
+                area: null,
+                [name]: val,
+            }));
+        } else if (name === "airport") {
+            setPageSearch(prev => ({
+                ...prev,
+                terminal: null,
+                [name]: val,
+            }));
+        } else {
+            setPageSearch(prev => ({
+                ...prev,
+                [name]: val,
+            }));
+        }
     };
 
     /**選擇分頁顯示行數 */
@@ -523,48 +554,14 @@ export default function Order() {
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
+                                <CusOutlinedSelect
                                     id={"search--type"}
                                     name={"type"}
                                     label={"訂單類型"}
-                                    value={pageSearch.type}
-                                    onChangeEvent={(e) => search_handleInput(e)}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
-                                    id={"search--city"}
-                                    name={"city"}
-                                    label={"城市"}
-                                    value={pageSearch.city}
-                                    onChangeEvent={(e) => search_handleInput(e)}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
-                                    id={"search--area"}
-                                    name={"area"}
-                                    label={"區域"}
-                                    value={pageSearch.area}
-                                    onChangeEvent={(e) => search_handleInput(e)}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
-                                    id={"search--road"}
-                                    name={"road"}
-                                    label={"路"}
-                                    value={pageSearch.road}
-                                    onChangeEvent={(e) => search_handleInput(e)}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
-                                    id={"search--section"}
-                                    name={"section"}
-                                    label={"段"}
-                                    value={pageSearch.section}
-                                    onChangeEvent={(e) => search_handleInput(e)}
+                                    options={options.orderTypeOptions}
+                                    optionKey={"name"}
+                                    value={options.orderTypeOptions.some(item => item.name === pageSearch.type) ? options.orderTypeOptions.find(item => item.name === pageSearch.type) : null}
+                                    onChangeEvent={(e) => search_handleSelect(e)}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3} lg={3}>
@@ -576,13 +573,55 @@ export default function Order() {
                                     onChangeEvent={(e) => search_handleInput(e)}
                                 />
                             </Grid>
+                            <Grid item xs={12} sm={3} lg={3}>
+                                <CusOutlinedSelect
+                                    id={"search--city"}
+                                    name={"city"}
+                                    label={"城市"}
+                                    options={options.cityAreaOptions.cityOptions}
+                                    optionKey={"name"}
+                                    value={options.cityAreaOptions.cityOptions.some(item => item.name === pageSearch.city) ? options.cityAreaOptions.cityOptions.find(item => item.name === pageSearch.city) : null}
+                                    onChangeEvent={(e) => search_handleSelect(e)}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={3} lg={3}>
+                                <CusOutlinedSelect
+                                    id={"search--area"}
+                                    name={"area"}
+                                    label={"區域"}
+                                    options={options.cityAreaOptions.areaOptions.filter(item => item.city === pageSearch.city)}
+                                    optionKey={"name"}
+                                    value={options.cityAreaOptions.areaOptions.some(item => item.name === pageSearch.area) ? options.cityAreaOptions.areaOptions.find(item => item.name === pageSearch.area) : null}
+                                    onChangeEvent={(e) => search_handleSelect(e)}
+                                    disabled={pageSearch.city ? false : true}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={3} lg={3}>
+                                <CusInput
+                                    id={"search--road"}
+                                    name={"road"}
+                                    label={"路"}
+                                    value={pageSearch.road}
+                                    onChangeEvent={(e) => search_handleInput(e)}
+                                />
+                            </Grid>
                             <Grid item xs={12} sm={4} md={3}>
                                 <CusDatePicker
-                                    id={"search--date_travel"}
-                                    name={"date_travel"}
-                                    label={"出發日期"}
+                                    id={"search--date_travel_start"}
+                                    name={"date_travel_start"}
+                                    label={"出發日期起"}
                                     views={["year", "month", "day"]}
-                                    value={pageSearch.date_travel}
+                                    value={pageSearch.date_travel_start}
+                                    onChangeEvent={(e) => search_handleInput(e)}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={4} md={3}>
+                                <CusDatePicker
+                                    id={"search--date_travel_end"}
+                                    name={"date_travel_end"}
+                                    label={"出發日期迄"}
+                                    views={["year", "month", "day"]}
+                                    value={pageSearch.date_travel_end}
                                     onChangeEvent={(e) => search_handleInput(e)}
                                 />
                             </Grid>

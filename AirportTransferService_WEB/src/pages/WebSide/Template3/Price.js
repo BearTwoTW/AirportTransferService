@@ -142,7 +142,7 @@ export default function Login() {
   }, [fareSearch]);
 
   /**[事件]下拉選單 */
-  const add_HandleSelect = (e) => {
+  const seacrh_HandleSelect = (e) => {
     const { id, name, value, key } = e.target;
     const val = value === null ? null : value[key];
 
@@ -181,7 +181,7 @@ export default function Login() {
               options={options.cityAreaOptions.cityOptions}
               optionKey={"name"}
               value={options.cityAreaOptions.cityOptions.some(item => item.name === fareSearch.city) ? options.cityAreaOptions.cityOptions.find(item => item.name === fareSearch.city) : null}
-              onChangeEvent={(e) => add_HandleSelect(e)}
+              onChangeEvent={(e) => seacrh_HandleSelect(e)}
             />
           </Grid>
           <Grid item lg={6} sm={6} xs={12}>
@@ -192,7 +192,7 @@ export default function Login() {
               options={options.cityAreaOptions.areaOptions.filter(item => item.city === fareSearch.city)}
               optionKey={"name"}
               value={options.cityAreaOptions.areaOptions.some(item => item.name === fareSearch.area) ? options.cityAreaOptions.areaOptions.find(item => item.name === fareSearch.area) : null}
-              onChangeEvent={(e) => add_HandleSelect(e)}
+              onChangeEvent={(e) => seacrh_HandleSelect(e)}
             />
           </Grid>
         </Grid>

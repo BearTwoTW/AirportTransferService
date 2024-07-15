@@ -63,9 +63,7 @@ export default function CityArea() {
     // 下拉選單
     const [options, setOptions] = useState({
         cityOptions: [],
-        cityCensusOptions: [],
         areaOptions: [],
-        areaCensusOptions: []
     });
 
     useEffect(() => {
@@ -109,8 +107,58 @@ export default function CityArea() {
         setInitDB(true);
     }, []);
 
+
     /**
-     * 查詢職責列表
+     * 查詢城市區域選單
+     */
+    const seacrhOptions = async () => {
+        ATS_CityAreaSettings.ATS_CityAreaSettingsSearch({
+            visible: "Y",
+            cas_id: null,
+            zip: null,
+            city: null,
+            area: null,
+            road: null,
+            section: null,
+            page: 0,
+            num_per_page: 0,
+            excel: "",
+        }).then(async res => {
+            if (res.success) {
+                setOptions(prev => {
+                    const cityOptions = res.data
+                        .map(item => item.city)
+                        .filter((city, index, self) => self.indexOf(city) === index)
+                        .map((name, index) => ({ key: index, name }));
+
+                    const uniqueAreaMap = new Map();
+                    res.data.forEach((item, index) => {
+                        if (!uniqueAreaMap.has(item.city)) {
+                            uniqueAreaMap.set(item.city, new Set());
+                        }
+                        uniqueAreaMap.get(item.city).add(item.area);
+                    });
+
+                    const areaOptions = [];
+                    let keyIndex = 0;
+                    uniqueAreaMap.forEach((areas, city) => {
+                        areas.forEach(area => {
+                            areaOptions.push({ key: keyIndex++, city, name: area });
+                        });
+                    });
+
+                    return {
+                        ...prev,
+                        cityOptions,
+                        areaOptions,
+                    };
+                });
+            }
+        })
+    }
+
+    /**
+     * 查詢城市區域列表
      */
     const searchCityArea = async (searchPrams) => {
         setIsLoading(true);
@@ -164,6 +212,7 @@ export default function CityArea() {
     };
 
     useEffect(() => {
+        seacrhOptions();
         searchCityArea(pageSearch);
     }, [pageSearch.search, pageSearch.page, pageSearch.num_per_page]);
 
@@ -181,14 +230,16 @@ export default function CityArea() {
                     <TableCell>{item.road}</TableCell>
                     <TableCell>{item.section}</TableCell>
                     <TableCell>
+                        {permission.Edit ?
+                            <CusIconButton
+                                onClick={(e) => edit_Click({ e: e, name: item.name, id: item.cas_id })}
+                                color='primary'
+                                icon={<Edit />}
+                            />
+                            : null}
                         {permission.Delete
                             ?
                             <React.Fragment>
-                                <CusIconButton
-                                    onClick={(e) => edit_Click({ e: e, name: item.name, id: item.cas_id })}
-                                    color='primary'
-                                    icon={<Edit />}
-                                />
                                 <CusIconButton
                                     onClick={(e) => del_Click({ e: e, name: item.name, id: item.cas_id })}
                                     color='primary'
@@ -340,16 +391,23 @@ export default function CityArea() {
         }));
     };
 
-    /**下拉選單 */
+    /**[事件]下拉選單 */
     const search_handleSelect = (e) => {
-        const { name, key, value } = e.target
-        const val = value === null ? "" : value[key];
+        const { id, name, value, key } = e.target;
+        const val = value === null ? null : value[key];
 
-        setPageSearch(prevParams => ({
-            ...prevParams,
-            page: 1,
-            [name]: val,
-        }));
+        if (name === "city") {
+            setPageSearch(prev => ({
+                ...prev,
+                area: null,
+                [name]: val,
+            }));
+        } else {
+            setPageSearch(prev => ({
+                ...prev,
+                [name]: val,
+            }));
+        }
     };
 
     /**選擇分頁顯示行數 */
@@ -390,21 +448,26 @@ export default function CityArea() {
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
+                                <CusOutlinedSelect
                                     id={"search--city"}
                                     name={"city"}
                                     label={"城市"}
-                                    value={pageSearch.city}
-                                    onChangeEvent={(e) => search_handleInput(e)}
+                                    options={options.cityOptions}
+                                    optionKey={"name"}
+                                    value={options.cityOptions.some(item => item.name === pageSearch.city) ? options.cityOptions.find(item => item.name === pageSearch.city) : null}
+                                    onChangeEvent={(e) => search_handleSelect(e)}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
+                                <CusOutlinedSelect
                                     id={"search--area"}
                                     name={"area"}
                                     label={"區域"}
-                                    value={pageSearch.area}
-                                    onChangeEvent={(e) => search_handleInput(e)}
+                                    options={options.areaOptions.filter(item => item.city === pageSearch.city)}
+                                    optionKey={"name"}
+                                    value={options.areaOptions.some(item => item.name === pageSearch.area) ? options.areaOptions.find(item => item.name === pageSearch.area) : null}
+                                    onChangeEvent={(e) => search_handleSelect(e)}
+                                    disabled={pageSearch.city ? false : true}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3} lg={3}>

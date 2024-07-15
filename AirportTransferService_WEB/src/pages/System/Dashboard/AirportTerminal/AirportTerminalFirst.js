@@ -54,6 +54,12 @@ export default function AirportTerminal() {
     const useDialogInner = useRef();
     const [dialogData, setDialogData] = useState({});
 
+    // 下拉選單
+    const [options, setOptions] = useState({
+        airportOptions: [],
+        terminalOptions: [],
+    });
+
     // 提示框
     const { enqueueSnackbar } = useSnackbar();
 
@@ -80,6 +86,52 @@ export default function AirportTerminal() {
         });
         setInitDB(true);
     }, []);
+
+    /**
+     * 查詢機場航廈選單
+     */
+    const seacrhOptions = async () => {
+        ATS_AirportTerminalSettings.ATS_AirportTerminalSettingsSearch({
+            visible: "Y",
+            ats_id: null,
+            airport: null,
+            terminal: null,
+            page: 0,
+            num_per_page: 0,
+            excel: "",
+        }).then(async res => {
+            if (res.success) {
+                setOptions(prev => {
+                    const airportOptions = res.data
+                        .map(item => item.airport)
+                        .filter((airport, index, self) => self.indexOf(airport) === index)
+                        .map((name, index) => ({ key: index, name }));
+
+                    const uniqueAreaMap = new Map();
+                    res.data.forEach((item, index) => {
+                        if (!uniqueAreaMap.has(item.airport)) {
+                            uniqueAreaMap.set(item.airport, new Set());
+                        }
+                        uniqueAreaMap.get(item.airport).add(item.terminal);
+                    });
+
+                    const terminalOptions = [];
+                    let keyIndex = 0;
+                    uniqueAreaMap.forEach((terminals, airport) => {
+                        terminals.forEach(terminal => {
+                            terminalOptions.push({ key: keyIndex++, airport, name: terminal });
+                        });
+                    });
+
+                    return {
+                        ...prev,
+                        airportOptions,
+                        terminalOptions,
+                    };
+                });
+            }
+        })
+    }
 
     /**
      * 查詢機場航廈
@@ -133,6 +185,7 @@ export default function AirportTerminal() {
     };
 
     useEffect(() => {
+        seacrhOptions();
         searchAirportTerminal(pageSearch);
     }, [pageSearch.search, pageSearch.page, pageSearch.num_per_page]);
 
@@ -147,14 +200,17 @@ export default function AirportTerminal() {
                     <TableCell>{item.airport}</TableCell>
                     <TableCell>{item.terminal}</TableCell>
                     <TableCell>
+                        {permission.Edit ?
+                            <CusIconButton
+                                onClick={(e) => edit_Click({ e: e, id: item.ats_id })}
+                                color='primary'
+                                icon={<Edit />}
+                            />
+                            : null}
                         {permission.Delete
                             ?
                             <React.Fragment>
-                                <CusIconButton
-                                    onClick={(e) => edit_Click({ e: e, id: item.ats_id })}
-                                    color='primary'
-                                    icon={<Edit />}
-                                />
+
                                 <CusIconButton
                                     onClick={(e) => del_Click({ e: e, id: item.ats_id })}
                                     color='primary'
@@ -294,15 +350,23 @@ export default function AirportTerminal() {
         });
     }, []);
 
-    /**輸入框*/
-    const search_handleInput = (e) => {
-        const { name, value } = e.target
+    /**[事件]下拉選單 */
+    const search_handleSelect = (e) => {
+        const { id, name, value, key } = e.target;
+        const val = value === null ? null : value[key];
 
-        setPageSearch(prevParams => ({
-            ...prevParams,
-            page: 1,
-            [name]: value
-        }));
+        if (name === "airport") {
+            setPageSearch(prev => ({
+                ...prev,
+                terminal: null,
+                [name]: val,
+            }));
+        } else {
+            setPageSearch(prev => ({
+                ...prev,
+                [name]: val,
+            }));
+        }
     };
 
     /**選擇分頁顯示行數 */
@@ -334,21 +398,26 @@ export default function AirportTerminal() {
                     <CusCard content={
                         <React.Fragment>
                             <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
+                                <CusOutlinedSelect
                                     id={"search--airport"}
                                     name={"airport"}
                                     label={"機場"}
-                                    value={pageSearch.airport}
-                                    onChangeEvent={(e) => search_handleInput(e)}
+                                    options={options.airportOptions}
+                                    optionKey={"name"}
+                                    value={options.airportOptions.some(item => item.name === pageSearch.airport) ? options.airportOptions.find(item => item.name === pageSearch.airport) : null}
+                                    onChangeEvent={(e) => search_handleSelect(e)}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
+                                <CusOutlinedSelect
                                     id={"search--terminal"}
                                     name={"terminal"}
                                     label={"航廈"}
-                                    value={pageSearch.terminal}
-                                    onChangeEvent={(e) => search_handleInput(e)}
+                                    options={options.terminalOptions.filter(item => item.airport === pageSearch.airport)}
+                                    optionKey={"name"}
+                                    value={options.terminalOptions.some(item => item.name === pageSearch.terminal) ? options.terminalOptions.find(item => item.name === pageSearch.terminal) : null}
+                                    onChangeEvent={(e) => search_handleSelect(e)}
+                                    disabled={pageSearch.airport ? false : true}
                                 />
                             </Grid>
                             <Grid item xs={12} display={"flex"} justifyContent={"end"}>

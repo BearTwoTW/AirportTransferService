@@ -54,6 +54,12 @@ export default function Extra() {
     const useDialogInner = useRef();
     const [dialogData, setDialogData] = useState({});
 
+    // 下拉選單
+    const [options, setOptions] = useState({
+        extraOptions: [],
+        typeOptions: [],
+    });
+
     // 提示框
     const { enqueueSnackbar } = useSnackbar();
 
@@ -80,6 +86,39 @@ export default function Extra() {
         });
         setInitDB(true);
     }, []);
+
+    /**
+     * 查詢加價選單
+     */
+    const seacrhOptions = async () => {
+        ATS_ExtraSettings.ATS_ExtraSettingsSearch({
+            visible: "Y",
+            es_id: null,
+            type: null,
+            name: null,
+            page: 0,
+            num_per_page: 0,
+            excel: "",
+        }).then(async res => {
+            if (res.success) {
+                setOptions(prev => ({
+                    ...prev,
+                    extraOptions: res.data,
+                }));
+                setOptions(prev => {
+                    const typeOptions = res.data
+                        .map(item => item.type)
+                        .filter((type, index, self) => self.indexOf(type) === index)
+                        .map((name, index) => ({ key: index, name }));
+
+                    return {
+                        ...prev,
+                        typeOptions,
+                    };
+                });
+            }
+        })
+    }
 
     /**
      * 查詢機場航廈
@@ -133,6 +172,7 @@ export default function Extra() {
     };
 
     useEffect(() => {
+        seacrhOptions();
         searchExtra(pageSearch);
     }, [pageSearch.search, pageSearch.page, pageSearch.num_per_page]);
 
@@ -148,14 +188,16 @@ export default function Extra() {
                     <TableCell>{item.name}</TableCell>
                     <TableCell>{item.price}</TableCell>
                     <TableCell>
+                        {permission.Edit ?
+                            <CusIconButton
+                                onClick={(e) => edit_Click({ e: e, id: item.es_id })}
+                                color='primary'
+                                icon={<Edit />}
+                            />
+                            : null}
                         {permission.Delete
                             ?
                             <React.Fragment>
-                                <CusIconButton
-                                    onClick={(e) => edit_Click({ e: e, id: item.es_id })}
-                                    color='primary'
-                                    icon={<Edit />}
-                                />
                                 <CusIconButton
                                     onClick={(e) => del_Click({ e: e, id: item.es_id })}
                                     color='primary'
@@ -305,6 +347,17 @@ export default function Extra() {
         }));
     };
 
+    /**[事件]下拉選單 */
+    const search_handleSelect = (e) => {
+        const { id, name, value, key } = e.target;
+        const val = value === null ? null : value[key];
+
+        setPageSearch(prev => ({
+            ...prev,
+            [name]: val,
+        }));
+    };
+
     /**選擇分頁顯示行數 */
     const onRowsPerPageChange = async (e) => {
         setPageSearch((prevData) => ({
@@ -334,21 +387,25 @@ export default function Extra() {
                     <CusCard content={
                         <React.Fragment>
                             <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
+                                <CusOutlinedSelect
                                     id={"search--type"}
                                     name={"type"}
                                     label={"加價類型"}
-                                    value={pageSearch.type}
-                                    onChangeEvent={(e) => search_handleInput(e)}
+                                    options={options.typeOptions}
+                                    optionKey={"name"}
+                                    value={options.typeOptions.some(item => item.name === pageSearch.type) ? options.typeOptions.find(item => item.name === pageSearch.type) : null}
+                                    onChangeEvent={(e) => search_handleSelect(e)}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
+                                <CusOutlinedSelect
                                     id={"search--name"}
                                     name={"name"}
                                     label={"加價名稱"}
-                                    value={pageSearch.name}
-                                    onChangeEvent={(e) => search_handleInput(e)}
+                                    options={options.extraOptions}
+                                    optionKey={"name"}
+                                    value={options.extraOptions.some(item => item.name === pageSearch.name) ? options.extraOptions.find(item => item.name === pageSearch.name) : null}
+                                    onChangeEvent={(e) => search_handleSelect(e)}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3} lg={3}>

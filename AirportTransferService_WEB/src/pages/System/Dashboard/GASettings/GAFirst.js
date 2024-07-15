@@ -151,14 +151,16 @@ export default function GA() {
                     <TableCell>{item.summary}</TableCell>
                     <TableCell>{item.descriptive_url}</TableCell>
                     <TableCell>
+                        {permission.Edit ?
+                            <CusIconButton
+                                onClick={(e) => edit_Click({ e: e, id: item.gas_id })}
+                                color='primary'
+                                icon={<Edit />}
+                            />
+                            : null}
                         {permission.Delete
                             ?
                             <React.Fragment>
-                                <CusIconButton
-                                    onClick={(e) => edit_Click({ e: e, id: item.gas_id })}
-                                    color='primary'
-                                    icon={<Edit />}
-                                />
                                 <CusIconButton
                                     onClick={(e) => del_Click({ e: e, id: item.gas_id })}
                                     color='primary'

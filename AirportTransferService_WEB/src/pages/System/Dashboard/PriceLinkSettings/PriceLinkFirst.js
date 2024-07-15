@@ -3,7 +3,7 @@ import MD5 from 'crypto-js/md5';
 import { useLocation, useNavigate } from "react-router-dom";
 import { CircularLoading } from '../../../../components/CusProgress';
 import { Grid, TableCell, TableRow, Chip, Box, Typography } from '@mui/material';
-import { HighlightOff, Add, Search, Delete, Edit, CloudUpload } from '@mui/icons-material';
+import { HighlightOff, Add, Search, Delete, Edit, CloudUpload, CloudDownload } from '@mui/icons-material';
 import { CusCard } from '../../../../components/CusCard';
 import { CusInfoTitle } from '../../../../components/CusInfo';
 import { CusFileImport } from '../../../../components/CusButtonTS';
@@ -20,6 +20,7 @@ import { CusDatePicker } from '../../../../components/CusDatePicker';
 import { UserAPI, OptionList, DDMenu, ATS_PriceLinkSettings, ImportData } from '../../../../js/APITS';
 import { useCheckLogInXPermission, get_ECC_indexedDB_factory } from '../../../../js/Function';
 import { isNullOrEmpty } from '../../../../js/FunctionTS';
+import { exportURL, ImportSampleURL } from '../../../../js/DomainTS';
 
 export default function PriceLink() {
     // 導頁
@@ -150,14 +151,16 @@ export default function PriceLink() {
                     <TableCell>{item.price}</TableCell>
                     <TableCell>{item.link}</TableCell>
                     <TableCell>
+                        {permission.Edit ?
+                            <CusIconButton
+                                onClick={(e) => edit_Click({ e: e, id: item.pls_id })}
+                                color='primary'
+                                icon={<Edit />}
+                            />
+                            : null}
                         {permission.Delete
                             ?
                             <React.Fragment>
-                                <CusIconButton
-                                    onClick={(e) => edit_Click({ e: e, id: item.pls_id })}
-                                    color='primary'
-                                    icon={<Edit />}
-                                />
                                 <CusIconButton
                                     onClick={(e) => del_Click({ e: e, id: item.pls_id })}
                                     color='primary'
@@ -296,6 +299,13 @@ export default function PriceLink() {
     }, []);
 
     /**
+     * @description [匯入範本下載]價錢連結
+     */
+    const exampleDownload = () => {
+        window.open(`${ImportSampleURL}/連結匯入格式.xlsx`);
+    };
+
+    /**
      * @description [匯入]匯入價錢連結
      */
     const import_Click = () => {
@@ -308,6 +318,7 @@ export default function PriceLink() {
             DialogContent: <DialogsInner
                 type={"import"}
                 ref={useDialogInner}
+                exampleDownload={exampleDownload}
             />,
             DialogActions: (
                 <React.Fragment>
@@ -488,7 +499,7 @@ export default function PriceLink() {
 
 /**新增modal內容*/
 const DialogsInner = forwardRef((props, ref) => {
-    const { type, name, getEditData, pls_id } = props;
+    const { type, name, getEditData, pls_id, exampleDownload } = props;
     const [file, setFile] = useState(null);
 
     // 新增價錢連結
@@ -645,6 +656,14 @@ const DialogsInner = forwardRef((props, ref) => {
                             variant={"outlined"}
                             addFile={(e) => addFile_Handler(e)}
                             clearFile={clearFile_Handler}
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={3} display={"flex"} justifyContent={"flex-end"}>
+                        <CusTextIconButton
+                            color={"info"}
+                            text={"範本下載"}
+                            startIcon={<CloudDownload />}
+                            onClick={exampleDownload}
                         />
                     </Grid>
                 </Grid>

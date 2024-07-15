@@ -3,7 +3,7 @@ import MD5 from 'crypto-js/md5';
 import { useLocation, useNavigate } from "react-router-dom";
 import { CircularLoading } from '../../../../components/CusProgress';
 import { Grid, TableCell, TableRow, Chip, Box, Typography } from '@mui/material';
-import { HighlightOff, Add, Search, Delete, Edit, CloudUpload } from '@mui/icons-material';
+import { HighlightOff, Add, Search, Delete, Edit, CloudUpload, CloudDownload } from '@mui/icons-material';
 import { CusCard } from '../../../../components/CusCard';
 import { CusInfoTitle } from '../../../../components/CusInfo';
 import { CusFileImport } from '../../../../components/CusButtonTS';
@@ -17,9 +17,12 @@ import { NoResults } from '../../../../components/CusError';
 import { CusOutlinedSelect } from '../../../../components/CusSelect';
 import { CusTextIconButton, CusIconButton, CusTextButton } from '../../../../components/CusButton';
 import { CusDatePicker } from '../../../../components/CusDatePicker';
-import { UserAPI, OptionList, DDMenu, ATS_FareSettings, ImportData } from '../../../../js/APITS';
+import { UserAPI, OptionList, DDMenu, ATS_FareSettings, ATS_CityAreaSettings, ATS_AirportTerminalSettings, ImportData } from '../../../../js/APITS';
 import { useCheckLogInXPermission, get_ECC_indexedDB_factory } from '../../../../js/Function';
 import { isNullOrEmpty } from '../../../../js/FunctionTS';
+import { exportURL, ImportSampleURL } from '../../../../js/DomainTS';
+
+console.log("ImportSampleURL: ", ImportSampleURL)
 
 export default function Fare() {
     // 導頁
@@ -62,6 +65,14 @@ export default function Fare() {
     const useDialogInner = useRef();
     const [dialogData, setDialogData] = useState({});
 
+    // 下拉選單
+    const [options, setOptions] = useState({
+        cityOptions: [],
+        areaOptions: [],
+        airportOptions: [],
+        terminalOptions: [],
+    });
+
     // 提示框
     const { enqueueSnackbar } = useSnackbar();
 
@@ -88,6 +99,96 @@ export default function Fare() {
         });
         setInitDB(true);
     }, []);
+
+    /**
+     * 查詢城市區域選單
+     */
+    const seacrhOptions = async () => {
+        ATS_CityAreaSettings.ATS_CityAreaSettingsSearch({
+            visible: "Y",
+            cas_id: null,
+            zip: null,
+            city: null,
+            area: null,
+            road: null,
+            section: null,
+            page: 0,
+            num_per_page: 0,
+            excel: "",
+        }).then(async res => {
+            if (res.success) {
+                setOptions(prev => {
+                    const cityOptions = res.data
+                        .map(item => item.city)
+                        .filter((city, index, self) => self.indexOf(city) === index)
+                        .map((name, index) => ({ key: index, name }));
+
+                    const uniqueAreaMap = new Map();
+                    res.data.forEach((item, index) => {
+                        if (!uniqueAreaMap.has(item.city)) {
+                            uniqueAreaMap.set(item.city, new Set());
+                        }
+                        uniqueAreaMap.get(item.city).add(item.area);
+                    });
+
+                    const areaOptions = [];
+                    let keyIndex = 0;
+                    uniqueAreaMap.forEach((areas, city) => {
+                        areas.forEach(area => {
+                            areaOptions.push({ key: keyIndex++, city, name: area });
+                        });
+                    });
+
+                    return {
+                        ...prev,
+                        cityOptions,
+                        areaOptions,
+                    };
+                });
+            }
+        })
+
+        ATS_AirportTerminalSettings.ATS_AirportTerminalSettingsSearch({
+            visible: "Y",
+            ats_id: null,
+            airport: null,
+            terminal: null,
+            page: 0,
+            num_per_page: 0,
+            excel: "",
+        }).then(async res => {
+            if (res.success) {
+                setOptions(prev => {
+                    const airportOptions = res.data
+                        .map(item => item.airport)
+                        .filter((airport, index, self) => self.indexOf(airport) === index)
+                        .map((name, index) => ({ key: index, name }));
+
+                    const uniqueAreaMap = new Map();
+                    res.data.forEach((item, index) => {
+                        if (!uniqueAreaMap.has(item.airport)) {
+                            uniqueAreaMap.set(item.airport, new Set());
+                        }
+                        uniqueAreaMap.get(item.airport).add(item.terminal);
+                    });
+
+                    const terminalOptions = [];
+                    let keyIndex = 0;
+                    uniqueAreaMap.forEach((terminals, airport) => {
+                        terminals.forEach(terminal => {
+                            terminalOptions.push({ key: keyIndex++, airport, name: terminal });
+                        });
+                    });
+
+                    return {
+                        ...prev,
+                        airportOptions,
+                        terminalOptions,
+                    };
+                });
+            }
+        })
+    }
 
     /**
      * 查詢車資
@@ -148,6 +249,7 @@ export default function Fare() {
     };
 
     useEffect(() => {
+        seacrhOptions();
         searchFare(pageSearch);
     }, [pageSearch.search, pageSearch.page, pageSearch.num_per_page]);
 
@@ -233,6 +335,13 @@ export default function Fare() {
     };
 
     /**
+     * @description [匯入範本下載]車資
+     */
+    const exampleDownload = () => {
+        window.open(`${ImportSampleURL}/車資匯入格式.xlsx`);
+    };
+
+    /**
      * @description [匯入]匯入車資
      */
     const import_Click = () => {
@@ -245,6 +354,7 @@ export default function Fare() {
             DialogContent: <DialogsInner
                 type={"import"}
                 ref={useDialogInner}
+                exampleDownload={exampleDownload}
             />,
             DialogActions: (
                 <React.Fragment>
@@ -301,6 +411,31 @@ export default function Fare() {
         }));
     };
 
+    /**[事件]下拉選單 */
+    const search_handleSelect = (e) => {
+        const { id, name, value, key } = e.target;
+        const val = value === null ? null : value[key];
+
+        if (name === "city") {
+            setPageSearch(prev => ({
+                ...prev,
+                area: null,
+                [name]: val,
+            }));
+        } else if (name === "airport") {
+            setPageSearch(prev => ({
+                ...prev,
+                terminal: null,
+                [name]: val,
+            }));
+        } else {
+            setPageSearch(prev => ({
+                ...prev,
+                [name]: val,
+            }));
+        }
+    };
+
     /**選擇分頁顯示行數 */
     const onRowsPerPageChange = async (e) => {
         setPageSearch((prevData) => ({
@@ -330,21 +465,26 @@ export default function Fare() {
                     <CusCard content={
                         <React.Fragment>
                             <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
+                                <CusOutlinedSelect
                                     id={"search--city"}
                                     name={"city"}
                                     label={"城市"}
-                                    value={pageSearch.city}
-                                    onChangeEvent={(e) => search_handleInput(e)}
+                                    options={options.cityOptions}
+                                    optionKey={"name"}
+                                    value={options.cityOptions.some(item => item.name === pageSearch.city) ? options.cityOptions.find(item => item.name === pageSearch.city) : null}
+                                    onChangeEvent={(e) => search_handleSelect(e)}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
+                                <CusOutlinedSelect
                                     id={"search--area"}
                                     name={"area"}
                                     label={"區域"}
-                                    value={pageSearch.area}
-                                    onChangeEvent={(e) => search_handleInput(e)}
+                                    options={options.areaOptions.filter(item => item.city === pageSearch.city)}
+                                    optionKey={"name"}
+                                    value={options.areaOptions.some(item => item.name === pageSearch.area) ? options.areaOptions.find(item => item.name === pageSearch.area) : null}
+                                    onChangeEvent={(e) => search_handleSelect(e)}
+                                    disabled={pageSearch.city ? false : true}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3} lg={3}>
@@ -366,22 +506,26 @@ export default function Fare() {
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
+                                <CusOutlinedSelect
                                     id={"search--airport"}
                                     name={"airport"}
                                     label={"機場"}
-                                    type={"number"}
-                                    value={pageSearch.airport}
-                                    onChangeEvent={(e) => search_handleInput(e)}
+                                    options={options.airportOptions}
+                                    optionKey={"name"}
+                                    value={options.airportOptions.some(item => item.name === pageSearch.airport) ? options.airportOptions.find(item => item.name === pageSearch.airport) : null}
+                                    onChangeEvent={(e) => search_handleSelect(e)}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
+                                <CusOutlinedSelect
                                     id={"search--terminal"}
                                     name={"terminal"}
                                     label={"航廈"}
-                                    value={pageSearch.terminal}
-                                    onChangeEvent={(e) => search_handleInput(e)}
+                                    options={options.terminalOptions.filter(item => item.airport === pageSearch.airport)}
+                                    optionKey={"name"}
+                                    value={options.terminalOptions.some(item => item.name === pageSearch.terminal) ? options.terminalOptions.find(item => item.name === pageSearch.terminal) : null}
+                                    onChangeEvent={(e) => search_handleSelect(e)}
+                                    disabled={pageSearch.airport ? false : true}
                                 />
                             </Grid>
                             <Grid item xs={12} display={"flex"} justifyContent={"end"}>
@@ -458,7 +602,7 @@ export default function Fare() {
 
 /**新增modal內容*/
 const DialogsInner = forwardRef((props, ref) => {
-    const { type, name, getEditData, fs_id } = props;
+    const { type, name, getEditData, fs_id, exampleDownload } = props;
     const [file, setFile] = useState(null);
     // 編輯加價
     const [editData, setEditData] = useState({
@@ -552,6 +696,14 @@ const DialogsInner = forwardRef((props, ref) => {
                             variant={"outlined"}
                             addFile={(e) => addFile_Handler(e)}
                             clearFile={clearFile_Handler}
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={3} display={"flex"} justifyContent={"flex-end"}>
+                        <CusTextIconButton
+                            color={"info"}
+                            text={"範本下載"}
+                            startIcon={<CloudDownload />}
+                            onClick={exampleDownload}
                         />
                     </Grid>
                 </Grid>

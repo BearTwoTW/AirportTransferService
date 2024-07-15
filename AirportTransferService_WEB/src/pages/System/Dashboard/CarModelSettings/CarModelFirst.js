@@ -57,6 +57,11 @@ export default function CarModel() {
     const useDialogInner = useRef();
     const [dialogData, setDialogData] = useState({});
 
+    // 下拉選單
+    const [options, setOptions] = useState({
+        carModelOptions: [],
+    });
+
     // 提示框
     const { enqueueSnackbar } = useSnackbar();
 
@@ -85,7 +90,32 @@ export default function CarModel() {
     }, []);
 
     /**
-     * 查詢職責列表
+     * 查詢車型選單
+     */
+    const seacrhOptions = async () => {
+        ATS_CarModelSettings.ATS_CarModelSettingsSearch({
+            visible: "Y",
+            cms_id: null,
+            name: null,
+            max_passengers: null,
+            max_luggage: null,
+            max_child_seats: null,
+            max_service_extras: null,
+            page: 0,
+            num_per_page: 0,
+            excel: "",
+        }).then(async res => {
+            if (res.success) {
+                setOptions(prev => ({
+                    ...prev,
+                    carModelOptions: res.data,
+                }));
+            }
+        })
+    }
+
+    /**
+     * 查詢車型列表
      */
     const searchCarModel = async (searchPrams) => {
         setIsLoading(true);
@@ -139,6 +169,7 @@ export default function CarModel() {
     };
 
     useEffect(() => {
+        seacrhOptions();
         searchCarModel(pageSearch);
     }, [pageSearch.search, pageSearch.page, pageSearch.num_per_page]);
 
@@ -156,14 +187,16 @@ export default function CarModel() {
                     <TableCell>{item.max_child_seats}</TableCell>
                     <TableCell>{item.max_service_extras}</TableCell>
                     <TableCell>
+                        {permission.Edit ?
+                            <CusIconButton
+                                onClick={(e) => edit_Click({ e: e, name: item.name, id: item.cms_id })}
+                                color='primary'
+                                icon={<Edit />}
+                            />
+                            : null}
                         {permission.Delete
                             ?
                             <React.Fragment>
-                                <CusIconButton
-                                    onClick={(e) => edit_Click({ e: e, name: item.name, id: item.cms_id })}
-                                    color='primary'
-                                    icon={<Edit />}
-                                />
                                 <CusIconButton
                                     onClick={(e) => del_Click({ e: e, name: item.name, id: item.cms_id })}
                                     color='primary'
@@ -317,14 +350,13 @@ export default function CarModel() {
         }));
     };
 
-    /**下拉選單 */
+    /**[事件]下拉選單 */
     const search_handleSelect = (e) => {
-        const { name, key, value } = e.target
-        const val = value === null ? "" : value[key];
+        const { id, name, value, key } = e.target;
+        const val = value === null ? null : value[key];
 
-        setPageSearch(prevParams => ({
-            ...prevParams,
-            page: 1,
+        setPageSearch(prev => ({
+            ...prev,
             [name]: val,
         }));
     };
@@ -358,12 +390,14 @@ export default function CarModel() {
                     <CusCard content={
                         <React.Fragment>
                             <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
+                                <CusOutlinedSelect
                                     id={"search--name"}
                                     name={"name"}
-                                    label={"車型名稱"}
-                                    value={pageSearch.name}
-                                    onChangeEvent={(e) => search_handleInput(e)}
+                                    label={"車型"}
+                                    options={options.carModelOptions}
+                                    optionKey={"name"}
+                                    value={options.carModelOptions.some(item => item.name === pageSearch.name) ? options.carModelOptions.find(item => item.name === pageSearch.name) : null}
+                                    onChangeEvent={(e) => search_handleSelect(e)}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3} lg={3}>

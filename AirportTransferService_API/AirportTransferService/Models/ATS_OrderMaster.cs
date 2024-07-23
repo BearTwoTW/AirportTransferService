@@ -1012,13 +1012,41 @@ namespace AirportTransferService.Models
         /// es_id
         /// </summary>
         [Display(Name = "es_id")]
-        public string es_id { get; set; } = "";
-        
+        public string? es_id { get; set; } = "";
+
+        /// <summary>
+        /// es_name
+        /// </summary>
+        [Display(Name = "es_name")]
+        public string? es_name { get; set; } = "";
+
         /// <summary>
         /// count
         /// </summary>
         [Display(Name = "count")]
-        public int count { get; set; } = 0;
+        public int? count { get; set; } = 0;
+
+        /// <summary>
+        /// type
+        /// </summary>
+        [Display(Name = "type")]
+        public string? type { get; set; } = "Create";
+    }
+
+    /// <summary>
+    /// 訂單驗證結果
+    /// </summary>
+    public class ValidateOrderResult
+    {
+        /// <summary>
+        /// exists_es_ids
+        /// </summary>
+        public List<(SearchATS_ExtraSettingsResult result, int? count)> exists_es_ids { get; set; } = [];
+
+        /// <summary>
+        /// price
+        /// </summary>
+        public decimal? price { get; set; } = 0;
     }
 
     /// <summary>
@@ -1169,6 +1197,12 @@ namespace AirportTransferService.Models
         /// </summary>
         [Display(Name = "乘客電子信箱")]
         public string? email_passenger { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 加購項目
+        /// </summary>
+        [Display(Name = "加購項目")]
+        public List<ExtraItem>? es_ids { get; set; } = [];
     }
 
     /// <summary>
@@ -1493,6 +1527,12 @@ namespace AirportTransferService.Models
         /// </summary>
         [Display(Name = "乘客電子信箱")]
         public string? email_passenger { get; set; }
+
+        /// <summary>
+        /// 加購項目
+        /// </summary>
+        [Display(Name = "加購項目")]
+        public List<ExtraItem>? es_ids { get; set; } = [];
 
         /// <summary>
         /// 價錢

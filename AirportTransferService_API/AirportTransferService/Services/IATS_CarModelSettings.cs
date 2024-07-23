@@ -116,7 +116,7 @@
                 from ATS_CarModelSettings
                 where 1=1
                 {SQL.GenerateSQLWhereQuery(param)}
-                {SQL.GenerateSQLOrderQuery<SearchATS_CarModelSettingsResult>(sort_columns, "order by ATS_CarModelSettings.cms_id desc")}
+                {SQL.GenerateSQLOrderQuery<SearchATS_CarModelSettingsResult>(sort_columns, "order by ATS_CarModelSettings.cms_id")}
                 {(param.page > 0 ? "offset((@page-1)) * @num_per_page ROWS fetch next @num_per_page ROWS only;" : "")}";
 
                 dt = SQL.GenerateSQLSelectResult(param, strSql, myConn, out page_count);

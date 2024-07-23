@@ -131,7 +131,9 @@
                     es_id = dt.Columns.Contains("es_id") ? dr["es_id"].ToString() : null,
                     es_type = dt.Columns.Contains("es_type") ? dr["es_type"].ToString() : null,
                     es_name = dt.Columns.Contains("es_name") ? dr["es_name"].ToString() : null,
-                    es_price = dt.Columns.Contains("es_price") ? dr.Field<decimal>("es_price") : null
+                    es_price = dt.Columns.Contains("es_price") ? dr.Field<decimal>("es_price") : null,
+                    count = dt.Columns.Contains("count") ? dr.Field<int>("count") : null,
+                    total_price = dt.Columns.Contains("total_price") ? dr.Field<decimal>("total_price") : null,
                 });
             }
             return result;

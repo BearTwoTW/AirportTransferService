@@ -825,7 +825,7 @@
     }
 
     /// <summary>
-    /// 加購類型
+    /// 加購類別
     /// </summary>
     public enum ExtraType
     {
@@ -843,5 +843,26 @@
         /// 其它
         /// </summary>
         其它
+    }
+
+    /// <summary>
+    /// 加購動作類別
+    /// </summary>
+    public enum ExtraActionType
+    {
+        /// <summary>
+        /// 新增
+        /// </summary>
+        Create,
+
+        /// <summary>
+        /// 修改
+        /// </summary>
+        Update,
+
+        /// <summary>
+        /// 刪除
+        /// </summary>
+        Delete
     }
 }

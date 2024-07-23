@@ -121,7 +121,8 @@ namespace AirportTransferService.Controllers
                     terminal: data.terminal,
                     page: data.page,
                     num_per_page: data.num_per_page),
-                ["ats_id", "visible", "airport", "terminal"], [],
+                ["ats_id", "visible", "airport", "terminal"], 
+                [new SQL.SQLOrder_obj { sort_column = "airport", is_desc = false }, new SQL.SQLOrder_obj { sort_column = "terminal", is_desc = false }],
                 out int page_count);
 
             List<ATS_AirportTerminalSettingsSearchResponse> response = [];

@@ -271,6 +271,7 @@ export default function Reserve() {
 
   // [事件]預約送機 & 預約接機 打開 Modal
   const reserve_next = ({ e, type, orderAdd, signboard, extra, sameDetail, price }) => {
+    console.log(orderAdd)
     useDialog.current.handleOpen();
     setDialogData({
       id: type,
@@ -464,7 +465,7 @@ const GoTabPanel = forwardRef((props, ref) => {
 
     if (name === "date_travel") {
       let formattedValue = val;
-      formattedValue = new Date(formattedValue).toISOString().split('T')[0];
+      formattedValue = formattedValue.split('T')[0];
 
       setOrderAdd(prev => ({
         ...prev,
@@ -851,7 +852,7 @@ const GoTabPanel = forwardRef((props, ref) => {
               <Grid item lg={12} sm={12} xs={12}>
                 <FormGroup>
                   <FormControlLabel
-                    control={<Checkbox defaultChecked name="signboard" checked={checkboxState.signboard} onChange={handleCheckboxChange} />}
+                    control={<Checkbox name="signboard" checked={checkboxState.signboard} onChange={handleCheckboxChange} />}
                     label="接機舉牌 (+$200)"
                   />
                 </FormGroup>
@@ -885,7 +886,7 @@ const GoTabPanel = forwardRef((props, ref) => {
               <Grid item lg={12} sm={12} xs={12}>
                 <FormGroup>
                   <FormControlLabel
-                    control={<Checkbox defaultChecked name="extra" checked={checkboxState.extra} onChange={handleCheckboxChange} />}
+                    control={<Checkbox name="extra" checked={checkboxState.extra} onChange={handleCheckboxChange} />}
                     label="加購兒童安全座椅及增高墊 (+$200)"
                   />
                 </FormGroup>
@@ -950,7 +951,7 @@ const GoTabPanel = forwardRef((props, ref) => {
               <Grid item lg={12} sm={12} xs={12}>
                 <FormGroup>
                   <FormControlLabel
-                    control={<Checkbox defaultChecked name="sameDetail" checked={checkboxState.sameDetail} onChange={handleCheckboxChange} />}
+                    control={<Checkbox name="sameDetail" checked={checkboxState.sameDetail} onChange={handleCheckboxChange} />}
                     label="乘客同訂購人"
                   />
                 </FormGroup>
@@ -1071,10 +1072,11 @@ const LeaveTabPanel = forwardRef((props, ref) => {
   const add_handelInput = e => {
     const { name, value } = e.target;
     const val = value === "" ? null : value;
+    console.log(val)
 
     if (name === "date_travel") {
       let formattedValue = val;
-      formattedValue = new Date(formattedValue).toISOString().split('T')[0];
+      formattedValue = formattedValue.split('T')[0];
 
       setOrderAdd(prev => ({
         ...prev,
@@ -1461,7 +1463,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
               <Grid item lg={12} sm={12} xs={12}>
                 <FormGroup>
                   <FormControlLabel
-                    control={<Checkbox defaultChecked name="signboard" checked={checkboxState.signboard} onChange={handleCheckboxChange} />}
+                    control={<Checkbox name="signboard" checked={checkboxState.signboard} onChange={handleCheckboxChange} />}
                     label="接機舉牌 (+$200)"
                   />
                 </FormGroup>
@@ -1495,7 +1497,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
               <Grid item lg={12} sm={12} xs={12}>
                 <FormGroup>
                   <FormControlLabel
-                    control={<Checkbox defaultChecked name="extra" checked={checkboxState.extra} onChange={handleCheckboxChange} />}
+                    control={<Checkbox name="extra" checked={checkboxState.extra} onChange={handleCheckboxChange} />}
                     label="加購兒童安全座椅及增高墊 (+$200)"
                   />
                 </FormGroup>
@@ -1560,7 +1562,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
               <Grid item lg={12} sm={12} xs={12}>
                 <FormGroup>
                   <FormControlLabel
-                    control={<Checkbox defaultChecked name="sameDetail" checked={checkboxState.sameDetail} onChange={handleCheckboxChange} />}
+                    control={<Checkbox name="sameDetail" checked={checkboxState.sameDetail} onChange={handleCheckboxChange} />}
                     label="乘客同訂購人"
                   />
                 </FormGroup>
@@ -1694,7 +1696,7 @@ const DialogsInner = forwardRef((props, ref) => {
             <Box>
               <FormGroup>
                 <FormControlLabel
-                  control={<Checkbox defaultChecked name="signboard" checked={signboard} disabled />}
+                  control={<Checkbox name="signboard" checked={signboard} disabled />}
                   label="接機舉牌 (+$200)"
                 />
               </FormGroup>
@@ -1724,7 +1726,7 @@ const DialogsInner = forwardRef((props, ref) => {
                 : null}
               <FormGroup>
                 <FormControlLabel
-                  control={<Checkbox defaultChecked name="signboard" checked={extra} disabled />}
+                  control={<Checkbox name="signboard" checked={extra} disabled />}
                   label="兒童座椅及增高墊 (+$200)"
                 />
               </FormGroup>
@@ -1845,7 +1847,7 @@ const DialogsInner = forwardRef((props, ref) => {
             <Box>
               <FormGroup>
                 <FormControlLabel
-                  control={<Checkbox defaultChecked name="signboard" checked={signboard} disabled />}
+                  control={<Checkbox name="signboard" checked={signboard} disabled />}
                   label="接機舉牌 (+$200)"
                 />
               </FormGroup>
@@ -1875,7 +1877,7 @@ const DialogsInner = forwardRef((props, ref) => {
                 : null}
               <FormGroup>
                 <FormControlLabel
-                  control={<Checkbox defaultChecked name="signboard" checked={extra} disabled />}
+                  control={<Checkbox name="signboard" checked={extra} disabled />}
                   label="兒童座椅及增高墊 (+$200)"
                 />
               </FormGroup>

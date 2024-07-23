@@ -89,7 +89,6 @@ export const WebSwipeableSideBar3 = () => {
         <Box className={"flex-1 p-10"}>
           <Box className="flex flex-col space-y-10 text-info font-bold">
             <a className="cursor-pointer hover:opacity-80" onClick={() => navigate("/Index")}>首頁</a>
-            <a className="cursor-pointer hover:opacity-80">預約流程</a>
             <a className="cursor-pointer hover:opacity-80" onClick={() => navigate("/Price")}>加價服務</a>
             <a className="cursor-pointer hover:opacity-80" onClick={() => reserve_Click({ type: "go" })}>預約及車資計算</a>
           </Box>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-import { DatePicker, DateTimePicker, renderTimeViewClock } from '@mui/x-date-pickers';
+import { DatePicker, DateTimePicker } from '@mui/x-date-pickers';
 import { inputLabelClasses } from "@mui/material/InputLabel";
 import { TextField, Stack } from '@mui/material';
 import Variables from "../scss/App.css";
@@ -83,8 +83,6 @@ const CusTimePicker = (props) => {
         disablePast={props.disablePast}
         disableFuture={props.disableFuture}
         displayWeekNumber={props.displayWeekNumber}
-        maxDate={props.maxDate}
-        minDate={props.minDate}
         onChange={(e) => checkInputData({
           moment: e,
           target: {
@@ -116,11 +114,6 @@ const CusTimePicker = (props) => {
             }
           }
         }
-        viewRenderers={{
-          hours: renderTimeViewClock,
-          minutes: renderTimeViewClock,
-          seconds: renderTimeViewClock,
-        }}
       />
     </LocalizationProvider>
   );
@@ -131,9 +124,7 @@ CusTimePicker.defaultProps = {
   label: '',
   format: "HH:mm",
   views: ["hours", "minutes"],
-  openTo: "day",
-  maxDate: null,
-  minDate: null,
+  openTo: "hours",
   disabled: false,
   disablePast: false,
   disableFuture: false,
@@ -151,8 +142,6 @@ CusTimePicker.prototype = {
   value: PropTypes.string,
   error: PropTypes.bool,
   format: PropTypes.string,
-  maxDate: PropTypes.string,
-  minDate: PropTypes.string,
   views: PropTypes.object,
   openTo: PropTypes.string,
   disabled: PropTypes.bool,

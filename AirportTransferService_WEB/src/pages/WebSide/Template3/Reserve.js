@@ -271,7 +271,6 @@ export default function Reserve() {
 
   // [事件]預約送機 & 預約接機 打開 Modal
   const reserve_next = ({ e, type, orderAdd, signboard, extra, sameDetail, price }) => {
-    console.log(orderAdd)
     useDialog.current.handleOpen();
     setDialogData({
       id: type,

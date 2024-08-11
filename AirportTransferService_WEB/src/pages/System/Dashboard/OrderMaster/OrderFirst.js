@@ -2,8 +2,10 @@ import React, { useRef, useState, useEffect, useCallback, forwardRef, useImperat
 import MD5 from 'crypto-js/md5';
 import { useLocation, useNavigate } from "react-router-dom";
 import { CircularLoading } from '../../../../components/CusProgress';
-import { Grid, TableCell, TableRow, Chip, Box, Typography } from '@mui/material';
-import { HighlightOff, Add, Search, Delete, Edit, Pages } from '@mui/icons-material';
+import { Grid, TableCell, TableRow, Chip, Box, Typography, Switch, FormControlLabel } from '@mui/material';
+import FormGroup from '@mui/material/FormGroup';
+import { HighlightOff, Add, Search, Delete, Edit, Pages, CloudDownload } from '@mui/icons-material';
+import Checkbox from '@mui/material/Checkbox';
 import { CusCard } from '../../../../components/CusCard';
 import { CusInfoTitle } from '../../../../components/CusInfo';
 import { CusDialog } from '../../../../components/CusDialog';
@@ -16,9 +18,10 @@ import { CusOutlinedSelect } from '../../../../components/CusSelect';
 import { CusTextIconButton, CusIconButton, CusTextButton } from '../../../../components/CusButton';
 import { CusDatePicker } from '../../../../components/CusDatePicker';
 import { CusTimePicker } from '../../../../components/CusTimePicker';
-import { UserAPI, OptionList, DDMenu, ATS_OrderMaster, ATS_CityAreaSettings, ATS_AirportTerminalSettings, ATS_CarModelSettings } from '../../../../js/APITS';
+import { UserAPI, OptionList, DDMenu, ATS_OrderMaster, ATS_CityAreaSettings, ATS_ExtraSettings, ATS_AirportTerminalSettings, ATS_CarModelSettings } from '../../../../js/APITS';
 import { useCheckLogInXPermission, get_ECC_indexedDB_factory } from '../../../../js/Function';
 import { isNullOrEmpty } from '../../../../js/FunctionTS';
+import { exportURL } from '../../../../js/DomainTS';
 
 export default function Order() {
     // 導頁
@@ -56,8 +59,6 @@ export default function Order() {
         name_passenger: null,
         phone_passenger: null,
         email_passenger: null,
-        price: null,
-        link: null,
         excel: "",
         page: 1,
         num_per_page: 10,
@@ -103,6 +104,17 @@ export default function Order() {
         num_per_page: 0,
     })
 
+    // 加價查詢
+    const [extraSearch, setExtraSearch] = useState({
+        visible: null,
+        es_id: null,
+        type: null,
+        name: null,
+        excel: "",
+        page: 0,
+        num_per_page: 0,
+    })
+
     // indexedDB
     const [indexDB, setIndexDB] = useState(null);
     const [initDB, setInitDB] = useState(false);
@@ -122,10 +134,21 @@ export default function Order() {
             airportOptions: [],
             terminalOptions: []
         },
+        passengerOptions: [],
+        bagsOptions: [], // 行李數
         carModelOptions: [],
         orderTypeOptions: [
             { name: "送機" },
             { name: "接機" }
+        ],
+        extraOptions: [], // 加價服務
+        extraCount: [
+            { key: 0, name: "1" },
+            { key: 1, name: "2" },
+        ], // 加價服務
+        visible: [
+            { name: "開放", value: "Y" },
+            { name: "未開放", value: "N" },
         ],
     });
     const [pageCount, setPageCount] = useState(0);
@@ -166,16 +189,36 @@ export default function Order() {
         // 查城市區域 (下拉選單用)
         ATS_CityAreaSettings.ATS_CityAreaSettingsSearch(cityAreaSearch).then(async res => {
             if (res.success) {
-                setOptions(prev => ({
-                    ...prev,
-                    cityAreaOptions: {
-                        cityOptions: res.data
-                            .map(item => item.city)
-                            .filter((city, index, self) => self.indexOf(city) === index)
-                            .map((name, index) => ({ key: index, name })),
-                        areaOptions: res.data.map((item, index) => { return { key: index, city: item.city, name: item.area } }),
-                    },
-                }));
+                setOptions(prev => {
+                    const cityOptions = res.data
+                        .map(item => item.city)
+                        .filter((city, index, self) => self.indexOf(city) === index)
+                        .map((name, index) => ({ key: index, name }));
+
+                    const uniqueAreaMap = new Map();
+                    res.data.forEach((item, index) => {
+                        if (!uniqueAreaMap.has(item.city)) {
+                            uniqueAreaMap.set(item.city, new Set());
+                        }
+                        uniqueAreaMap.get(item.city).add(item.area);
+                    });
+
+                    const areaOptions = [];
+                    let keyIndex = 0;
+                    uniqueAreaMap.forEach((areas, city) => {
+                        areas.forEach(area => {
+                            areaOptions.push({ key: keyIndex++, city, name: area });
+                        });
+                    });
+
+                    return {
+                        ...prev,
+                        cityAreaOptions: {
+                            cityOptions,
+                            areaOptions,
+                        },
+                    };
+                });
             }
         })
         // 查機場航廈 (下拉選單用)
@@ -196,9 +239,47 @@ export default function Order() {
         // 查車型 (下拉選單用)
         ATS_CarModelSettings.ATS_CarModelSettingsSearch(carModelSearch).then(async res => {
             if (res.success) {
+                // 找到 max_passengers 最大的物件
+                let maxPassengers = 0;
+                let maxLuggage = 0;
+                res.data.forEach(item => {
+                    if (item.max_passengers > maxPassengers) {
+                        maxPassengers = item.max_passengers;
+                    }
+                });
+                // 找到 max_luggage 最大的物件
+                res.data.forEach(item => {
+                    if (item.max_luggage > maxLuggage) {
+                        maxLuggage = item.max_luggage;
+                    }
+                });
+
+                // 生成人數下拉選單選項
+                const passengersOptions = [];
+                for (let i = 1; i <= maxPassengers; i++) {
+                    passengersOptions.push({ key: i - 1, name: i.toString() });
+                }
+
+                // 生成行李數下拉選單選項
+                const luggageOptions = [];
+                for (let i = 1; i <= maxPassengers; i++) {
+                    luggageOptions.push({ key: i - 1, name: i.toString() });
+                }
+
                 setOptions(prev => ({
                     ...prev,
                     carModelOptions: res.data,
+                    passengerOptions: passengersOptions,
+                    bagsOptions: luggageOptions,
+                }));
+            }
+        })
+        // 查加購 (下拉選單用)
+        ATS_ExtraSettings.ATS_ExtraSettingsSearch(extraSearch).then(async res => {
+            if (res.success) {
+                setOptions(prev => ({
+                    ...prev,
+                    extraOptions: res.data,
                 }));
             }
         })
@@ -241,6 +322,21 @@ export default function Order() {
         }
     };
 
+    /** 編輯是否開放 */
+    const edit_Visible = async ({ id, visible }) => {
+        const { success, message } = await ATS_OrderMaster.ATS_OrderMasterUpdate({
+            o_id: id,
+            visible: visible === "Y" ? "N" : "Y"
+        });
+
+        if (success) searchOrder(pageSearch);
+
+        enqueueSnackbar(message, {
+            variant: success ? "success" : "warning",
+            persist: !success
+        });
+    };
+
     /** [清除]查查查查 */
     const cleanSearch_Click = () => {
         setPageSearch(prevData => ({
@@ -271,8 +367,6 @@ export default function Order() {
             name_passenger: null,
             phone_passenger: null,
             email_passenger: null,
-            price: null,
-            link: null,
             excel: "",
             page: 1,
             num_per_page: 10,
@@ -285,13 +379,26 @@ export default function Order() {
     }, [pageSearch.search, pageSearch.page, pageSearch.num_per_page]);
 
     /** table body */
-    const TableBodyContent = React.memo(() => {
+    const TableBodyContent = React.memo((props) => {
+        const { edit_Visible } = props;
         return (
             orderList.map((item, index) => (
                 <TableRow
                     hover
                     key={item.o_id}>
                     <TableCell>{index + 1}</TableCell>
+                    <TableCell>
+                        <FormControlLabel
+                            onClick={(e) => e.stopPropagation()}
+                            control={
+                                <Switch
+                                    checked={item.visible === "Y" ? true : false}
+                                    color={"success"}
+                                    onChange={() => edit_Visible({ id: item.o_id, visible: item.visible })}
+                                />
+                            }
+                        />
+                    </TableCell>
                     <TableCell>{item.o_id}</TableCell>
                     <TableCell>{item.type}</TableCell>
                     <TableCell>{item.city}</TableCell>
@@ -309,16 +416,6 @@ export default function Order() {
                                 color='primary'
                                 icon={<Edit />}
                             />
-                            : null}
-                        {permission.Delete
-                            ?
-                            <React.Fragment>
-                                <CusIconButton
-                                    onClick={(e) => del_Click({ e: e, id: item.o_id })}
-                                    color='primary'
-                                    icon={<Delete />}
-                                />
-                            </React.Fragment>
                             : null}
                     </TableCell>
                 </TableRow>
@@ -350,7 +447,7 @@ export default function Order() {
             || !orderAdd.airport || !orderAdd.terminal || !orderAdd.flght_number || !orderAdd.date_travel || !orderAdd.time_travel
             || !orderAdd.number_passenger || !orderAdd.number_bags || !orderAdd.cms_id
             || !orderAdd.name_purchaser || !orderAdd.phone_purchaser || !orderAdd.email_purchaser
-            || !orderAdd.name_passenger || !orderAdd.phone_passenger || !orderAdd.email_passenger || !orderAdd.price || !orderAdd.link
+            || !orderAdd.name_passenger || !orderAdd.phone_passenger || !orderAdd.email_passenger
         ) {
             setOrderAddCheck({
                 type: !orderAdd.type ? true : false,
@@ -373,8 +470,6 @@ export default function Order() {
                 name_passenger: !orderAdd.name_passenger ? true : false,
                 phone_passenger: !orderAdd.phone_passenger ? true : false,
                 email_passenger: !orderAdd.email_passenger ? true : false,
-                price: !orderAdd.price ? true : false,
-                link: !orderAdd.link ? true : false,
             })
         } else {
             setOrderAddCheck(initOrderAddCheck);
@@ -533,6 +628,24 @@ export default function Order() {
         }))
     };
 
+    /**匯出訂單*/
+    const exportImport = async () => {
+        let importData = await ATS_OrderMaster.ATS_OrderMasterSearch({
+            ...pageSearch,
+            excel: "Y"
+        });
+
+        if (importData.success) {
+            let url = exportURL + "/" + importData.data;
+            window.open(url);
+        } else {
+            enqueueSnackbar(importData.message, {
+                variant: "error",
+                persist: true
+            });
+        }
+    };
+
     /**關閉Dialog  */
     const dialogClose = () => {
         useDialog.current.handleClose();
@@ -551,6 +664,17 @@ export default function Order() {
                                     label={"訂單編號"}
                                     value={pageSearch.o_id}
                                     onChangeEvent={(e) => search_handleInput(e)}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={3} lg={3}>
+                                <CusOutlinedSelect
+                                    id={"search--visible"}
+                                    name={"visible"}
+                                    label={"開放狀態"}
+                                    options={options.visible}
+                                    optionKey={"value"}
+                                    value={options.visible.some(item => item.value === pageSearch.visible) ? options.visible.find(item => item.value === pageSearch.visible) : null}
+                                    onChangeEvent={(e) => search_handleSelect(e)}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3} lg={3}>
@@ -665,6 +789,12 @@ export default function Order() {
                         <React.Fragment>
                             <Grid item xs={12}>
                                 <Box display={"flex"} justifyContent={"flex-end"}>
+                                    <CusTextIconButton
+                                        color={"secondary"}
+                                        variant={"outlined"}
+                                        text={"匯出訂單"}
+                                        startIcon={<CloudDownload />}
+                                        onClick={exportImport} />
                                     {permission.Add
                                         ? <CusTextIconButton
                                             color={"primary"}
@@ -686,6 +816,7 @@ export default function Order() {
                                                 onRowsPerPageChange={onRowsPerPageChange}
                                                 tableHead={[
                                                     { name: "排序" },
+                                                    { name: "是否開放" },
                                                     { name: "訂單編號" },
                                                     { name: "訂單類型" },
                                                     { name: "城市" },
@@ -698,7 +829,11 @@ export default function Order() {
                                                     { name: "訂單金額" },
                                                     { name: "操作" },
                                                 ]}
-                                                tableBody={<TableBodyContent />}
+                                                tableBody={
+                                                    <TableBodyContent
+                                                        edit_Visible={edit_Visible}
+                                                    />
+                                                }
                                             />
                                             <PaginationActionsTS
                                                 totalPage={pageCount}
@@ -721,13 +856,23 @@ export default function Order() {
 /**新增modal內容*/
 const DialogsInner = forwardRef((props, ref) => {
     const { type, name, getEditData, o_id, options } = props;
+    const filteredData = type === "edit" ? getEditData.es_ids.filter(item => item.es_id !== "00001") : null;
+    const isNotEmpty = type === "edit" ? filteredData.length !== 0 : null;
+    // checkbox 狀態
+    const [checkboxState, setCheckboxState] = useState({
+        signboard: type === "edit" ? getEditData.es_ids.some(item => item.es_id === "00001") : false,
+        extra: type === "edit" ? isNotEmpty : false,
+        sameDetail: false,
+    });
 
     const orderTypeOptions = options.orderTypeOptions; // 訂單類型 (送機/接機)
     const cityOptions = options.cityAreaOptions.cityOptions; // 城市
     const areaOptions = options.cityAreaOptions.areaOptions; // 區域
     const airportOptions = options.airPortOptions.airportOptions; // 機場
     const terminalOptions = options.airPortOptions.terminalOptions; // 航廈
-    const carModelOptions = options.carModelOptions; // 車型
+    const passengerOptions = options.passengerOptions; // 人數
+    const bagsOptions = options.bagsOptions; // 行李數
+    const [carModelOptions, setCarModelOptions] = useState(options.carModelOptions);
 
     // 新增訂單
     const [orderAdd, setOrderAdd] = useState({
@@ -746,6 +891,7 @@ const DialogsInner = forwardRef((props, ref) => {
         number_passenger: null,
         number_bags: null,
         cms_id: null,
+        es_ids: null,
         signboard_title: null,
         signboard_content: null,
         name_purchaser: null,
@@ -754,8 +900,7 @@ const DialogsInner = forwardRef((props, ref) => {
         name_passenger: null,
         phone_passenger: null,
         email_passenger: null,
-        price: null,
-        link: null
+        calculation: "N"
     });
 
     const initOrderAddCheck = {
@@ -781,8 +926,6 @@ const DialogsInner = forwardRef((props, ref) => {
         name_passenger: false,
         phone_passenger: false,
         email_passenger: false,
-        price: false,
-        link: false
     }
     const [orderAddCheck, setOrderAddCheck] = useState(initOrderAddCheck);
 
@@ -791,6 +934,37 @@ const DialogsInner = forwardRef((props, ref) => {
         dtlData: getEditData,
         updData: { o_id: o_id }
     });
+
+    useEffect(() => {
+        if (type === "edit") {
+            let arr = [];
+            if (filteredData) {
+                arr.push(
+                    {
+                        es_id: "00001",
+                        count: "1",
+                    }
+                );
+            }
+            if (isNotEmpty) {
+                getEditData.es_ids.forEach(item => {
+                    arr.push(
+                        {
+                            es_id: item.es_id,
+                            count: item.count,
+                        }
+                    );
+                });
+            }
+            setEditData(prevData => ({
+                ...prevData,
+                updData: {
+                    ...prevData.updData,
+                    es_ids: arr,
+                }
+            }));
+        }
+    }, [getEditData]);
 
     const editInitCheckState = {
         type: false,
@@ -815,43 +989,109 @@ const DialogsInner = forwardRef((props, ref) => {
         name_passenger: false,
         phone_passenger: false,
         email_passenger: false,
-        price: false,
-        link: false
     };
     const [editFieldCheck, setEditFieldCheck] = useState(editInitCheckState);
+
+    // 新增加價勾選
+    const handleCheckboxChange = (event) => {
+        const { name, checked } = event.target;
+
+        if (name === "signboard") { // 舉牌
+            // 如果勾選, 就把舉牌加入es_ids欄位
+            let arr = [];
+            if (checked) {
+                arr.push(
+                    {
+                        es_id: options.extraOptions.find(item => item.type === "舉牌").es_id,
+                        count: "1",
+                    }
+                );
+            }
+            // 更新加購
+            setOrderAdd(prev => ({
+                ...prev,
+                es_ids: checked ? arr : null,
+            }))
+        } else if (name === "sameDetail" && checked) { // 同訂購人
+            setOrderAdd(prev => ({
+                ...prev,
+                name_passenger: orderAdd.name_purchaser,
+                phone_passenger: orderAdd.phone_purchaser,
+                email_passenger: orderAdd.email_purchaser,
+            }));
+        } else {
+            setOrderAdd(prev => ({
+                ...prev,
+                name_passenger: null,
+                phone_passenger: null,
+                email_passenger: null,
+            }));
+        }
+
+        setCheckboxState({
+            ...checkboxState,
+            [name]: checked,
+        });
+    };
+
+    // 編輯加價勾選
+    const handleCheckboxChangeEdit = (event) => {
+        const { name, checked } = event.target;
+
+        if (name === "signboard") { // 舉牌
+            // 如果勾選, 就把舉牌加入es_ids欄位
+            let arr = [];
+            if (checked) {
+                arr.push(
+                    {
+                        es_id: options.extraOptions.find(item => item.type === "舉牌").es_id,
+                        count: "1",
+                    }
+                );
+            }
+            setEditData(prevData => ({
+                ...prevData,
+                updData: {
+                    ...prevData.updData,
+                    es_ids: checked ? arr : null,
+                }
+            }));
+        }
+        setCheckboxState({
+            ...checkboxState,
+            [name]: checked,
+        });
+    };
 
     /**新增 input */
     const add_handelInput = e => {
         const { name, value } = e.target;
         const val = value === "" ? null : value;
 
-        let formattedValue = value;
         if (name === "date_travel") {
-            formattedValue = new Date(value).toLocaleDateString('en-CA');
+            let formattedValue = val;
+            formattedValue = formattedValue.split('T')[0];
+
             setOrderAdd(prev => ({
                 ...prev,
                 [name]: formattedValue
             }));
         } else if (name === "time_travel") {
-            const dateTravelValue = orderAdd.date_travel;
-            if (dateTravelValue) {
-                formattedValue = `${dateTravelValue}T${value}:00`;
-            }
             setOrderAdd(prev => ({
                 ...prev,
-                [name]: formattedValue
+                [name]: val + ":00"
+            }));
+        } else {
+            setOrderAdd(prev => ({
+                ...prev,
+                [name]: val
             }));
         }
-
-        setOrderAdd(prev => ({
-            ...prev,
-            [name]: val
-        }));
     };
 
     /**[事件]下拉選單 */
     const add_HandleSelect = (e) => {
-        const { name, value, key } = e.target;
+        const { id, name, value, key } = e.target;
         const val = value === null ? null : value[key];
 
         if (name === "city") {
@@ -866,12 +1106,60 @@ const DialogsInner = forwardRef((props, ref) => {
                 terminal: null,
                 [name]: val,
             }));
-        }
+        } else if (name === "number_passenger") {
+            setOrderAdd(prev => ({
+                ...prev,
+                [name]: val,
+            }));
 
-        setOrderAdd(prev => ({
-            ...prev,
-            [name]: val,
-        }));
+            const passengerCount = parseInt(val) || 0; // 選擇人數
+            const luggageCount = parseInt(orderAdd.number_bags ? orderAdd.number_bags : 0) || 0; // 選擇行李數
+
+            const filteredVehicles = options.carModelOptions.filter(item => item.max_passengers >= passengerCount && item.max_luggage >= luggageCount);
+
+            setCarModelOptions(filteredVehicles);
+        } else if (name === "number_bags") {
+            setOrderAdd(prev => ({
+                ...prev,
+                [name]: val,
+            }));
+
+            const passengerCount = parseInt(orderAdd.number_passenger ? orderAdd.number_passenger : 0) || 0; // 選擇人數
+            const luggageCount = parseInt(val) || 0; // 選擇行李數
+
+            const filteredVehicles = options.carModelOptions.filter(item => item.max_passengers >= passengerCount && item.max_luggage >= luggageCount);
+
+            setCarModelOptions(filteredVehicles);
+        } else if (name === "es_ids") {
+            let arr = orderAdd.es_ids ? [...orderAdd.es_ids] : []; // 使用展開運算符號來複製陣列
+            const index = arr.findIndex(item => item.es_id === id); // 找到相同 es_id 的物件索引
+
+            if (index !== -1) {
+                // 如果已經存在相同 es_id，更新 count
+                if (val === null) {
+                    // 如果 count 為 0，移除該物件
+                    arr = arr.filter(item => item.es_id !== id);
+                } else {
+                    arr[index].count = val;
+                }
+            } else {
+                // 如果不存在相同 es_id，新增一個新物件
+                arr.push({
+                    es_id: id,
+                    count: val,
+                });
+            }
+
+            setOrderAdd(prev => ({
+                ...prev,
+                [name]: arr.length > 0 ? arr : null,
+            }))
+        } else {
+            setOrderAdd(prev => ({
+                ...prev,
+                [name]: val,
+            }));
+        }
     };
 
     /**
@@ -879,6 +1167,10 @@ const DialogsInner = forwardRef((props, ref) => {
      */
     const edit_HandleInput = (e) => {
         const { name, value } = e.target;
+
+        if (name === "signboard") {
+
+        }
 
         setEditData(prevData => ({
             ...prevData,
@@ -891,7 +1183,7 @@ const DialogsInner = forwardRef((props, ref) => {
 
     /**[事件]下拉選單 */
     const edit_HandleSelect = (e) => {
-        const { name, value, key } = e.target;
+        const { id, name, value, key } = e.target;
         const val = value === null ? null : value[key];
 
         if (name === "city") {
@@ -912,15 +1204,71 @@ const DialogsInner = forwardRef((props, ref) => {
                     [name]: val
                 }
             }));
-        }
+        } else if (name === "number_passenger") {
+            setEditData(prev => ({
+                ...prev,
+                updData: {
+                    ...prev.updData,
+                    [name]: val,
+                }
+            }));
 
-        setEditData(prev => ({
-            ...prev,
-            updData: {
-                ...prev.updData,
-                [name]: val
+            const passengerCount = parseInt(val) || 0; // 選擇人數
+            const luggageCount = parseInt(editData.number_bags ? editData.number_bags : 0) || 0; // 選擇行李數
+
+            const filteredVehicles = options.carModelOptions.filter(item => item.max_passengers >= passengerCount && item.max_luggage >= luggageCount);
+
+            setCarModelOptions(filteredVehicles);
+        } else if (name === "number_bags") {
+            setEditData(prev => ({
+                ...prev,
+                updData: {
+                    ...prev.updData,
+                    [name]: val,
+                }
+            }));
+
+            const passengerCount = parseInt(editData.number_passenger ? editData.number_passenger : 0) || 0; // 選擇人數
+            const luggageCount = parseInt(val) || 0; // 選擇行李數
+
+            const filteredVehicles = options.carModelOptions.filter(item => item.max_passengers >= passengerCount && item.max_luggage >= luggageCount);
+
+            setCarModelOptions(filteredVehicles);
+        } else if (name === "es_ids") {
+            let arr = editData.updData.es_ids ? [...editData.updData.es_ids] : []; // 使用展開運算符號來複製陣列
+            const index = arr.findIndex(item => item.es_id === id); // 找到相同 es_id 的物件索引
+            if (index !== -1) {
+                // 如果已經存在相同 es_id，更新 count
+                if (val === null) {
+                    // 如果 count 為 0，移除該物件
+                    arr = arr.filter(item => item.es_id !== id);
+                } else {
+                    arr[index].count = val;
+                }
+            } else {
+                // 如果不存在相同 es_id，新增一個新物件
+                arr.push({
+                    es_id: id,
+                    count: val,
+                });
             }
-        }));
+
+            setEditData(prev => ({
+                ...prev,
+                updData: {
+                    ...prev.updData,
+                    [name]: arr.length > 0 ? arr : null,
+                }
+            }))
+        } else {
+            setEditData(prev => ({
+                ...prev,
+                updData: {
+                    ...prev.updData,
+                    [name]: val
+                }
+            }));
+        }
     };
 
     // 給父層function使用
@@ -1168,25 +1516,28 @@ const DialogsInner = forwardRef((props, ref) => {
                         <Typography variant="subtitle1" gutterBottom>人數及行李</Typography>
                     </Grid>
                     <Grid item xs={12} md={4} lg={4}>
-                        <CusInput
+                        <CusOutlinedSelect
                             id={"add--number_passenger"}
                             name={"number_passenger"}
-                            label={"乘客人數"}
-                            type={"number"}
+                            label={"人數"}
+                            options={passengerOptions}
+                            optionKey={"name"}
                             error={orderAddCheck.number_passenger}
-                            value={orderAdd.number_passenger}
-                            onChangeEvent={(e) => add_handelInput(e)}
+                            value={passengerOptions.some(item => item.name === orderAdd.number_passenger) ? passengerOptions.find(item => item.name === orderAdd.number_passenger) : null}
+                            onChangeEvent={(e) => add_HandleSelect(e)}
                         />
                     </Grid>
                     <Grid item xs={12} md={4} lg={4}>
-                        <CusInput
+                        <CusOutlinedSelect
                             id={"add--number_bags"}
                             name={"number_bags"}
-                            label={"行李數量"}
-                            type={"number"}
+                            label={"行李數"}
+                            options={bagsOptions}
+                            optionKey={"name"}
                             error={orderAddCheck.number_bags}
-                            value={orderAdd.number_bags}
-                            onChangeEvent={(e) => add_handelInput(e)}
+                            value={bagsOptions.some(item => item.name === orderAdd.number_bags) ? bagsOptions.find(item => item.name === orderAdd.number_bags) : null}
+                            onChangeEvent={(e) => add_HandleSelect(e)}
+                            disabled={orderAdd.number_passenger ? false : true}
                         />
                     </Grid>
                     <Grid item xs={12}>
@@ -1207,25 +1558,66 @@ const DialogsInner = forwardRef((props, ref) => {
                     <Grid item xs={12}>
                         <Typography variant="subtitle1" gutterBottom>加價服務</Typography>
                     </Grid>
-                    <Grid item xs={12} md={4} lg={4}>
-                        <CusInput
-                            id={"add--signboard_title"}
-                            name={"signboard_title"}
-                            label={"舉牌標題"}
-                            error={orderAddCheck.signboard_title}
-                            value={orderAdd.signboard_title}
-                            onChangeEvent={(e) => add_handelInput(e)}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={4} lg={4}>
-                        <CusInput
-                            id={"add--signboard_content"}
-                            name={"signboard_content"}
-                            label={"舉牌內容"}
-                            error={orderAddCheck.signboard_content}
-                            value={orderAdd.signboard_content}
-                            onChangeEvent={(e) => add_handelInput(e)}
-                        />
+                    <Grid container>
+                        <Grid item lg={12} sm={12} xs={12}>
+                            <FormGroup>
+                                <FormControlLabel
+                                    control={<Checkbox name="signboard" checked={checkboxState.signboard} onChange={handleCheckboxChange} />}
+                                    label="接機舉牌 (+$200)"
+                                />
+                            </FormGroup>
+                        </Grid>
+                        {checkboxState.signboard ?
+                            <React.Fragment>
+                                <Grid item lg={12} sm={12} xs={12}>
+                                    <CusInput
+                                        id={"add--signboard_title"}
+                                        name={"signboard_title"}
+                                        label={"舉牌標題"}
+                                        error={orderAddCheck.signboard_title}
+                                        value={orderAdd.signboard_title}
+                                        onChangeEvent={(e) => add_handelInput(e)}
+                                    />
+                                </Grid>
+                                <Grid item lg={12} sm={12} xs={12}>
+                                    <CusInput
+                                        multiline
+                                        rows={4}
+                                        id={"add--signboard_content"}
+                                        name={"signboard_content"}
+                                        label={"舉牌內容"}
+                                        error={orderAddCheck.signboard_content}
+                                        value={orderAdd.signboard_content}
+                                        onChangeEvent={(e) => add_handelInput(e)}
+                                    />
+                                </Grid>
+                            </React.Fragment>
+                            : null}
+                        <Grid item lg={12} sm={12} xs={12}>
+                            <FormGroup>
+                                <FormControlLabel
+                                    control={<Checkbox name="extra" checked={checkboxState.extra} onChange={handleCheckboxChange} />}
+                                    label="加購兒童安全座椅及增高墊 (+$200)"
+                                />
+                            </FormGroup>
+                        </Grid>
+                        {checkboxState.extra ?
+                            options.extraOptions.filter(filterEle => filterEle.type !== "舉牌").map((mapEle, index) => {
+                                return (
+                                    <Grid key={mapEle.es_id} item lg={4} sm={4} xs={12}>
+                                        <CusOutlinedSelect
+                                            id={mapEle.es_id}
+                                            name={"es_ids"}
+                                            label={mapEle.name}
+                                            options={options.extraCount}
+                                            optionKey={"name"}
+                                            value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
+                                            onChangeEvent={(e) => add_HandleSelect(e)}
+                                        />
+                                    </Grid>
+                                )
+                            })
+                            : null}
                     </Grid>
                     <Grid item xs={12}>
                         <Typography variant="subtitle1" gutterBottom>基本資料</Typography>
@@ -1290,26 +1682,6 @@ const DialogsInner = forwardRef((props, ref) => {
                             onChangeEvent={(e) => add_handelInput(e)}
                         />
                     </Grid>
-                    <Grid item xs={12} md={4} lg={4}>
-                        <CusInput
-                            id={"add--price"}
-                            name={"price"}
-                            label={"價錢"}
-                            error={orderAddCheck.price}
-                            value={orderAdd.price}
-                            onChangeEvent={(e) => add_handelInput(e)}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={4} lg={4}>
-                        <CusInput
-                            id={"add--link"}
-                            name={"link"}
-                            label={"連結"}
-                            error={orderAddCheck.link}
-                            value={orderAdd.link}
-                            onChangeEvent={(e) => add_handelInput(e)}
-                        />
-                    </Grid>
                 </Grid>
             </React.Fragment>
         );
@@ -1318,6 +1690,7 @@ const DialogsInner = forwardRef((props, ref) => {
             ...editData.dtlData,
             ...editData.updData
         }
+        console.log("data: ", editData)
         return (
             <React.Fragment>
                 <Grid container>
@@ -1551,25 +1924,28 @@ const DialogsInner = forwardRef((props, ref) => {
                         <Typography variant="subtitle1" gutterBottom>人數及行李</Typography>
                     </Grid>
                     <Grid item xs={12} md={4} lg={4}>
-                        <CusInput
+                        <CusOutlinedSelect
                             id={"edit--number_passenger"}
                             name={"number_passenger"}
-                            label={"乘客人數"}
-                            type={"number"}
+                            label={"人數"}
+                            options={passengerOptions}
+                            optionKey={"name"}
                             error={editFieldCheck.number_passenger}
-                            value={data.number_passenger}
-                            onChangeEvent={(e) => edit_HandleInput(e)}
+                            value={passengerOptions.some(item => item.name === String(data.number_passenger)) ? passengerOptions.find(item => item.name === String(data.number_passenger)) : null}
+                            onChangeEvent={(e) => edit_HandleSelect(e)}
                         />
                     </Grid>
                     <Grid item xs={12} md={4} lg={4}>
-                        <CusInput
+                        <CusOutlinedSelect
                             id={"edit--number_bags"}
                             name={"number_bags"}
                             label={"行李數量"}
-                            type={"number"}
+                            options={bagsOptions}
+                            optionKey={"name"}
                             error={editFieldCheck.number_bags}
-                            value={data.number_bags}
-                            onChangeEvent={(e) => edit_HandleInput(e)}
+                            value={bagsOptions.some(item => item.name === String(data.number_bags)) ? bagsOptions.find(item => item.name === String(data.number_bags)) : null}
+                            onChangeEvent={(e) => edit_HandleSelect(e)}
+                            disabled={data.number_passenger ? false : true}
                         />
                     </Grid>
                     <Grid item xs={12}>
@@ -1590,25 +1966,66 @@ const DialogsInner = forwardRef((props, ref) => {
                     <Grid item xs={12}>
                         <Typography variant="subtitle1" gutterBottom>加價服務</Typography>
                     </Grid>
-                    <Grid item xs={12} md={4} lg={4}>
-                        <CusInput
-                            id={"edit--signboard_title"}
-                            name={"signboard_title"}
-                            label={"舉牌標題"}
-                            error={editFieldCheck.signboard_title}
-                            value={data.signboard_title}
-                            onChangeEvent={(e) => edit_HandleInput(e)}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={4} lg={4}>
-                        <CusInput
-                            id={"edit--signboard_content"}
-                            name={"signboard_content"}
-                            label={"舉牌內容"}
-                            error={editFieldCheck.signboard_content}
-                            value={data.signboard_content}
-                            onChangeEvent={(e) => edit_HandleInput(e)}
-                        />
+                    <Grid container>
+                        <Grid item lg={12} sm={12} xs={12}>
+                            <FormGroup>
+                                <FormControlLabel
+                                    control={<Checkbox name="signboard" checked={checkboxState.signboard} onChange={handleCheckboxChangeEdit} />}
+                                    label="接機舉牌 (+$200)"
+                                />
+                            </FormGroup>
+                        </Grid>
+                        {checkboxState.signboard ?
+                            <React.Fragment>
+                                <Grid item lg={12} sm={12} xs={12}>
+                                    <CusInput
+                                        id={"edit--signboard_title"}
+                                        name={"signboard_title"}
+                                        label={"舉牌標題"}
+                                        error={editFieldCheck.signboard_title}
+                                        value={data.signboard_title}
+                                        onChangeEvent={(e) => edit_HandleInput(e)}
+                                    />
+                                </Grid>
+                                <Grid item lg={12} sm={12} xs={12}>
+                                    <CusInput
+                                        multiline
+                                        rows={4}
+                                        id={"edit--signboard_content"}
+                                        name={"signboard_content"}
+                                        label={"舉牌內容"}
+                                        error={editFieldCheck.signboard_content}
+                                        value={data.signboard_content}
+                                        onChangeEvent={(e) => edit_HandleInput(e)}
+                                    />
+                                </Grid>
+                            </React.Fragment>
+                            : null}
+                        <Grid item lg={12} sm={12} xs={12}>
+                            <FormGroup>
+                                <FormControlLabel
+                                    control={<Checkbox name="extra" checked={checkboxState.extra} onChange={handleCheckboxChangeEdit} />}
+                                    label="加購兒童安全座椅及增高墊 (+$200)"
+                                />
+                            </FormGroup>
+                        </Grid>
+                        {checkboxState.extra ?
+                            options.extraOptions.filter(filterEle => filterEle.type !== "舉牌").map((mapEle, index) => {
+                                return (
+                                    <Grid key={mapEle.es_id} item lg={4} sm={4} xs={12}>
+                                        <CusOutlinedSelect
+                                            id={mapEle.es_id}
+                                            name={"es_ids"}
+                                            label={mapEle.name}
+                                            options={options.extraCount}
+                                            optionKey={"name"}
+                                            value={data.es_ids ? (data.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === String(data.es_ids.find(item => item.es_id === mapEle.es_id).count)) : null) : null}
+                                            onChangeEvent={(e) => edit_HandleSelect(e)}
+                                        />
+                                    </Grid>
+                                )
+                            })
+                            : null}
                     </Grid>
                     <Grid item xs={12}>
                         <Typography variant="subtitle1" gutterBottom>基本資料</Typography>
@@ -1670,26 +2087,6 @@ const DialogsInner = forwardRef((props, ref) => {
                             label={"乘客信箱"}
                             error={editFieldCheck.email_passenger}
                             value={data.email_passenger}
-                            onChangeEvent={(e) => edit_HandleInput(e)}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={4} lg={4}>
-                        <CusInput
-                            id={"edit--price"}
-                            name={"price"}
-                            label={"價錢"}
-                            error={editFieldCheck.price}
-                            value={data.price}
-                            onChangeEvent={(e) => edit_HandleInput(e)}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={4} lg={4}>
-                        <CusInput
-                            id={"edit--link"}
-                            name={"link"}
-                            label={"連結"}
-                            error={editFieldCheck.link}
-                            value={data.link}
                             onChangeEvent={(e) => edit_HandleInput(e)}
                         />
                     </Grid>

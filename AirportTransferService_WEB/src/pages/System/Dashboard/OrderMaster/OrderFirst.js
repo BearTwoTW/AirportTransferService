@@ -177,7 +177,6 @@ export default function Order() {
             setPageSearch(prev => ({
                 ...prev,
                 ...search_set,
-                visible: "Y",
             }));
 
             // 存在search_set就用indexedDB的搜尋條件，不然就用預設的搜尋條件
@@ -401,7 +400,6 @@ export default function Order() {
 
     /** table body */
     const TableBodyContent = React.memo((props) => {
-        const { edit_Visible } = props;
         return (
             orderList.map((item, index) => (
                 <TableRow
@@ -1189,17 +1187,34 @@ const DialogsInner = forwardRef((props, ref) => {
     const edit_HandleInput = (e) => {
         const { name, value } = e.target;
 
-        if (name === "signboard") {
+        if (name === "date_travel") {
+            let formattedValue = value;
+            formattedValue = formattedValue.split('T')[0];
 
+            setEditData(prev => ({
+                ...prev,
+                updData: {
+                    ...prev.updData,
+                    [name]: formattedValue
+                }
+            }));
+        } else if (name === "time_travel") {
+            setEditData(prev => ({
+                ...prev,
+                updData: {
+                    ...prev.updData,
+                    [name]: value + ":00"
+                }
+            }));
+        } else {
+            setEditData(prev => ({
+                ...prev,
+                updData: {
+                    ...prev.updData,
+                    [name]: value
+                }
+            }));
         }
-
-        setEditData(prevData => ({
-            ...prevData,
-            updData: {
-                ...prevData.updData,
-                [name]: value
-            }
-        }));
     };
 
     /**[事件]下拉選單 */

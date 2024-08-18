@@ -7,14 +7,14 @@ const clientsConfigPath = path.resolve(__dirname, 'clientsConfig.json');
 const clientsConfig = require(clientsConfigPath);
 
 // 根據需要的客戶名稱，這裡假設使用環境變數或其他方式指定
-const targetClientName = process.env.TARGET_CLIENT || 'ECC';
+const targetClientName = process.env.TARGET_CLIENT || 'ATS';
 
 // 找到目標客戶的配置
 const targetClientConfig = clientsConfig.find(client => client.clientName === targetClientName);
 
 if (!targetClientConfig) {
-  console.error(`未找到名為 ${targetClientName} 的客戶配置。`);
-  process.exit(1);
+    console.error(`未找到名為 ${targetClientName} 的客戶配置。`);
+    process.exit(1);
 }
 
 // 讀取原始的 index.html

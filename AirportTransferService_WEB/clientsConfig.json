@@ -1,26 +1,8 @@
 [
   {
     "clientName": "ATS",
-    "title": "ATS測試網站",
-    "description": "ATS測試網站",
-    "ga_script": ""
-  },
-  {
-    "clientName": "tommeat",
-    "title": "糧呈喆食嚴選食品",
-    "description": "糧呈喆食嚴選食品",
-    "ga_script": ""
-  },
-  {
-    "clientName": "eccrde",
-    "title": "瑞達汽車商城",
-    "description": "瑞達汽車商城",
-    "ga_script": "<script async src=\"https://www.googletagmanager.com/gtag/js?id=G-J3C6K5EESJ\"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);} gtag('js', new Date());gtag('config', 'G-J3C6K5EESJ');</script>"
-  },
-  {
-    "clientName": "eccrdetest",
-    "title": "瑞達汽車商城測試",
-    "description": "瑞達汽車商城測試",
+    "title": "55688 商城機場接送預約及車資試算",
+    "description": "55688 商城機場接送預約及車資試算",
     "ga_script": ""
   }
 ]

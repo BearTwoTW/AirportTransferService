@@ -459,8 +459,8 @@ namespace AirportTransferService.App_Code
                 && (property.GetValue(param) == null || !((IEnumerable<object>?)property.GetValue(param) ?? []).Any())) continue;
 
                 else if ((property.PropertyType == typeof(DateTime) || property.PropertyType == typeof(DateTime?)) && Convert.ToDateTime(property.GetValue(param)) == Appsettings.api_datetime_param_no_pass) continue;
-                else if ((property.PropertyType == typeof(DateOnly) || property.PropertyType == typeof(DateOnly?)) && DateOnly.FromDateTime(Convert.ToDateTime(property.GetValue(param)?.ToString())) == Appsettings.api_dateonly_param_no_pass) continue;
-                else if ((property.PropertyType == typeof(TimeOnly) || property.PropertyType == typeof(TimeOnly?)) && TimeOnly.FromDateTime(Convert.ToDateTime(property.GetValue(param)?.ToString())) == Appsettings.api_timeonly_param_no_pass) continue;
+                else if ((property.PropertyType == typeof(DateOnly) || property.PropertyType == typeof(DateOnly?)) && property.GetValue(param) as DateOnly? == Appsettings.api_dateonly_param_no_pass) continue;
+                else if ((property.PropertyType == typeof(TimeOnly) || property.PropertyType == typeof(TimeOnly?)) && property.GetValue(param) as TimeOnly? == Appsettings.api_timeonly_param_no_pass) continue;
 
                 if (string.IsNullOrEmpty(str))
                 {

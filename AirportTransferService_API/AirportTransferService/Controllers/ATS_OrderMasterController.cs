@@ -1,7 +1,4 @@
-﻿using AirportTransferService.Models;
-using DocumentFormat.OpenXml.Office2010.Excel;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace AirportTransferService.Controllers
 {
@@ -144,12 +141,15 @@ namespace AirportTransferService.Controllers
         private ResultObject<ValidateOrderResult> ValidateOrder(ATS_OrderMasterCreate data)
         {
             #region 檢查預約日期時間: date_travel+time_travel 轉為 DateTime 要大於 48 小時
-            try
+            if (!data.date_travel.Equals(Appsettings.api_dateonly_param_no_pass))
             {
-                if (data.date_travel!.Value.ToDateTime((TimeOnly)data.time_travel!) < DateTime.Now.AddHours(48))
-                    return new ResultObject<ValidateOrderResult> { success = false, message = "預約時間需大於 48 小時" };
+                try
+                {
+                    if (data.date_travel!.Value.ToDateTime((TimeOnly)data.time_travel!) < DateTime.Now.AddHours(48))
+                        return new ResultObject<ValidateOrderResult> { success = false, message = "預約時間需大於 48 小時" };
+                }
+                catch (Exception e) { return new ResultObject<ValidateOrderResult> { success = false, message = $"預約日期時間格式錯誤:{JsonConvert.SerializeObject(e)}" }; }
             }
-            catch (Exception e) { return new ResultObject<ValidateOrderResult> { success = false, message = $"預約日期時間格式錯誤:{JsonConvert.SerializeObject(e)}" }; }
             #endregion
 
             #region 檢查重複: 檢查內容尚未確認
@@ -162,34 +162,44 @@ namespace AirportTransferService.Controllers
             #endregion
 
             #region 檢查類別
-            if (!Enum.TryParse(data.type, out OrderType _)) return new ResultObject<ValidateOrderResult> { success = false, message = "類別(接機/送機)錯誤" };
+            if (!data.type.Equals(Appsettings.api_string_param_no_pass))
+            {
+                if (!Enum.TryParse(data.type, out OrderType _)) return new ResultObject<ValidateOrderResult> { success = false, message = "類別(接機/送機)錯誤" };
+            }
             #endregion
 
             #region 檢查車資
-            List<SearchATS_FareSettingsResult> resultSearchATS_FareSettings = ExecuteSearchATS_FareSettings(
-                new SearchATS_FareSettingsParam(
-                    visible: "Y",
-                    cms_id: data.cms_id,
-                    city: data.city,
-                    area: data.area,
-                    road: data.road,
-                    section: data.section,
-                    airport: data.airport,
-                    terminal: data.terminal));
-            if (resultSearchATS_FareSettings.Count == 0) return new ResultObject<ValidateOrderResult> { success = false, message = "車資不存在" };
-            if ((resultSearchATS_FareSettings[0].price ?? 0) == 0) return new ResultObject<ValidateOrderResult> { success = false, message = "車資尚未設定" };
-            decimal? price = resultSearchATS_FareSettings[0].price;
+            decimal? price = 0;
+            if (!data.cms_id!.Equals(Appsettings.api_string_param_no_pass))
+            {
+                List<SearchATS_FareSettingsResult> resultSearchATS_FareSettings = ExecuteSearchATS_FareSettings(
+                    new SearchATS_FareSettingsParam(
+                        visible: "Y",
+                        cms_id: data.cms_id,
+                        city: data.city,
+                        area: data.area,
+                        road: data.road,
+                        section: data.section,
+                        airport: data.airport,
+                        terminal: data.terminal));
+                if (resultSearchATS_FareSettings.Count == 0) return new ResultObject<ValidateOrderResult> { success = false, message = "車資不存在" };
+                if ((resultSearchATS_FareSettings[0].price ?? 0) == 0) return new ResultObject<ValidateOrderResult> { success = false, message = "車資尚未設定" };
+                price = resultSearchATS_FareSettings[0].price;
+            }
             #endregion
 
             #region 檢查機場
-            List<SearchATS_AirportTerminalSettingsResult> resultSearchATS_AirportTerminalSettings = _ATS_AirportTerminalSettings.SearchATS_AirportTerminalSettings(
-                new SearchATS_AirportTerminalSettingsParam(
-                    visible: "Y",
-                    airport: data.airport,
-                    terminal: data.terminal),
-                ["ats_id"], [],
-                out int _);
-            if (resultSearchATS_AirportTerminalSettings.Count == 0) return new ResultObject<ValidateOrderResult> { success = false, message = "機場不存在" };
+            if (!data.cms_id.Equals(Appsettings.api_string_param_no_pass))
+            {
+                List<SearchATS_AirportTerminalSettingsResult> resultSearchATS_AirportTerminalSettings = _ATS_AirportTerminalSettings.SearchATS_AirportTerminalSettings(
+                    new SearchATS_AirportTerminalSettingsParam(
+                        visible: "Y",
+                        airport: data.airport,
+                        terminal: data.terminal),
+                    ["ats_id"], [],
+                    out int _);
+                if (resultSearchATS_AirportTerminalSettings.Count == 0) return new ResultObject<ValidateOrderResult> { success = false, message = "機場不存在" };
+            }
             #endregion
 
             #region 檢查加購項目
@@ -220,37 +230,43 @@ namespace AirportTransferService.Controllers
             #endregion
 
             #region 檢查夜間加成
-            List<SearchSystemSettingResult> SearchSystemSetting_result = _systemSettings.SearchSystemSetting(new SearchSystemSettingParam(), ["value_json", "ssm_name"], out int _);
-            SearchSystemSettingResult? SearchSystemSetting_target = SearchSystemSetting_result.Where(x => (x.ssm_name ?? "").Equals("夜間加成")).FirstOrDefault();
-            if (SearchSystemSetting_target == null || SearchSystemSetting_target.value_json == null) return new ResultObject<ValidateOrderResult> { success = false, message = "系統設定遺失" };
-            List<DictionaryKeyValue> keyValues = JsonConvert.DeserializeObject<List<DictionaryKeyValue>>(SearchSystemSetting_target.value_json) ?? [];
-            if (keyValues.Count == 0) return new ResultObject<ValidateOrderResult> { success = false, message = "夜間加成設定遺失" };
-            try
+            if (!data.time_travel.Equals(Appsettings.api_timeonly_param_no_pass))
             {
-                TimeOnly timeStart = new(
-                    Convert.ToInt32(keyValues.Where(x => x.key.Equals("時間小時起")).FirstOrDefault()?.value ?? "23"),
-                    Convert.ToInt32(keyValues.Where(x => x.key.Equals("時間分鐘起")).FirstOrDefault()?.value ?? "0"));
-                TimeOnly timeEnd = new(
-                    Convert.ToInt32(keyValues.Where(x => x.key.Equals("時間小時迄")).FirstOrDefault()?.value ?? "5"),
-                    Convert.ToInt32(keyValues.Where(x => x.key.Equals("時間分鐘迄")).FirstOrDefault()?.value ?? "59"));
+                List<SearchSystemSettingResult> SearchSystemSetting_result = _systemSettings.SearchSystemSetting(new SearchSystemSettingParam(), ["value_json", "ssm_name"], out int _);
+                SearchSystemSettingResult? SearchSystemSetting_target = SearchSystemSetting_result.Where(x => (x.ssm_name ?? "").Equals("夜間加成")).FirstOrDefault();
+                if (SearchSystemSetting_target == null || SearchSystemSetting_target.value_json == null) return new ResultObject<ValidateOrderResult> { success = false, message = "系統設定遺失" };
+                List<DictionaryKeyValue> keyValues = JsonConvert.DeserializeObject<List<DictionaryKeyValue>>(SearchSystemSetting_target.value_json) ?? [];
+                if (keyValues.Count == 0) return new ResultObject<ValidateOrderResult> { success = false, message = "夜間加成設定遺失" };
+                try
+                {
+                    TimeOnly timeStart = new(
+                        Convert.ToInt32(keyValues.Where(x => x.key.Equals("時間小時起")).FirstOrDefault()?.value ?? "23"),
+                        Convert.ToInt32(keyValues.Where(x => x.key.Equals("時間分鐘起")).FirstOrDefault()?.value ?? "0"));
+                    TimeOnly timeEnd = new(
+                        Convert.ToInt32(keyValues.Where(x => x.key.Equals("時間小時迄")).FirstOrDefault()?.value ?? "5"),
+                        Convert.ToInt32(keyValues.Where(x => x.key.Equals("時間分鐘迄")).FirstOrDefault()?.value ?? "59"));
 
-                if (IsTimeInRange(timeStart, timeEnd, data.time_travel))
-                    price += Convert.ToDecimal(keyValues.Where(x => x.key.Equals("金額")).FirstOrDefault()?.value ?? "200");
+                    if (IsTimeInRange(timeStart, timeEnd, data.time_travel))
+                        price += Convert.ToDecimal(keyValues.Where(x => x.key.Equals("金額")).FirstOrDefault()?.value ?? "200");
+                }
+                catch (Exception e) { return new ResultObject<ValidateOrderResult> { success = false, message = $"夜間加成日期時間格式錯誤:{JsonConvert.SerializeObject(e)}" }; }
             }
-            catch (Exception e) { return new ResultObject<ValidateOrderResult> { success = false, message = $"夜間加成日期時間格式錯誤:{JsonConvert.SerializeObject(e)}" }; }
             #endregion
 
             #region 檢查車型
-            List<SearchATS_CarModelSettingsResult> resultSearchATS_CarModelSettings = _ATS_CarModelSettings.SearchATS_CarModelSettings(
-                new SearchATS_CarModelSettingsParam(
-                    cms_id: data.cms_id,
-                    visible: "Y"),
-                ["cms_id", "max_passengers", "max_luggage", "max_child_seats", "max_service_extras"], [],
-                out int _);
-            if (resultSearchATS_CarModelSettings.Count == 0) return new ResultObject<ValidateOrderResult> { success = false, message = "車型不存在" };
-            if (data.number_passenger > resultSearchATS_CarModelSettings[0].max_passengers) return new ResultObject<ValidateOrderResult> { success = false, message = "乘車人數超過車型限制" };
-            if (data.number_bags > resultSearchATS_CarModelSettings[0].max_luggage) return new ResultObject<ValidateOrderResult> { success = false, message = "行李數超過車型限制" };
-            if (count_total_combine > resultSearchATS_CarModelSettings[0].max_child_seats) return new ResultObject<ValidateOrderResult> { success = false, message = "安全座椅數量超過車型限制" };
+            if (!data.cms_id.Equals(Appsettings.api_string_param_no_pass))
+            {
+                List<SearchATS_CarModelSettingsResult> resultSearchATS_CarModelSettings = _ATS_CarModelSettings.SearchATS_CarModelSettings(
+                    new SearchATS_CarModelSettingsParam(
+                        cms_id: data.cms_id,
+                        visible: "Y"),
+                    ["cms_id", "max_passengers", "max_luggage", "max_child_seats", "max_service_extras"], [],
+                    out int _);
+                if (resultSearchATS_CarModelSettings.Count == 0) return new ResultObject<ValidateOrderResult> { success = false, message = "車型不存在" };
+                if (data.number_passenger > resultSearchATS_CarModelSettings[0].max_passengers) return new ResultObject<ValidateOrderResult> { success = false, message = "乘車人數超過車型限制" };
+                if (data.number_bags > resultSearchATS_CarModelSettings[0].max_luggage) return new ResultObject<ValidateOrderResult> { success = false, message = "行李數超過車型限制" };
+                if (count_total_combine > resultSearchATS_CarModelSettings[0].max_child_seats) return new ResultObject<ValidateOrderResult> { success = false, message = "安全座椅數量超過車型限制" };
+            }
             #endregion
 
             return new ResultObject<ValidateOrderResult> { success = true, data = new ValidateOrderResult { exists_es_ids = exists_es_ids, price = price } };
@@ -334,26 +350,46 @@ namespace AirportTransferService.Controllers
         {
             // 查自己
             SearchATS_OrderMasterResult? search_own_result = _ATS_OrderMaster.SearchATS_OrderMaster(
-                new SearchATS_OrderMasterParam(o_id: data.o_id),
-                ["o_id", "type", "city", "area", "road", "section", "airport", "terminal", "date_travel", "time_travel", "number_passenger", "number_bags", "cms_id"], [],
-                out int _).FirstOrDefault();
+            new SearchATS_OrderMasterParam(o_id: data.o_id),
+            ["o_id", "type", "city", "area", "road", "section", "airport", "terminal", "date_travel", "time_travel", "number_passenger", "number_bags", "cms_id"], [],
+            out int _).FirstOrDefault();
             if (search_own_result == null) return new ResultObject<object> { success = false, message = "修改失敗，查無訂單" };
 
+            bool isFareUpdate = !data.cms_id.Equals(Appsettings.api_string_param_no_pass)
+                || !data.city.Equals(Appsettings.api_string_param_no_pass)
+                || !data.area.Equals(Appsettings.api_string_param_no_pass)
+                || !data.road.Equals(Appsettings.api_string_param_no_pass)
+                || !data.section.Equals(Appsettings.api_string_param_no_pass)
+                || !data.airport.Equals(Appsettings.api_string_param_no_pass)
+                || !data.terminal.Equals(Appsettings.api_string_param_no_pass);
             // 驗證訂單資料
             ResultObject<ValidateOrderResult> validateResult = ValidateOrder(new ATS_OrderMasterCreate
             {
-                type = data.type == Appsettings.api_string_param_no_pass ? search_own_result.type : data.type,
-                city = data.city == Appsettings.api_string_param_no_pass ? search_own_result.city : data.city,
-                area = data.area == Appsettings.api_string_param_no_pass ? search_own_result.area : data.area,
-                road = data.road == Appsettings.api_string_param_no_pass ? search_own_result.road : data.road,
-                section = data.section == Appsettings.api_string_param_no_pass ? search_own_result.section : data.section,
-                airport = data.airport == Appsettings.api_string_param_no_pass ? search_own_result.airport : data.airport,
-                terminal = data.terminal == Appsettings.api_string_param_no_pass ? search_own_result.terminal : data.terminal,
-                date_travel = data.date_travel == Appsettings.api_dateonly_param_no_pass ? search_own_result.date_travel : data.date_travel,
-                time_travel = data.time_travel == Appsettings.api_timeonly_param_no_pass ? search_own_result.time_travel : data.time_travel,
-                number_passenger = data.number_passenger == Appsettings.api_numeric_param_no_pass ? search_own_result.number_passenger : data.number_passenger,
-                number_bags = data.number_bags == Appsettings.api_numeric_param_no_pass ? search_own_result.number_bags : data.number_bags,
-                cms_id = data.cms_id == Appsettings.api_string_param_no_pass ? search_own_result.cms_id : data.cms_id,
+                //TODO: 如果沒有要更改的話，應該不用再次檢查
+                //type = data.type == Appsettings.api_string_param_no_pass ? search_own_result.type : data.type,
+                //city = data.city == Appsettings.api_string_param_no_pass ? search_own_result.city : data.city,
+                //area = data.area == Appsettings.api_string_param_no_pass ? search_own_result.area : data.area,
+                //road = data.road == Appsettings.api_string_param_no_pass ? search_own_result.road : data.road,
+                //section = data.section == Appsettings.api_string_param_no_pass ? search_own_result.section : data.section,
+                //airport = data.airport == Appsettings.api_string_param_no_pass ? search_own_result.airport : data.airport,
+                //terminal = data.terminal == Appsettings.api_string_param_no_pass ? search_own_result.terminal : data.terminal,
+                //date_travel = data.date_travel == Appsettings.api_dateonly_param_no_pass ? search_own_result.date_travel : data.date_travel,
+                //time_travel = data.time_travel == Appsettings.api_timeonly_param_no_pass ? search_own_result.time_travel : data.time_travel,
+                //number_passenger = data.number_passenger == Appsettings.api_numeric_param_no_pass ? search_own_result.number_passenger : data.number_passenger,
+                //number_bags = data.number_bags == Appsettings.api_numeric_param_no_pass ? search_own_result.number_bags : data.number_bags,
+                //cms_id = data.cms_id == Appsettings.api_string_param_no_pass ? search_own_result.cms_id : data.cms_id,
+                type = data.type == Appsettings.api_string_param_no_pass && isFareUpdate ? search_own_result.type : data.type,
+                city = data.city == Appsettings.api_string_param_no_pass && isFareUpdate ? search_own_result.city : data.city,
+                area = data.area == Appsettings.api_string_param_no_pass && isFareUpdate ? search_own_result.area : data.area,
+                road = data.road == Appsettings.api_string_param_no_pass && isFareUpdate ? search_own_result.road : data.road,
+                section = data.section == Appsettings.api_string_param_no_pass && isFareUpdate ? search_own_result.section : data.section,
+                airport = data.airport == Appsettings.api_string_param_no_pass && isFareUpdate ? search_own_result.airport : data.airport,
+                terminal = data.terminal == Appsettings.api_string_param_no_pass && isFareUpdate ? search_own_result.terminal : data.terminal,
+                date_travel = data.date_travel,
+                time_travel = data.time_travel,
+                number_passenger = data.number_passenger,
+                number_bags = data.number_bags,
+                cms_id = data.cms_id,
                 es_ids = data.es_ids
             });
             if (!validateResult.success) return new ResultObject<object> { success = validateResult.success, message = validateResult.message, data = validateResult.data };
@@ -364,19 +400,19 @@ namespace AirportTransferService.Controllers
             DateTime now_time = DateTime.Now;
             using (TransactionScope tx = new())
             {
-                // 刪除原來的加購項目
-                List<SearchATS_OrderDetailResult> resultSearchATS_OrderDetail = _ATS_OrderDetail.SearchATS_OrderDetail(
-                    new SearchATS_OrderDetailParam(o_id: data.o_id),
-                    ["od_id"], [],
-                    out int _);
-                foreach (SearchATS_OrderDetailResult item in resultSearchATS_OrderDetail)
-                {
-                    _ATS_OrderDetail.DeleteATS_OrderDetail(od_id: item.od_id!);
-                }
-
                 // 如果有新的加購項目
                 if (exists_es_ids != null && exists_es_ids.Count > 0)
                 {
+                    // 刪除原來的加購項目
+                    List<SearchATS_OrderDetailResult> resultSearchATS_OrderDetail = _ATS_OrderDetail.SearchATS_OrderDetail(
+                        new SearchATS_OrderDetailParam(o_id: data.o_id),
+                        ["od_id"], [],
+                        out int _);
+                    foreach (SearchATS_OrderDetailResult item in resultSearchATS_OrderDetail)
+                    {
+                        _ATS_OrderDetail.DeleteATS_OrderDetail(od_id: item.od_id!);
+                    }
+
                     foreach ((SearchATS_ExtraSettingsResult result, int? count) in exists_es_ids)
                     {
                         // 建立訂單明細
@@ -395,12 +431,17 @@ namespace AirportTransferService.Controllers
                     }
                 }
 
+                if (price == 0) price = Appsettings.api_numeric_param_no_pass;
+                List<SearchATS_PriceLinkSettingsResult> resultSearchATS_PriceLinkSettings = [];
                 // 拿價錢查連結
-                List<SearchATS_PriceLinkSettingsResult> resultSearchATS_PriceLinkSettings = _ATS_PriceLinkSettings.SearchATS_PriceLinkSettings(
-                    new SearchATS_PriceLinkSettingsParam(price: price),
-                    ["link"], [],
-                    out int _);
-                if (resultSearchATS_PriceLinkSettings.Count == 0) return new ResultObject<object> { success = false, message = "價錢連結不存在" };
+                if (price != Appsettings.api_numeric_param_no_pass)
+                {
+                    resultSearchATS_PriceLinkSettings = _ATS_PriceLinkSettings.SearchATS_PriceLinkSettings(
+                        new SearchATS_PriceLinkSettingsParam(price: price),
+                        ["link"], [],
+                        out int _);
+                    if (resultSearchATS_PriceLinkSettings.Count == 0) return new ResultObject<object> { success = false, message = "價錢連結不存在" };
+                }
 
                 _ATS_OrderMaster.UpdateATS_OrderMaster(new UpdateATS_OrderMasterParam(
                     cre_time: Appsettings.api_datetime_param_no_pass,
@@ -431,7 +472,7 @@ namespace AirportTransferService.Controllers
                     phone_passenger: data.phone_passenger,
                     email_passenger: data.email_passenger,
                     price: price,
-                    link: resultSearchATS_PriceLinkSettings[0].link));
+                    link: resultSearchATS_PriceLinkSettings.Count > 0 ? resultSearchATS_PriceLinkSettings[0].link : Appsettings.api_string_param_no_pass));
 
                 tx.Complete();
             }
@@ -482,7 +523,7 @@ namespace AirportTransferService.Controllers
                 ["cms_id", "name"], [],
                 out int _);
 
-            
+
 
             List<ATS_OrderMasterSearchResponse> response = [];
             foreach (SearchATS_OrderMasterResult result in resultSearchATS_OrderMaster)

@@ -577,6 +577,8 @@ const DialogsInner = forwardRef((props, ref) => {
             <React.Fragment>
                 <Grid item xs={12}>
                     <CusInput
+                        multiline={true}
+                        rows={2}
                         id={'edit--tracking_code'}
                         name={'tracking_code'}
                         label={'追蹤碼'}
@@ -589,6 +591,8 @@ const DialogsInner = forwardRef((props, ref) => {
                 </Grid>
                 <Grid item xs={12}>
                     <CusInput
+                        multiline={true}
+                        rows={2}
                         id={'edit--keyword'}
                         name={'keyword'}
                         label={'關鍵字'}
@@ -601,6 +605,8 @@ const DialogsInner = forwardRef((props, ref) => {
                 </Grid>
                 <Grid item xs={12}>
                     <CusInput
+                        multiline={true}
+                        rows={2}
                         id={'edit--summary'}
                         name={'summary'}
                         label={'簡介'}
@@ -613,6 +619,8 @@ const DialogsInner = forwardRef((props, ref) => {
                 </Grid>
                 <Grid item xs={12}>
                     <CusInput
+                        multiline={true}
+                        rows={2}
                         id={'edit--descriptive_url'}
                         name={'descriptive_url'}
                         label={'描述性URL'}

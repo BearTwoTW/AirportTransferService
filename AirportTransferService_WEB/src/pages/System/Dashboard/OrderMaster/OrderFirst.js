@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { CircularLoading } from '../../../../components/CusProgress';
 import { Grid, TableCell, TableRow, Chip, Box, Typography, Switch, FormControlLabel } from '@mui/material';
 import FormGroup from '@mui/material/FormGroup';
-import { HighlightOff, Add, Search, Delete, Edit, Pages, CloudDownload } from '@mui/icons-material';
+import { HighlightOff, Add, Search, Delete, Edit, Pages, CloudDownload, PublishedWithChanges } from '@mui/icons-material';
 import Checkbox from '@mui/material/Checkbox';
 import { CusCard } from '../../../../components/CusCard';
 import { CusInfoTitle } from '../../../../components/CusInfo';
@@ -36,7 +36,7 @@ export default function Order() {
         signboard_title: null,
         signboard_content: null,
         o_id: null,
-        visible: null,
+        visible: "Y",
         type: null,
         city: null,
         area: null,
@@ -147,8 +147,8 @@ export default function Order() {
             { key: 1, name: "2" },
         ], // 加價服務
         visible: [
-            { name: "開放", value: "Y" },
-            { name: "未開放", value: "N" },
+            { name: "作廢", value: "N" },
+            { name: "正常", value: "Y" },
         ],
     });
     const [pageCount, setPageCount] = useState(0);
@@ -176,7 +176,8 @@ export default function Order() {
             setIndexDB(idb);
             setPageSearch(prev => ({
                 ...prev,
-                ...search_set
+                ...search_set,
+                visible: "Y",
             }));
 
             // 存在search_set就用indexedDB的搜尋條件，不然就用預設的搜尋條件
@@ -322,14 +323,34 @@ export default function Order() {
         }
     };
 
+    /**[作廢]訂單 */
+    const visible_Click = useCallback(({ e, id, visible }) => {
+        e.stopPropagation();
+        useDialog.current.handleOpen();
+
+        setDialogData(({
+            id: 'visible',
+            DialogTitle: visible === "N" ? '訂單作廢' : "訂單生效",
+            DialogContent: <DialogsInner type={'visible'} ref={useDialogInner} options={options} o_id={id} visible={visible} />,
+            DialogActions: (
+                <React.Fragment>
+                    <CusTextButton autoFocus onClick={dialogClose} color="default" text="取消" />
+                    <CusTextButton autoFocus onClick={() => edit_Visible(id, visible)} color="primary" text="確認" />
+                </React.Fragment>)
+        }));
+    }, [])
+
     /** 編輯是否開放 */
-    const edit_Visible = async ({ id, visible }) => {
+    const edit_Visible = async (id, visible) => {
         const { success, message } = await ATS_OrderMaster.ATS_OrderMasterUpdate({
             o_id: id,
-            visible: visible === "Y" ? "N" : "Y"
+            visible: visible
         });
 
-        if (success) searchOrder(pageSearch);
+        if (success) {
+            dialogClose();
+            searchOrder(pageSearch);
+        }
 
         enqueueSnackbar(message, {
             variant: success ? "success" : "warning",
@@ -387,25 +408,13 @@ export default function Order() {
                     hover
                     key={item.o_id}>
                     <TableCell>{index + 1}</TableCell>
-                    <TableCell>
-                        <FormControlLabel
-                            onClick={(e) => e.stopPropagation()}
-                            control={
-                                <Switch
-                                    checked={item.visible === "Y" ? true : false}
-                                    color={"success"}
-                                    onChange={() => edit_Visible({ id: item.o_id, visible: item.visible })}
-                                />
-                            }
-                        />
-                    </TableCell>
                     <TableCell>{item.o_id}</TableCell>
                     <TableCell>{item.type}</TableCell>
                     <TableCell>{item.city}</TableCell>
                     <TableCell>{item.area}</TableCell>
                     <TableCell>{item.road}</TableCell>
                     <TableCell>{item.flght_number}</TableCell>
-                    <TableCell>{item.date_travel + item.time_travel}</TableCell>
+                    <TableCell>{item.date_travel + " " + item.time_travel.slice(0, 5)}</TableCell>
                     <TableCell>{item.name_purchaser}</TableCell>
                     <TableCell>{item.phone_purchaser}</TableCell>
                     <TableCell>{item.price}</TableCell>
@@ -416,6 +425,19 @@ export default function Order() {
                                 color='primary'
                                 icon={<Edit />}
                             />
+                            : null}
+                        {permission.Delete ?
+                            item.visible === "Y" ?
+                                <CusIconButton
+                                    onClick={(e) => visible_Click({ e: e, id: item.o_id, visible: "N" })}
+                                    color='primary'
+                                    icon={<Delete />}
+                                /> :
+                                <CusIconButton
+                                    onClick={(e) => visible_Click({ e: e, id: item.o_id, visible: "Y" })}
+                                    color='primary'
+                                    icon={<PublishedWithChanges />}
+                                />
                             : null}
                     </TableCell>
                 </TableRow>
@@ -539,37 +561,37 @@ export default function Order() {
         }
     };
 
-    /**[刪除]訂單 */
-    const del_Click = useCallback(({ e, name, id }) => {
-        e.stopPropagation();
-        useDialog.current.handleOpen();
+    // /**[刪除]訂單 */
+    // const del_Click = useCallback(({ e, name, id }) => {
+    //     e.stopPropagation();
+    //     useDialog.current.handleOpen();
 
-        setDialogData(({
-            id: 'del',
-            DialogTitle: '刪除',
-            DialogContent: <DialogsInner type={'del'} ref={useDialogInner} options={options} name={name} id={id} />,
-            DialogActions: (
-                <React.Fragment>
-                    <CusTextButton autoFocus onClick={dialogClose} color="default" text="取消" />
-                    <CusTextButton autoFocus onClick={() => { del_Confirm(e, id) }} color="primary" text="確認" />
-                </React.Fragment>)
-        }));
-    }, [])
+    //     setDialogData(({
+    //         id: 'del',
+    //         DialogTitle: '刪除',
+    //         DialogContent: <DialogsInner type={'del'} ref={useDialogInner} options={options} name={name} id={id} />,
+    //         DialogActions: (
+    //             <React.Fragment>
+    //                 <CusTextButton autoFocus onClick={dialogClose} color="default" text="取消" />
+    //                 <CusTextButton autoFocus onClick={() => { del_Confirm(e, id) }} color="primary" text="確認" />
+    //             </React.Fragment>)
+    //     }));
+    // }, [])
 
-    /**[確認]刪除訂單 */
-    const del_Confirm = useCallback((e, _id) => {
-        e.stopPropagation();
-        ATS_OrderMaster.ATS_OrderMasterDelete({ o_id: _id }).then(res => {
-            if (res.success) {
-                dialogClose();
-                searchOrder(pageSearch);
-            }
-            enqueueSnackbar(res.message, {
-                variant: res.success ? "success" : "warning",
-                persist: !res.success
-            });
-        });
-    }, []);
+    // /**[確認]刪除訂單 */
+    // const del_Confirm = useCallback((e, _id) => {
+    //     e.stopPropagation();
+    //     ATS_OrderMaster.ATS_OrderMasterDelete({ o_id: _id }).then(res => {
+    //         if (res.success) {
+    //             dialogClose();
+    //             searchOrder(pageSearch);
+    //         }
+    //         enqueueSnackbar(res.message, {
+    //             variant: res.success ? "success" : "warning",
+    //             persist: !res.success
+    //         });
+    //     });
+    // }, []);
 
     /**輸入框*/
     const search_handleInput = (e) => {
@@ -670,7 +692,7 @@ export default function Order() {
                                 <CusOutlinedSelect
                                     id={"search--visible"}
                                     name={"visible"}
-                                    label={"開放狀態"}
+                                    label={"訂單狀態"}
                                     options={options.visible}
                                     optionKey={"value"}
                                     value={options.visible.some(item => item.value === pageSearch.visible) ? options.visible.find(item => item.value === pageSearch.visible) : null}
@@ -816,7 +838,6 @@ export default function Order() {
                                                 onRowsPerPageChange={onRowsPerPageChange}
                                                 tableHead={[
                                                     { name: "排序" },
-                                                    { name: "是否開放" },
                                                     { name: "訂單編號" },
                                                     { name: "訂單類型" },
                                                     { name: "城市" },
@@ -855,7 +876,7 @@ export default function Order() {
 
 /**新增modal內容*/
 const DialogsInner = forwardRef((props, ref) => {
-    const { type, name, getEditData, o_id, options } = props;
+    const { type, name, getEditData, o_id, options, visible } = props;
     const filteredData = type === "edit" ? getEditData.es_ids.filter(item => item.es_id !== "00001") : null;
     const isNotEmpty = type === "edit" ? filteredData.length !== 0 : null;
     // checkbox 狀態
@@ -2093,10 +2114,10 @@ const DialogsInner = forwardRef((props, ref) => {
                 </Grid>
             </React.Fragment>
         )
-    } else if (type === "del") {
+    } else if (type === "visible") {
         return (
             <Typography component={"p"}>
-                確定刪除 <CusSpan text={name} color="info" /> ?
+                確定要{visible === "N" ? "作廢" : "重新生效"}訂單編號：<CusSpan text={o_id} color="info" /> 嗎 ?
             </Typography>
         )
     }

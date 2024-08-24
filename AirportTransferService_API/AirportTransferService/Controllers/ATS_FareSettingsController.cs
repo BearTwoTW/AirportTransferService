@@ -145,13 +145,13 @@ namespace AirportTransferService.Controllers
                     .ToList();
             }
 
+            // 取得所有車型名稱
+            List<SearchATS_CarModelSettingsResult> resultSearchATS_CarModelSettings = _ATS_CarModelSettings.SearchATS_CarModelSettings(
+                new SearchATS_CarModelSettingsParam(),
+                ["cms_id", "name"], [],
+                out _);
             if (data.excel.Equals("Y") && !data.distinct.Equals("Y"))
             {
-                // 取得所有車型名稱
-                List<SearchATS_CarModelSettingsResult> resultSearchATS_CarModelSettings = _ATS_CarModelSettings.SearchATS_CarModelSettings(
-                    new SearchATS_CarModelSettingsParam(),
-                    ["cms_id", "name"], [],
-                    out _);
 
                 // 建立DataTable欄位
                 DataTable dt_excel = new();
@@ -159,7 +159,7 @@ namespace AirportTransferService.Controllers
                 dt_excel.Columns.Add("區域", typeof(string));
                 dt_excel.Columns.Add("路", typeof(string));
                 dt_excel.Columns.Add("段", typeof(string));
-                foreach(SearchATS_CarModelSettingsResult item in resultSearchATS_CarModelSettings.OrderBy(x => x.cms_id))
+                foreach (SearchATS_CarModelSettingsResult item in resultSearchATS_CarModelSettings.OrderBy(x => x.cms_id))
                 {
                     dt_excel.Columns.Add(item.name, typeof(decimal));
                 }
@@ -167,7 +167,7 @@ namespace AirportTransferService.Controllers
                 // 處理資料
                 IEnumerable<DataRow> groupedResults = search_results
                     .GroupBy(x => new { x.city, x.area, x.road, x.section }).OrderBy(x => x.Key.city).ThenBy(x => x.Key.area).ThenBy(x => x.Key.road).ThenBy(x => x.Key.section)
-                    .Select(g => 
+                    .Select(g =>
                     {
                         DataRow row = dt_excel.NewRow();
                         row["城市"] = g.Key.city;
@@ -199,6 +199,7 @@ namespace AirportTransferService.Controllers
                     fs_id = result.fs_id,
                     visible = result.visible,
                     cms_id = result.cms_id,
+                    cms_name = string.IsNullOrEmpty(result.cms_id) ? "" : resultSearchATS_CarModelSettings.Find(x => x.cms_id == result.cms_id)!.name,
                     city = result.city,
                     area = result.area,
                     road = result.road,

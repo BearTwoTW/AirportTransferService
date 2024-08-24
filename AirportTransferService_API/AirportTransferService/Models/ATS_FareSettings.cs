@@ -244,13 +244,13 @@ namespace AirportTransferService.Models
         /// <summary>
         /// city
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_FareSettings.city")]
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_FareSettings.city")]
         public string? city { get; } = city;
 
         /// <summary>
         /// area
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_FareSettings.area")]
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_FareSettings.area")]
         public string? area { get; } = area;
 
         /// <summary>
@@ -268,13 +268,13 @@ namespace AirportTransferService.Models
         /// <summary>
         /// airport
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_FareSettings.airport")]
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_FareSettings.airport")]
         public string? airport { get; } = airport;
 
         /// <summary>
         /// terminal
         /// </summary>
-        [SQLSearchCondition(SQLSearchConditionType.Like, "ATS_FareSettings.terminal")]
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_FareSettings.terminal")]
         public string? terminal { get; } = terminal;
 
         /// <summary>
@@ -594,6 +594,12 @@ namespace AirportTransferService.Models
         /// </summary>
         [Display(Name = "編號")]
         public string? fs_id { get; set; } = "";
+
+        /// <summary>
+        /// 車型名稱
+        /// </summary>
+        [Display(Name = "車型名稱")]
+        public string? cms_name { get; set; } = "";
     }
 
     /// <summary>

@@ -454,7 +454,7 @@ export default function PriceLink() {
                                     {permission.Add
                                         ? <CusTextIconButton
                                             color={"primary"}
-                                            text={"新增加價項目"}
+                                            text={"新增價錢連結"}
                                             startIcon={<Add />}
                                             onClick={() => add_click()}
                                         />

@@ -52,7 +52,19 @@ namespace AirportTransferService.Controllers
             List<(SearchATS_ExtraSettingsResult result, int? count)> exists_es_ids = validateResultData.exists_es_ids;
             decimal? price = validateResultData.price;
 
-            if (data.calculation!.Equals("Y")) return new ResultObject<object> { success = true, message = "計算價錢成功", data = price.ToString() };
+            if (data.calculation!.Equals("Y"))
+            {
+                // 這裡要把加價項目的價錢加進去
+                if (exists_es_ids != null && exists_es_ids.Count > 0)
+                {
+                    foreach ((SearchATS_ExtraSettingsResult result, int? count) in exists_es_ids)
+                    {
+                        price += (count ?? 0) * (result.price ?? 0);
+                    }
+                }
+                
+                return new ResultObject<object> { success = true, message = "計算價錢成功", data = price.ToString() };
+            }
 
             DateTime cre_time = DateTime.Now;
             string id = "";

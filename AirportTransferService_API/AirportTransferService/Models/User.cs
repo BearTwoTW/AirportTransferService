@@ -1790,6 +1790,13 @@ namespace AirportTransferService.Models
         public string username { get; set; } = "";
 
         /// <summary>
+        /// 密碼
+        /// </summary>
+        [MaxLength(50, ErrorMessage = "{0}長度最大為{1}字元")]
+        [Display(Name = "密碼")]
+        public string? password { get; set; }
+
+        /// <summary>
         /// name
         /// </summary>
         [Required(ErrorMessage = "請輸入{0}")]

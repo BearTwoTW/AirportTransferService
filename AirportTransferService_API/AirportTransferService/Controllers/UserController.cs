@@ -229,7 +229,7 @@ namespace AirportTransferService.Controllers
             DateTime cre_time = DateTime.Now;
 
             string _user_id = "";
-            string password = userDealerInfo.ds_code + data.username;
+            string password = string.IsNullOrEmpty(data.password) ? Tool.MD5(userDealerInfo.ds_code + data.username) : data.password;
 
             List<SearchUserResult> result = _user.SearchUser(
                 new SearchUserParam(own_user_id: "", top_ul_id: 1, username: data.username), ["username"], out int page_count);
@@ -241,7 +241,7 @@ namespace AirportTransferService.Controllers
                 cre_time: cre_time,
                 company_code: jwtObject.company_code,
                 username: data.username,
-                password: Tool.MD5(password),
+                password: password,
                 name: Tool.Sy_Encoder(data.name, cre_time.ToString("yyyyMMddHHmmss")),
                 gender: data.gender,
                 birthday: data.birthday,

@@ -42,6 +42,9 @@ namespace AirportTransferService.Controllers
         [HttpPost]
         public ResultObject<object> ATS_OrderMasterCreate(ATS_OrderMasterCreate data)
         {
+            // 檢查 路 & 段
+            data.road = CheckRoadFormat(data.road!);
+            data.section = CheckSectionFormat(data.section!);
             // 驗證訂單資料
             ResultObject<ValidateOrderResult> validateResult = ValidateOrder(data);
             if (!validateResult.success) return new ResultObject<object> { success = validateResult.success, message = validateResult.message, data = validateResult.data };
@@ -133,6 +136,358 @@ namespace AirportTransferService.Controllers
         }
 
         /// <summary>
+        /// 訂單管理修改
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public ResultObject<object> ATS_OrderMasterUpdate(ATS_OrderMasterUpdate data)
+        {
+            // 檢查 路 & 段
+            data.road = CheckRoadFormat(data.road!);
+            data.section = CheckSectionFormat(data.section!);
+            // 查自己
+            SearchATS_OrderMasterResult? search_own_result = _ATS_OrderMaster.SearchATS_OrderMaster(
+            new SearchATS_OrderMasterParam(o_id: data.o_id),
+            ["o_id", "type", "city", "area", "road", "section", "airport", "terminal", "date_travel", "time_travel", "number_passenger", "number_bags", "cms_id"], [],
+            out int _).FirstOrDefault();
+            if (search_own_result == null) return new ResultObject<object> { success = false, message = "修改失敗，查無訂單" };
+
+            // 驗證訂單資料
+            ResultObject<ValidateOrderResult> validateResult = ValidateOrder(new ATS_OrderMasterCreate
+            {
+                //TODO: 如果沒有要更改的話，應該不用再次檢查
+                //type = data.type == Appsettings.api_string_param_no_pass ? search_own_result.type : data.type,
+                //city = data.city == Appsettings.api_string_param_no_pass ? search_own_result.city : data.city,
+                //area = data.area == Appsettings.api_string_param_no_pass ? search_own_result.area : data.area,
+                //road = data.road == Appsettings.api_string_param_no_pass ? search_own_result.road : data.road,
+                //section = data.section == Appsettings.api_string_param_no_pass ? search_own_result.section : data.section,
+                //airport = data.airport == Appsettings.api_string_param_no_pass ? search_own_result.airport : data.airport,
+                //terminal = data.terminal == Appsettings.api_string_param_no_pass ? search_own_result.terminal : data.terminal,
+                //date_travel = data.date_travel == Appsettings.api_dateonly_param_no_pass ? search_own_result.date_travel : data.date_travel,
+                //time_travel = data.time_travel == Appsettings.api_timeonly_param_no_pass ? search_own_result.time_travel : data.time_travel,
+                //number_passenger = data.number_passenger == Appsettings.api_numeric_param_no_pass ? search_own_result.number_passenger : data.number_passenger,
+                //number_bags = data.number_bags == Appsettings.api_numeric_param_no_pass ? search_own_result.number_bags : data.number_bags,
+                //cms_id = data.cms_id == Appsettings.api_string_param_no_pass ? search_own_result.cms_id : data.cms_id,
+                type = string.IsNullOrEmpty(data.type) || data.type == Appsettings.api_string_param_no_pass  ? search_own_result.type : data.type,
+                city = string.IsNullOrEmpty(data.city) || data.city == Appsettings.api_string_param_no_pass  ? search_own_result.city : data.city,
+                area = string.IsNullOrEmpty(data.area) || data.area == Appsettings.api_string_param_no_pass  ? search_own_result.area : data.area,
+                road = string.IsNullOrEmpty(data.road) || data.road == Appsettings.api_string_param_no_pass  ? search_own_result.road : data.road,
+                section = string.IsNullOrEmpty(data.section) || data.section == Appsettings.api_string_param_no_pass  ? search_own_result.section : data.section,
+                airport = string.IsNullOrEmpty(data.airport) || data.airport == Appsettings.api_string_param_no_pass  ? search_own_result.airport : data.airport,
+                terminal = string.IsNullOrEmpty(data.terminal) || data.terminal == Appsettings.api_string_param_no_pass  ? search_own_result.terminal : data.terminal,
+                date_travel = data.date_travel,
+                time_travel = data.time_travel,
+                number_passenger = data.number_passenger,
+                number_bags = data.number_bags,
+                cms_id = string.IsNullOrEmpty(data.cms_id) || data.cms_id == Appsettings.api_string_param_no_pass ? search_own_result.cms_id : data.cms_id,
+                es_ids = data.es_ids
+            });
+            if (!validateResult.success) return new ResultObject<object> { success = validateResult.success, message = validateResult.message, data = validateResult.data };
+            ValidateOrderResult validateResultData = validateResult.data!;
+            List<(SearchATS_ExtraSettingsResult result, int? count)> exists_es_ids = validateResultData.exists_es_ids;
+            decimal? price = validateResultData.price;
+
+            DateTime now_time = DateTime.Now;
+            using (TransactionScope tx = new())
+            {
+                // 如果有新的加購項目
+                if (exists_es_ids != null && exists_es_ids.Count > 0)
+                {
+                    // 刪除原來的加購項目
+                    List<SearchATS_OrderDetailResult> resultSearchATS_OrderDetail = _ATS_OrderDetail.SearchATS_OrderDetail(
+                        new SearchATS_OrderDetailParam(o_id: data.o_id),
+                        ["od_id"], [],
+                        out int _);
+                    foreach (SearchATS_OrderDetailResult item in resultSearchATS_OrderDetail)
+                    {
+                        _ATS_OrderDetail.DeleteATS_OrderDetail(od_id: item.od_id!);
+                    }
+
+                    foreach ((SearchATS_ExtraSettingsResult result, int? count) in exists_es_ids)
+                    {
+                        // 建立訂單明細
+                        _ATS_OrderDetail.CreateATS_OrderDetail(new CreateATS_OrderDetailParam(
+                                cre_userid: jwtObject.user_id,
+                                cre_time: now_time,
+                                visible: "Y",
+                                o_id: data.o_id,
+                                es_id: result.es_id,
+                                es_type: result.type,
+                                es_name: result.name,
+                                es_price: result.price,
+                                count: count,
+                                total_price: (count ?? 0) * (result.price ?? 0)));
+                        price += (count ?? 0) * (result.price ?? 0);
+                    }
+                }
+
+                if (price == 0) price = Appsettings.api_numeric_param_no_pass;
+                List<SearchATS_PriceLinkSettingsResult> resultSearchATS_PriceLinkSettings = [];
+                // 拿價錢查連結
+                if (price != Appsettings.api_numeric_param_no_pass)
+                {
+                    resultSearchATS_PriceLinkSettings = _ATS_PriceLinkSettings.SearchATS_PriceLinkSettings(
+                        new SearchATS_PriceLinkSettingsParam(price: price),
+                        ["link"], [],
+                        out int _);
+                    if (resultSearchATS_PriceLinkSettings.Count == 0) return new ResultObject<object> { success = false, message = $"價錢連結不存在，價錢:{price}" };
+                }
+
+                _ATS_OrderMaster.UpdateATS_OrderMaster(new UpdateATS_OrderMasterParam(
+                    cre_time: Appsettings.api_datetime_param_no_pass,
+                    upd_userid: jwtObject.user_id,
+                    upd_time: now_time,
+                    o_id: data.o_id,
+                    visible: data.visible,
+                    type: data.type,
+                    city: data.city,
+                    area: data.area,
+                    road: data.road,
+                    section: data.section,
+                    address: data.address,
+                    airport: data.airport,
+                    terminal: data.terminal,
+                    flght_number: data.flght_number,
+                    date_travel: data.date_travel,
+                    time_travel: data.time_travel,
+                    number_passenger: data.number_passenger,
+                    number_bags: data.number_bags,
+                    cms_id: data.cms_id,
+                    signboard_title: data.signboard_title,
+                    signboard_content: data.signboard_content,
+                    name_purchaser: data.name_purchaser,
+                    phone_purchaser: data.phone_purchaser,
+                    email_purchaser: data.email_purchaser,
+                    name_passenger: data.name_passenger,
+                    phone_passenger: data.phone_passenger,
+                    email_passenger: data.email_passenger,
+                    price: price,
+                    link: resultSearchATS_PriceLinkSettings.Count > 0 ? resultSearchATS_PriceLinkSettings[0].link : Appsettings.api_string_param_no_pass));
+
+                tx.Complete();
+            }
+
+            return new ResultObject<object> { success = true, message = "修改成功" };
+        }
+
+        /// <summary>
+        /// 訂單管理查詢
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public ResultObject<object> ATS_OrderMasterSearch(ATS_OrderMasterSearch data)
+        {
+            List<SearchATS_OrderMasterResult> resultSearchATS_OrderMaster = _ATS_OrderMaster.SearchATS_OrderMaster(
+                new SearchATS_OrderMasterParam(
+                    cre_time_start: data.cre_date_start.HasValue ? data.cre_date_start.Value.ToDateTime(new TimeOnly(0, 0, 0)) : null,
+                    cre_time_end: data.cre_date_end.HasValue ? data.cre_date_end.Value.ToDateTime(new TimeOnly(23, 59, 59)) : null,
+                    o_id: data.o_id,
+                    visible: data.visible,
+                    type: data.type,
+                    city: data.city,
+                    area: data.area,
+                    road: data.road,
+                    section: data.section,
+                    address: data.address,
+                    airport: data.airport,
+                    terminal: data.terminal,
+                    flght_number: data.flght_number,
+                    date_travel_start: data.date_travel_start,
+                    date_travel_end: data.date_travel_end,
+                    time_travel_start: data.time_travel_start,
+                    time_travel_end: data.time_travel_end,
+                    cms_id: data.cms_id,
+                    name_purchaser: data.name_purchaser,
+                    phone_purchaser: data.phone_purchaser,
+                    email_purchaser: data.email_purchaser,
+                    name_passenger: data.name_passenger,
+                    phone_passenger: data.phone_passenger,
+                    email_passenger: data.email_passenger,
+                    page: data.page,
+                    num_per_page: data.num_per_page),
+                ["o_id", "visible", "type", "city", "area", "road", "section", "address", "airport", "terminal", "flght_number", "date_travel", "time_travel", "number_passenger", "number_bags", "cms_id", "signboard_title", "signboard_content", "name_purchaser", "phone_purchaser", "email_purchaser", "name_passenger", "phone_passenger", "email_passenger", "price", "link"], [],
+                out int page_count);
+            List<SearchATS_CarModelSettingsResult> resultSearchATS_CarModelSettings = _ATS_CarModelSettings.SearchATS_CarModelSettings(
+                new SearchATS_CarModelSettingsParam(cms_id: data.cms_id),
+                ["cms_id", "name"], [],
+                out int _);
+
+            List<ATS_OrderMasterSearchResponse> response = [];
+            foreach (SearchATS_OrderMasterResult result in resultSearchATS_OrderMaster)
+            {
+                List<SearchATS_OrderDetailResult> resultSearchATS_OrderDetail = _ATS_OrderDetail.SearchATS_OrderDetail(
+                new SearchATS_OrderDetailParam(o_id: result.o_id),
+                ["es_id", "es_name", "count"], [new SQL.SQLOrder_obj { sort_column = "es_id", is_desc = false }],
+                out int _);
+                List<ExtraItem> es_ids = [];
+                foreach (SearchATS_OrderDetailResult item in resultSearchATS_OrderDetail)
+                {
+                    es_ids.Add(new ExtraItem
+                    {
+                        es_id = item.es_id,
+                        es_name = item.es_name,
+                        count = item.count,
+                        type = "Update"
+                    });
+                }
+
+                response.Add(new ATS_OrderMasterSearchResponse
+                {
+                    o_id = result.o_id,
+                    visible = result.visible,
+                    type = result.type,
+                    city = result.city,
+                    area = result.area,
+                    road = result.road,
+                    section = result.section,
+                    address = result.address,
+                    airport = result.airport,
+                    terminal = result.terminal,
+                    flght_number = result.flght_number,
+                    date_travel = result.date_travel,
+                    time_travel = result.time_travel,
+                    number_passenger = result.number_passenger,
+                    number_bags = result.number_bags,
+                    cms_id = result.cms_id,
+                    cms_name = resultSearchATS_CarModelSettings.Find(x => x.cms_id == result.cms_id)?.name,
+                    signboard_title = result.signboard_title,
+                    signboard_content = result.signboard_content,
+                    name_purchaser = result.name_purchaser,
+                    phone_purchaser = result.phone_purchaser,
+                    email_purchaser = result.email_purchaser,
+                    name_passenger = result.name_passenger,
+                    phone_passenger = result.phone_passenger,
+                    email_passenger = result.email_passenger,
+                    es_ids = es_ids,
+                    price = result.price,
+                    link = result.link
+                });
+            }
+
+            if (data.excel.Equals("Y"))
+            {
+                DataTable dt_excel = new();
+                dt_excel.Columns.Add("訂單編號", typeof(string));
+                dt_excel.Columns.Add("類別(接機/送機)", typeof(string));
+                dt_excel.Columns.Add("城市", typeof(string));
+                dt_excel.Columns.Add("區域", typeof(string));
+                dt_excel.Columns.Add("路", typeof(string));
+                dt_excel.Columns.Add("段", typeof(string));
+                dt_excel.Columns.Add("地址", typeof(string));
+                dt_excel.Columns.Add("機場", typeof(string));
+                dt_excel.Columns.Add("航廈", typeof(string));
+                dt_excel.Columns.Add("航班號碼", typeof(string));
+                dt_excel.Columns.Add("乘車日期", Nullable.GetUnderlyingType(typeof(DateOnly)) ?? typeof(DateOnly));
+                dt_excel.Columns.Add("乘車時間", Nullable.GetUnderlyingType(typeof(TimeOnly)) ?? typeof(TimeOnly));
+                dt_excel.Columns.Add("人數", typeof(int));
+                dt_excel.Columns.Add("行李數", typeof(int));
+                dt_excel.Columns.Add("車型名稱", typeof(string));
+                dt_excel.Columns.Add("舉牌標題", typeof(string));
+                dt_excel.Columns.Add("舉牌內容", typeof(string));
+                dt_excel.Columns.Add("訂購人姓名", typeof(string));
+                dt_excel.Columns.Add("訂購人電話", typeof(string));
+                dt_excel.Columns.Add("訂購人電子信箱", typeof(string));
+                dt_excel.Columns.Add("乘客姓名", typeof(string));
+                dt_excel.Columns.Add("乘客電話", typeof(string));
+                dt_excel.Columns.Add("乘客電子信箱", typeof(string));
+                dt_excel.Columns.Add("加購項目", typeof(string));
+                dt_excel.Columns.Add("價錢", typeof(decimal));
+                dt_excel.Columns.Add("連結", typeof(string));
+                foreach (ATS_OrderMasterSearchResponse obj in response)
+                {
+                    DataRow dr_excel = dt_excel.NewRow();
+                    dr_excel["訂單編號"] = obj.o_id;
+                    dr_excel["類別(接機/送機)"] = obj.type;
+                    dr_excel["城市"] = obj.city;
+                    dr_excel["區域"] = obj.area;
+                    dr_excel["路"] = obj.road;
+                    dr_excel["段"] = obj.section;
+                    dr_excel["地址"] = obj.address;
+                    dr_excel["機場"] = obj.airport;
+                    dr_excel["航廈"] = obj.terminal;
+                    dr_excel["航班號碼"] = obj.flght_number;
+                    dr_excel["乘車日期"] = obj.date_travel;
+                    dr_excel["乘車時間"] = obj.time_travel;
+                    dr_excel["人數"] = obj.number_passenger;
+                    dr_excel["行李數"] = obj.number_bags;
+                    dr_excel["車型名稱"] = obj.cms_name;
+                    dr_excel["舉牌標題"] = obj.signboard_title ?? "";
+                    dr_excel["舉牌內容"] = obj.signboard_content ?? "";
+                    dr_excel["訂購人姓名"] = obj.name_purchaser;
+                    dr_excel["訂購人電話"] = obj.phone_purchaser;
+                    dr_excel["訂購人電子信箱"] = obj.email_purchaser;
+                    dr_excel["乘客姓名"] = obj.name_passenger;
+                    dr_excel["乘客電話"] = obj.phone_passenger;
+                    dr_excel["乘客電子信箱"] = obj.email_passenger;
+                    dr_excel["加購項目"] = obj.es_ids!.Count > 0 ? string.Join("/", obj.es_ids!.Select(x => $"{x.es_name}(數量:{x.count})")) : "";
+                    dr_excel["價錢"] = obj.price;
+                    dr_excel["連結"] = obj.link;
+                    dt_excel.Rows.Add(dr_excel);
+                }
+                string path = Tool.CreateExcelToServer(jwtObject.company_code, "OrderMaster", jwtObject.user_id, dt_excel);
+                return new ResultObject<object> { success = true, data = path };
+            }
+
+            return new ResultObject<object> { success = true, data = response, page = page_count };
+        }
+
+        /// <summary>
+        /// 訂單管理刪除
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        // 訂單暫時不提供刪除功能
+        [NonAction]
+        public ResultObject<string> ATS_OrderMasterDelete(ATS_OrderMasterDelete data)
+        {
+            // 查自己
+            SearchATS_OrderMasterResult? search_own_result = _ATS_OrderMaster.SearchATS_OrderMaster(
+                new SearchATS_OrderMasterParam(o_id: data.o_id),
+                ["o_id"], [],
+                out int _).FirstOrDefault();
+            if (search_own_result == null) return new ResultObject<string> { success = false, message = "刪除失敗，查無訂單" };
+
+            using (TransactionScope tx = new())
+            {
+                // 刪除加購項目
+                List<SearchATS_OrderDetailResult> resultSearchATS_OrderDetail = _ATS_OrderDetail.SearchATS_OrderDetail(
+                    new SearchATS_OrderDetailParam(o_id: data.o_id),
+                    ["od_id"], [],
+                    out int _);
+                foreach (SearchATS_OrderDetailResult item in resultSearchATS_OrderDetail)
+                {
+                    _ATS_OrderDetail.DeleteATS_OrderDetail(od_id: item.od_id!);
+                }
+
+                _ATS_OrderMaster.DeleteATS_OrderMaster(data.o_id!);
+
+                tx.Complete();
+            }
+
+            return new ResultObject<string> { success = true, message = "刪除成功" };
+        }
+
+        /// <summary>
+        /// 檢查預約時間是否大於 48 小時
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public ResultObject<string> CheckTravelDateTime(ATS_OrderMasterCreate data)
+        {
+            try
+            {
+                if (!CheckTravelDateTime(data.date_travel, data.time_travel))
+                    return new ResultObject<string> { success = false, message = "預約時間需大於 48 小時" };
+            }
+            catch (Exception e) { return new ResultObject<string> { success = false, message = $"預約日期時間格式錯誤:{JsonConvert.SerializeObject(e)}" }; }
+
+            return new ResultObject<string> { success = true, message = "預約時間正確" };
+        }
+
+        #region Private Methods
+        /// <summary>
         /// 驗證訂單
         /// </summary>
         /// <param name="data"></param>
@@ -145,7 +500,7 @@ namespace AirportTransferService.Controllers
             {
                 try
                 {
-                    if (data.date_travel!.Value.ToDateTime((TimeOnly)data.time_travel!) < DateTime.Now.AddHours(48))
+                    if (!CheckTravelDateTime(data.date_travel, data.time_travel))
                         return new ResultObject<ValidateOrderResult> { success = false, message = "預約時間需大於 48 小時" };
                 }
                 catch (Exception e) { return new ResultObject<ValidateOrderResult> { success = false, message = $"預約日期時間格式錯誤:{JsonConvert.SerializeObject(e)}" }; }
@@ -273,6 +628,49 @@ namespace AirportTransferService.Controllers
         }
 
         /// <summary>
+        /// 檢查路名格式
+        /// </summary>
+        /// <param name="road"></param>
+        /// <returns></returns>
+        [NonAction]
+        private static string CheckRoadFormat(string road)
+        {
+            if (string.IsNullOrEmpty(road) 
+                || road == Appsettings.api_string_param_no_pass 
+                || road.Contains('路', StringComparison.CurrentCulture)) return road;
+            return $"{road}路";
+        }
+
+        /// <summary>
+        /// 檢查段名格式
+        /// </summary>
+        /// <param name="section"></param>
+        /// <returns></returns>
+        [NonAction]
+        private static string CheckSectionFormat(string section)
+        {
+            if (string.IsNullOrEmpty(section) 
+                || section == Appsettings.api_string_param_no_pass 
+                || section.Contains('段', StringComparison.CurrentCulture)) return section;
+            return $"{section}段";
+        }
+
+        /// <summary>
+        /// 檢查預約時間是否大於 48 小時
+        /// </summary>
+        /// <param name="date_travel"></param>
+        /// <param name="time_travel"></param>
+        /// <returns></returns>
+        [NonAction]
+        private static bool CheckTravelDateTime(DateOnly? date_travel, TimeOnly? time_travel)
+        {
+            if (date_travel!.Value.ToDateTime((TimeOnly)time_travel!) < DateTime.Now.AddHours(48))
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
         /// 車資查詢 遞迴
         /// </summary>
         /// <param name="data"></param>
@@ -290,11 +688,29 @@ namespace AirportTransferService.Controllers
                     section: data.section,
                     airport: data.airport,
                     terminal: data.terminal),
-                ["price"], [],
+                ["road","section","price"], [],
                 out int _);
 
-            // 如果查詢有結果，返回結果
-            if (result.Count != 0) return result;
+            // 如果查詢有結果
+            if (result.Count != 0)
+            {
+                List<SearchATS_FareSettingsResult> resultReturn = [];
+                // 先比對 road && section 是否有完全符合
+                resultReturn = result.Where(x => (x.road ?? "").Equals(data.road) && (x.section ?? "").Equals(data.section)).ToList();
+                if (resultReturn.Count != 0) return resultReturn;
+
+                // 如果沒有，再單獨比對 section 是否有完全符合
+                resultReturn = result.Where(x => string.IsNullOrEmpty(x.road) && (x.section ?? "").Equals(data.section)).ToList();
+                if (resultReturn.Count != 0) return resultReturn;
+
+                // 如果沒有，再單獨比對 road 是否有完全符合
+                resultReturn = result.Where(x => (x.road ?? "").Equals(data.road) && string.IsNullOrEmpty(x.section)).ToList();
+                if (resultReturn.Count != 0) return resultReturn;
+
+                // 如果都沒有，就回傳 road 和 section 都為空的結果
+                resultReturn = result.Where(x => string.IsNullOrEmpty(x.road) && string.IsNullOrEmpty(x.section)).ToList();
+                if (resultReturn.Count != 0) return resultReturn;
+            }
 
             // 如果 section 不為空，嘗試將 section 設為空並再次查詢
             if (!string.IsNullOrEmpty(data.section))
@@ -305,6 +721,7 @@ namespace AirportTransferService.Controllers
                     city: data.city,
                     area: data.area,
                     road: data.road,
+                    section: "",
                     airport: data.airport,
                     terminal: data.terminal));
             }
@@ -317,6 +734,8 @@ namespace AirportTransferService.Controllers
                     cms_id: data.cms_id,
                     city: data.city,
                     area: data.area,
+                    road: "",
+                    section: "",
                     airport: data.airport,
                     terminal: data.terminal));
             }
@@ -339,345 +758,6 @@ namespace AirportTransferService.Controllers
             else
                 return target >= start || target <= end; // 範圍跨越午夜
         }
-
-        /// <summary>
-        /// 訂單管理修改
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        [HttpPost]
-        public ResultObject<object> ATS_OrderMasterUpdate(ATS_OrderMasterUpdate data)
-        {
-            // 查自己
-            SearchATS_OrderMasterResult? search_own_result = _ATS_OrderMaster.SearchATS_OrderMaster(
-            new SearchATS_OrderMasterParam(o_id: data.o_id),
-            ["o_id", "type", "city", "area", "road", "section", "airport", "terminal", "date_travel", "time_travel", "number_passenger", "number_bags", "cms_id"], [],
-            out int _).FirstOrDefault();
-            if (search_own_result == null) return new ResultObject<object> { success = false, message = "修改失敗，查無訂單" };
-
-            bool isFareUpdate = !data.cms_id.Equals(Appsettings.api_string_param_no_pass)
-                || !data.city.Equals(Appsettings.api_string_param_no_pass)
-                || !data.area.Equals(Appsettings.api_string_param_no_pass)
-                || !data.road.Equals(Appsettings.api_string_param_no_pass)
-                || !data.section.Equals(Appsettings.api_string_param_no_pass)
-                || !data.airport.Equals(Appsettings.api_string_param_no_pass)
-                || !data.terminal.Equals(Appsettings.api_string_param_no_pass);
-            // 驗證訂單資料
-            ResultObject<ValidateOrderResult> validateResult = ValidateOrder(new ATS_OrderMasterCreate
-            {
-                //TODO: 如果沒有要更改的話，應該不用再次檢查
-                //type = data.type == Appsettings.api_string_param_no_pass ? search_own_result.type : data.type,
-                //city = data.city == Appsettings.api_string_param_no_pass ? search_own_result.city : data.city,
-                //area = data.area == Appsettings.api_string_param_no_pass ? search_own_result.area : data.area,
-                //road = data.road == Appsettings.api_string_param_no_pass ? search_own_result.road : data.road,
-                //section = data.section == Appsettings.api_string_param_no_pass ? search_own_result.section : data.section,
-                //airport = data.airport == Appsettings.api_string_param_no_pass ? search_own_result.airport : data.airport,
-                //terminal = data.terminal == Appsettings.api_string_param_no_pass ? search_own_result.terminal : data.terminal,
-                //date_travel = data.date_travel == Appsettings.api_dateonly_param_no_pass ? search_own_result.date_travel : data.date_travel,
-                //time_travel = data.time_travel == Appsettings.api_timeonly_param_no_pass ? search_own_result.time_travel : data.time_travel,
-                //number_passenger = data.number_passenger == Appsettings.api_numeric_param_no_pass ? search_own_result.number_passenger : data.number_passenger,
-                //number_bags = data.number_bags == Appsettings.api_numeric_param_no_pass ? search_own_result.number_bags : data.number_bags,
-                //cms_id = data.cms_id == Appsettings.api_string_param_no_pass ? search_own_result.cms_id : data.cms_id,
-                type = data.type == Appsettings.api_string_param_no_pass && isFareUpdate ? search_own_result.type : data.type,
-                city = data.city == Appsettings.api_string_param_no_pass && isFareUpdate ? search_own_result.city : data.city,
-                area = data.area == Appsettings.api_string_param_no_pass && isFareUpdate ? search_own_result.area : data.area,
-                road = data.road == Appsettings.api_string_param_no_pass && isFareUpdate ? search_own_result.road : data.road,
-                section = data.section == Appsettings.api_string_param_no_pass && isFareUpdate ? search_own_result.section : data.section,
-                airport = data.airport == Appsettings.api_string_param_no_pass && isFareUpdate ? search_own_result.airport : data.airport,
-                terminal = data.terminal == Appsettings.api_string_param_no_pass && isFareUpdate ? search_own_result.terminal : data.terminal,
-                date_travel = data.date_travel,
-                time_travel = data.time_travel,
-                number_passenger = data.number_passenger,
-                number_bags = data.number_bags,
-                cms_id = data.cms_id,
-                es_ids = data.es_ids
-            });
-            if (!validateResult.success) return new ResultObject<object> { success = validateResult.success, message = validateResult.message, data = validateResult.data };
-            ValidateOrderResult validateResultData = validateResult.data!;
-            List<(SearchATS_ExtraSettingsResult result, int? count)> exists_es_ids = validateResultData.exists_es_ids;
-            decimal? price = validateResultData.price;
-
-            DateTime now_time = DateTime.Now;
-            using (TransactionScope tx = new())
-            {
-                // 如果有新的加購項目
-                if (exists_es_ids != null && exists_es_ids.Count > 0)
-                {
-                    // 刪除原來的加購項目
-                    List<SearchATS_OrderDetailResult> resultSearchATS_OrderDetail = _ATS_OrderDetail.SearchATS_OrderDetail(
-                        new SearchATS_OrderDetailParam(o_id: data.o_id),
-                        ["od_id"], [],
-                        out int _);
-                    foreach (SearchATS_OrderDetailResult item in resultSearchATS_OrderDetail)
-                    {
-                        _ATS_OrderDetail.DeleteATS_OrderDetail(od_id: item.od_id!);
-                    }
-
-                    foreach ((SearchATS_ExtraSettingsResult result, int? count) in exists_es_ids)
-                    {
-                        // 建立訂單明細
-                        _ATS_OrderDetail.CreateATS_OrderDetail(new CreateATS_OrderDetailParam(
-                                cre_userid: jwtObject.user_id,
-                                cre_time: now_time,
-                                visible: "Y",
-                                o_id: data.o_id,
-                                es_id: result.es_id,
-                                es_type: result.type,
-                                es_name: result.name,
-                                es_price: result.price,
-                                count: count,
-                                total_price: (count ?? 0) * (result.price ?? 0)));
-                        price += (count ?? 0) * (result.price ?? 0);
-                    }
-                }
-
-                if (price == 0) price = Appsettings.api_numeric_param_no_pass;
-                List<SearchATS_PriceLinkSettingsResult> resultSearchATS_PriceLinkSettings = [];
-                // 拿價錢查連結
-                if (price != Appsettings.api_numeric_param_no_pass)
-                {
-                    resultSearchATS_PriceLinkSettings = _ATS_PriceLinkSettings.SearchATS_PriceLinkSettings(
-                        new SearchATS_PriceLinkSettingsParam(price: price),
-                        ["link"], [],
-                        out int _);
-                    if (resultSearchATS_PriceLinkSettings.Count == 0) return new ResultObject<object> { success = false, message = "價錢連結不存在" };
-                }
-
-                _ATS_OrderMaster.UpdateATS_OrderMaster(new UpdateATS_OrderMasterParam(
-                    cre_time: Appsettings.api_datetime_param_no_pass,
-                    upd_userid: jwtObject.user_id,
-                    upd_time: now_time,
-                    o_id: data.o_id,
-                    visible: data.visible,
-                    type: data.type,
-                    city: data.city,
-                    area: data.area,
-                    road: data.road,
-                    section: data.section,
-                    address: data.address,
-                    airport: data.airport,
-                    terminal: data.terminal,
-                    flght_number: data.flght_number,
-                    date_travel: data.date_travel,
-                    time_travel: data.time_travel,
-                    number_passenger: data.number_passenger,
-                    number_bags: data.number_bags,
-                    cms_id: data.cms_id,
-                    signboard_title: data.signboard_title,
-                    signboard_content: data.signboard_content,
-                    name_purchaser: data.name_purchaser,
-                    phone_purchaser: data.phone_purchaser,
-                    email_purchaser: data.email_purchaser,
-                    name_passenger: data.name_passenger,
-                    phone_passenger: data.phone_passenger,
-                    email_passenger: data.email_passenger,
-                    price: price,
-                    link: resultSearchATS_PriceLinkSettings.Count > 0 ? resultSearchATS_PriceLinkSettings[0].link : Appsettings.api_string_param_no_pass));
-
-                tx.Complete();
-            }
-
-            return new ResultObject<object> { success = true, message = "修改成功" };
-        }
-
-        /// <summary>
-        /// 訂單管理查詢
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        [HttpPost]
-        public ResultObject<object> ATS_OrderMasterSearch(ATS_OrderMasterSearch data)
-        {
-            List<SearchATS_OrderMasterResult> resultSearchATS_OrderMaster = _ATS_OrderMaster.SearchATS_OrderMaster(
-                new SearchATS_OrderMasterParam(
-                    cre_time_start: data.cre_date_start.HasValue ? data.cre_date_start.Value.ToDateTime(new TimeOnly(0, 0, 0)) : null,
-                    cre_time_end: data.cre_date_end.HasValue ? data.cre_date_end.Value.ToDateTime(new TimeOnly(23, 59, 59)) : null,
-                    o_id: data.o_id,
-                    visible: data.visible,
-                    type: data.type,
-                    city: data.city,
-                    area: data.area,
-                    road: data.road,
-                    section: data.section,
-                    address: data.address,
-                    airport: data.airport,
-                    terminal: data.terminal,
-                    flght_number: data.flght_number,
-                    date_travel_start: data.date_travel_start,
-                    date_travel_end: data.date_travel_end,
-                    time_travel_start: data.time_travel_start,
-                    time_travel_end: data.time_travel_end,
-                    cms_id: data.cms_id,
-                    name_purchaser: data.name_purchaser,
-                    phone_purchaser: data.phone_purchaser,
-                    email_purchaser: data.email_purchaser,
-                    name_passenger: data.name_passenger,
-                    phone_passenger: data.phone_passenger,
-                    email_passenger: data.email_passenger,
-                    page: data.page,
-                    num_per_page: data.num_per_page),
-                ["o_id", "visible", "type", "city", "area", "road", "section", "address", "airport", "terminal", "flght_number", "date_travel", "time_travel", "number_passenger", "number_bags", "cms_id", "signboard_title", "signboard_content", "name_purchaser", "phone_purchaser", "email_purchaser", "name_passenger", "phone_passenger", "email_passenger", "price", "link"], [],
-                out int page_count);
-            List<SearchATS_CarModelSettingsResult> resultSearchATS_CarModelSettings = _ATS_CarModelSettings.SearchATS_CarModelSettings(
-                new SearchATS_CarModelSettingsParam(cms_id: data.cms_id),
-                ["cms_id", "name"], [],
-                out int _);
-
-
-
-            List<ATS_OrderMasterSearchResponse> response = [];
-            foreach (SearchATS_OrderMasterResult result in resultSearchATS_OrderMaster)
-            {
-                List<SearchATS_OrderDetailResult> resultSearchATS_OrderDetail = _ATS_OrderDetail.SearchATS_OrderDetail(
-                new SearchATS_OrderDetailParam(o_id: result.o_id),
-                ["es_id", "es_name", "count"], [new SQL.SQLOrder_obj { sort_column = "es_id", is_desc = false }],
-                out int _);
-                List<ExtraItem> es_ids = [];
-                foreach (SearchATS_OrderDetailResult item in resultSearchATS_OrderDetail)
-                {
-                    es_ids.Add(new ExtraItem
-                    {
-                        es_id = item.es_id,
-                        es_name = item.es_name,
-                        count = item.count,
-                        type = "Update"
-                    });
-                }
-
-                response.Add(new ATS_OrderMasterSearchResponse
-                {
-                    o_id = result.o_id,
-                    visible = result.visible,
-                    type = result.type,
-                    city = result.city,
-                    area = result.area,
-                    road = result.road,
-                    section = result.section,
-                    address = result.address,
-                    airport = result.airport,
-                    terminal = result.terminal,
-                    flght_number = result.flght_number,
-                    date_travel = result.date_travel,
-                    time_travel = result.time_travel,
-                    number_passenger = result.number_passenger,
-                    number_bags = result.number_bags,
-                    cms_id = result.cms_id,
-                    cms_name = resultSearchATS_CarModelSettings.Find(x => x.cms_id == result.cms_id)?.name,
-                    signboard_title = result.signboard_title,
-                    signboard_content = result.signboard_content,
-                    name_purchaser = result.name_purchaser,
-                    phone_purchaser = result.phone_purchaser,
-                    email_purchaser = result.email_purchaser,
-                    name_passenger = result.name_passenger,
-                    phone_passenger = result.phone_passenger,
-                    email_passenger = result.email_passenger,
-                    es_ids = es_ids,
-                    price = result.price,
-                    link = result.link
-                });
-            }
-
-            if (data.excel.Equals("Y"))
-            {
-                DataTable dt_excel = new();
-                dt_excel.Columns.Add("訂單編號", typeof(string));
-                dt_excel.Columns.Add("類別(接機/送機)", typeof(string));
-                dt_excel.Columns.Add("城市", typeof(string));
-                dt_excel.Columns.Add("區域", typeof(string));
-                dt_excel.Columns.Add("路", typeof(string));
-                dt_excel.Columns.Add("段", typeof(string));
-                dt_excel.Columns.Add("地址", typeof(string));
-                dt_excel.Columns.Add("機場", typeof(string));
-                dt_excel.Columns.Add("航廈", typeof(string));
-                dt_excel.Columns.Add("航班號碼", typeof(string));
-                dt_excel.Columns.Add("乘車日期", Nullable.GetUnderlyingType(typeof(DateOnly)) ?? typeof(DateOnly));
-                dt_excel.Columns.Add("乘車時間", Nullable.GetUnderlyingType(typeof(TimeOnly)) ?? typeof(TimeOnly));
-                dt_excel.Columns.Add("人數", typeof(int));
-                dt_excel.Columns.Add("行李數", typeof(int));
-                dt_excel.Columns.Add("車型", typeof(string));
-                dt_excel.Columns.Add("舉牌標題", typeof(string));
-                dt_excel.Columns.Add("舉牌內容", typeof(string));
-                dt_excel.Columns.Add("訂購人姓名", typeof(string));
-                dt_excel.Columns.Add("訂購人電話", typeof(string));
-                dt_excel.Columns.Add("訂購人電子信箱", typeof(string));
-                dt_excel.Columns.Add("乘客姓名", typeof(string));
-                dt_excel.Columns.Add("乘客電話", typeof(string));
-                dt_excel.Columns.Add("乘客電子信箱", typeof(string));
-                dt_excel.Columns.Add("加購項目", typeof(string));
-                dt_excel.Columns.Add("價錢", typeof(decimal));
-                dt_excel.Columns.Add("連結", typeof(string));
-                foreach (ATS_OrderMasterSearchResponse obj in response)
-                {
-                    DataRow dr_excel = dt_excel.NewRow();
-                    dr_excel["訂單編號"] = obj.o_id;
-                    dr_excel["類別(接機/送機)"] = obj.type;
-                    dr_excel["城市"] = obj.city;
-                    dr_excel["區域"] = obj.area;
-                    dr_excel["路"] = obj.road;
-                    dr_excel["段"] = obj.section;
-                    dr_excel["地址"] = obj.address;
-                    dr_excel["機場"] = obj.airport;
-                    dr_excel["航廈"] = obj.terminal;
-                    dr_excel["航班號碼"] = obj.flght_number;
-                    dr_excel["乘車日期"] = obj.date_travel;
-                    dr_excel["乘車時間"] = obj.time_travel;
-                    dr_excel["人數"] = obj.number_passenger;
-                    dr_excel["行李數"] = obj.number_bags;
-                    dr_excel["車型"] = obj.cms_id;
-                    dr_excel["舉牌標題"] = obj.signboard_title ?? "";
-                    dr_excel["舉牌內容"] = obj.signboard_content ?? "";
-                    dr_excel["訂購人姓名"] = obj.name_purchaser;
-                    dr_excel["訂購人電話"] = obj.phone_purchaser;
-                    dr_excel["訂購人電子信箱"] = obj.email_purchaser;
-                    dr_excel["乘客姓名"] = obj.name_passenger;
-                    dr_excel["乘客電話"] = obj.phone_passenger;
-                    dr_excel["乘客電子信箱"] = obj.email_passenger;
-                    dr_excel["加購項目"] = obj.es_ids!.Count > 0 ? string.Join("/", obj.es_ids!.Select(x => $"{x.es_name}(數量:{x.count})")) : "";
-                    dr_excel["價錢"] = obj.price;
-                    dr_excel["連結"] = obj.link;
-                    dt_excel.Rows.Add(dr_excel);
-                }
-                string path = Tool.CreateExcelToServer(jwtObject.company_code, "OrderMaster", jwtObject.user_id, dt_excel);
-                return new ResultObject<object> { success = true, data = path };
-            }
-
-            return new ResultObject<object> { success = true, data = response, page = page_count };
-        }
-
-        /// <summary>
-        /// 訂單管理刪除
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        // 訂單暫時不提供刪除功能
-        [NonAction]
-        public ResultObject<string> ATS_OrderMasterDelete(ATS_OrderMasterDelete data)
-        {
-            // 查自己
-            SearchATS_OrderMasterResult? search_own_result = _ATS_OrderMaster.SearchATS_OrderMaster(
-                new SearchATS_OrderMasterParam(o_id: data.o_id),
-                ["o_id"], [],
-                out int _).FirstOrDefault();
-            if (search_own_result == null) return new ResultObject<string> { success = false, message = "刪除失敗，查無訂單" };
-
-            using (TransactionScope tx = new())
-            {
-                // 刪除加購項目
-                List<SearchATS_OrderDetailResult> resultSearchATS_OrderDetail = _ATS_OrderDetail.SearchATS_OrderDetail(
-                    new SearchATS_OrderDetailParam(o_id: data.o_id),
-                    ["od_id"], [],
-                    out int _);
-                foreach (SearchATS_OrderDetailResult item in resultSearchATS_OrderDetail)
-                {
-                    _ATS_OrderDetail.DeleteATS_OrderDetail(od_id: item.od_id!);
-                }
-
-                _ATS_OrderMaster.DeleteATS_OrderMaster(data.o_id!);
-
-                tx.Complete();
-            }
-
-            return new ResultObject<string> { success = true, message = "刪除成功" };
-        }
+        #endregion
     }
 }

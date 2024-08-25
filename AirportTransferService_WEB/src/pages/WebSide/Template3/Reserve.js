@@ -571,6 +571,11 @@ const GoTabPanel = forwardRef((props, ref) => {
         ...prev,
         [name]: arr.length > 0 ? arr : null,
       }))
+    } else {
+      setOrderAdd(prev => ({
+        ...prev,
+        [name]: val,
+      }));
     }
     setOrderAddCheck(prev => ({
       ...prev,

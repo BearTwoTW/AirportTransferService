@@ -112,6 +112,19 @@ export default function WebSetting() {
         html3: "",
     });
 
+    // 夜間加成 文字設定
+    const [night, setNight] = useState({
+        ws_id: "00009",
+        title: "night",
+        image: "",
+        text1: "",
+        text2: "",
+        text3: "",
+        html1: "",
+        html2: "",
+        html3: "",
+    });
+
     // 查詢狀態 & 網站設定查詢結果
     const [isLoading, setIsLoading] = useState(true);
 
@@ -125,11 +138,13 @@ export default function WebSetting() {
         setIsLoading(true);
         ATS_WebSetting.ATS_WebSettingsSearch(pageSearch).then(res => {
             if (res.success) {
+                console.log(res.data)
                 setWebData(res.data);
                 setF_upd(res.data.filter(item => item.ws_id === "00005")[0])
                 setG_upd(res.data.filter(item => item.ws_id === "00006")[0])
                 setModalA(res.data.filter(item => item.ws_id === "00007")[0])
                 setModalB(res.data.filter(item => item.ws_id === "00008")[0])
+                setNight(res.data.filter(item => item.ws_id === "00009")[0])
             }
             setIsLoading(false);
         });
@@ -297,11 +312,32 @@ export default function WebSetting() {
     })
 
     /**
+     * @description [事件]夜間加成-儲存修改
+     */
+    const saveNight_handelClick = useCallback((e) => {
+        ATS_WebSetting.ATS_WebSettingsUpdate(night).then(res => {
+            if (res.success) {
+                enqueueSnackbar("修改成功", { variant: 'success' });
+            } else {
+                enqueueSnackbar("修改失敗", { variant: 'error' });
+            }
+        });
+    })
+
+    /**
      * @description [事件]客服聯繫方式-input
      */
     const G_handleInput = (e, editor, name) => {
         let val = editor.getData();
         setG_upd((prevData) => ({ ...prevData, [name]: val }))
+    }
+
+    /**
+     * @description [事件]夜間加成
+     */
+    const night_HandleInput = (e, editor, name) => {
+        let val = editor.getData();
+        setNight((prevData) => ({ ...prevData, [name]: val }))
     }
 
     /**
@@ -508,6 +544,77 @@ export default function WebSetting() {
                                                         />
                                                     </Grid>
                                                 </>
+                                            }
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={6} lg={6}>
+                                        <CusInfoTitle
+                                            label={"夜間加成設定"}
+                                            buttonType={"button"}
+                                            buttonGroup={
+                                                [{
+                                                    variant: "contained",
+                                                    color: "info",
+                                                    icon: <Save />,
+                                                    name: "儲存",
+                                                    onClick: (e) => saveNight_handelClick(e)
+                                                }]}
+                                            content={
+                                                <React.Fragment>
+                                                    <Grid item xs={12}>
+                                                        <Box style={{ minHeight: '350px' }}>
+                                                            <CKEditor
+                                                                editor={DecoupledEditor}
+                                                                onReady={(editor) => {
+                                                                    // 加入工具列
+                                                                    editor.ui.view.editable.element.parentElement.insertBefore(
+                                                                        editor.ui.view.toolbar.element,
+                                                                        editor.ui.view.editable.element
+                                                                    )
+                                                                    editor.editing.view.change((writer) => {
+                                                                        writer.setStyle({
+                                                                            "background-color": "white",
+                                                                            "min-height": '300px',
+                                                                            "border": '1px solid #dddddd'
+                                                                        }, editor.editing.view.document.getRoot())
+                                                                    })
+                                                                }}
+                                                                // 內容
+                                                                data={night ? night.html1 : ""}
+                                                                // 事件
+                                                                onChange={(e, editor) => night_HandleInput(e, editor, "html1")}
+                                                                // 設定
+                                                                config={{
+                                                                    // 語系
+                                                                    language: 'zh',
+                                                                    // 工具列
+                                                                    toolbar: {
+                                                                        items: [
+                                                                            'heading',
+                                                                            '|',
+                                                                            'fontFamily',
+                                                                            'fontSize',
+                                                                            'fontColor',
+                                                                            'fontBackgroundColor',
+                                                                            'bold',
+                                                                            'italic',
+                                                                            'underline',
+                                                                            '|',
+                                                                            'blockQuote',
+                                                                            'alignment',
+                                                                            'outdent',
+                                                                            'indent',
+                                                                            'numberedList',
+                                                                            'bulletedList',
+                                                                            '|',
+                                                                            'undo',
+                                                                            'redo',
+                                                                        ],
+                                                                    },
+                                                                }} />
+                                                        </Box>
+                                                    </Grid>
+                                                </React.Fragment>
                                             }
                                         />
                                     </Grid>

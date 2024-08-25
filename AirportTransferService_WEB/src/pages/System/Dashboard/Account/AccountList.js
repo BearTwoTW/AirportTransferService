@@ -443,9 +443,9 @@ const DialogsInner = forwardRef((props, ref) => {
   // 新增帳號
   const [accountAdd, setAccountAdd] = useState({
     username: null,
-    on_board_date: null,
+    on_board_date: new Date(),
     name: null,
-    home_page: null,
+    home_page: "001",
   });
   const initAccountAddCheck = { username: false, on_board_date: false, name: false, home_page: false }
   const [accountAddCheck, setAccountAddCheck] = useState(initAccountAddCheck);
@@ -524,7 +524,7 @@ const DialogsInner = forwardRef((props, ref) => {
                       onChangeEvent={(e) => add_handelInput(e)}
                     />
                   </Grid>
-                  <Grid item lg={3} sm={3} xs={12}>
+                  {/* <Grid item lg={3} sm={3} xs={12}>
                     <CusInput
                       id={"add--password"}
                       name={"password"}
@@ -557,7 +557,7 @@ const DialogsInner = forwardRef((props, ref) => {
                       value={options.sysOptions.some(item => item.sps_id === accountAdd.home_page) ? options.sysOptions.find(item => item.sps_id === accountAdd.home_page) : null}
                       onChangeEvent={(e) => add_handelSelect(e)}
                     />
-                  </Grid>
+                  </Grid> */}
                 </>
               }
             />
@@ -568,7 +568,7 @@ const DialogsInner = forwardRef((props, ref) => {
             label={"基本資料"}
             content={
               <>
-                <Grid item lg={4} sm={4} xs={12}>
+                <Grid item lg={6} sm={6} xs={12}>
                   <CusInput
                     id={"add--name"}
                     name={"name"}
@@ -579,7 +579,7 @@ const DialogsInner = forwardRef((props, ref) => {
                     onChangeEvent={(e) => add_handelInput(e)}
                   />
                 </Grid>
-                <Grid item lg={4} sm={4} xs={12}>
+                <Grid item lg={6} sm={6} xs={12}>
                   <CusOutlinedSelect
                     id={"add--gender"}
                     name={"gender"}
@@ -590,7 +590,7 @@ const DialogsInner = forwardRef((props, ref) => {
                     onChangeEvent={(e) => add_handelSelect(e)}
                   />
                 </Grid>
-                <Grid item lg={4} sm={4} xs={12}>
+                {/* <Grid item lg={4} sm={4} xs={12}>
                   <CusInput
                     id={"add--blood_type"}
                     name={"blood_type"}
@@ -598,8 +598,8 @@ const DialogsInner = forwardRef((props, ref) => {
                     value={accountAdd.blood_type}
                     onChangeEvent={(e) => add_handelInput(e)}
                   />
-                </Grid>
-                <Grid item lg={4} sm={4} xs={12}>
+                </Grid> */}
+                {/* <Grid item lg={4} sm={4} xs={12}>
                   <CusInput
                     id={"add--identity_card"}
                     name={"identity_card"}
@@ -607,8 +607,8 @@ const DialogsInner = forwardRef((props, ref) => {
                     value={accountAdd.identity_card}
                     onChangeEvent={(e) => add_handelInput(e)}
                   />
-                </Grid>
-                <Grid item lg={4} sm={4} xs={12}>
+                </Grid> */}
+                {/* <Grid item lg={4} sm={4} xs={12}>
                   <CusDatePicker
                     id={"add--birthday"}
                     name={"birthday"}
@@ -616,8 +616,8 @@ const DialogsInner = forwardRef((props, ref) => {
                     views={["year", "month", "day"]}
                     onChangeEvent={(e) => add_handelInput(e)}
                   />
-                </Grid>
-                <Grid item lg={4} sm={4} xs={12}>
+                </Grid> */}
+                <Grid item lg={6} sm={6} xs={12}>
                   <CusInput
                     id={"add--mobile_phone"}
                     name={"mobile_phone"}
@@ -626,7 +626,7 @@ const DialogsInner = forwardRef((props, ref) => {
                     onChangeEvent={(e) => add_handelInput(e)}
                   />
                 </Grid>
-                <Grid item lg={4} sm={4} xs={12}>
+                {/* <Grid item lg={4} sm={4} xs={12}>
                   <CusInput
                     id={"add--telephone"}
                     name={"telephone"}
@@ -634,8 +634,8 @@ const DialogsInner = forwardRef((props, ref) => {
                     value={accountAdd.telephone}
                     onChangeEvent={(e) => add_handelInput(e)}
                   />
-                </Grid>
-                <Grid item lg={4} sm={4} xs={12}>
+                </Grid> */}
+                <Grid item lg={6} sm={6} xs={12}>
                   <CusInput
                     id={"add--email"}
                     name={"email"}
@@ -648,7 +648,7 @@ const DialogsInner = forwardRef((props, ref) => {
             }
           />
         </Grid>
-        <Grid item lg={12} md={12} xs={12}>
+        {/* <Grid item lg={12} md={12} xs={12}>
           <CusInfoTitle
             label={"聯絡地址"}
             content={
@@ -729,7 +729,7 @@ const DialogsInner = forwardRef((props, ref) => {
               </>
             }
           />
-        </Grid>
+        </Grid> */}
         <Grid item lg={12} md={12} xs={12}>
           <CusInfoTitle
             label={"其它"}

@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback, useImperativeHandle, forwardRef, useContext } from 'react';
-import { Box, Grid } from '@mui/material';
+import { Box, Grid, Button } from '@mui/material';
 import { useLocation, useNavigate } from "react-router-dom";
 import { Google, CheckCircleOutline, CheckCircle, Error } from '@mui/icons-material';
 import { LineIcon } from '../../../components/CusSvgLibrary';
@@ -10,15 +10,21 @@ import { WebDialog3 } from '../../../components/WebSide/WebDialog';
 import { CusBackdropLoading } from '../../../components/CusProgressTS';
 import { CusOutlinedSelect } from '../../../components/CusSelect';
 import { OauthAPI } from '../../../js/APITS';
-import { CustomerAPI, OrderAPI, ATS_FareSettings, ATS_CityAreaSettings, ATS_ExtraSettings } from '../../../js/APITS';
+import { CustomerAPI, OrderAPI, ATS_FareSettings, ATS_CityAreaSettings, ATS_ExtraSettings, ATS_WebSetting } from '../../../js/APITS';
 import { imageURL } from '../../../js/Domain';
 import { Helmet } from "react-helmet";
 
 export default function Login() {
+  const navigate = useNavigate();
   const [websiteSetting, setwebsiteSetting] = useState(null);
   const [ICO, setICO] = useState(null)
   const [fareList, setFareList] = useState([]);
   const [extraList, setExtraList] = useState([]);
+
+  // Model
+  const useDialog = useRef();
+  const useDialogInner = useRef();
+  const [dialogData, setDialogData] = useState({});
   // 下拉選單
   const [options, setOptions] = useState({
     cityAreaOptions: { // 城市區域
@@ -26,6 +32,22 @@ export default function Login() {
       areaOptions: []
     },
     extraOptions: [], // 加價服務
+  });
+
+  // 網頁設定資料查詢
+  const [pageSearch, setPageSearch] = useState({
+    ws_id: "",
+    title: "",
+    image: "",
+    text1: "",
+    text2: "",
+    text3: "",
+    html1: "",
+    html2: "",
+    html3: "",
+    excel: "",
+    page: 0,
+    num_per_page: 0,
   });
 
   // 查車資
@@ -69,6 +91,33 @@ export default function Login() {
     num_per_page: 0,
     excel: "",
   });
+
+  const [webData, setWebData] = useState([]);
+  const [imageC, setImageC] = useState();
+  const [imageD, setImageD] = useState();
+  const [imageE, setImageE] = useState();
+  const [imageF, setImageF] = useState();
+  const [textF, setTextF] = useState();
+  const [modalA, setModalA] = useState();
+  const [modalB, setModalB] = useState();
+  const [night, setNight] = useState();
+
+  /**網站設定查詢 */
+  const getWebSetting = () => {
+    ATS_WebSetting.ATS_WebSettingsSearch(pageSearch).then(res => {
+      if (res.success) {
+        setWebData(res.data);
+        setImageC(res.data.filter(e => e.ws_id === "00002")[0].image);
+        setImageD(res.data.filter(e => e.ws_id === "00003")[0].image);
+        setImageE(res.data.filter(e => e.ws_id === "00004")[0].image);
+        setImageF(res.data.filter(e => e.ws_id === "00005")[0].image);
+        setTextF(res.data.filter(e => e.ws_id === "00005")[0].text1);
+        setModalA(res.data.filter(e => e.ws_id === "00007")[0].html1)
+        setModalB(res.data.filter(e => e.ws_id === "00008")[0].html1)
+        setNight(res.data.filter(e => e.ws_id === "00009")[0].html1)
+      }
+    });
+  };
 
   /**
    * 查詢車資
@@ -133,6 +182,7 @@ export default function Login() {
   };
 
   useEffect(() => {
+    getWebSetting();
     searchCityArea(cityAreaSearch);
     searchExtra(extraSearch);
   }, [cityAreaSearch, extraSearch]);
@@ -142,37 +192,70 @@ export default function Login() {
   }, [fareSearch]);
 
   /**[事件]下拉選單 */
-  const seacrh_HandleSelect = (e) => {
-    const { id, name, value, key } = e.target;
-    const val = value === null ? null : value[key];
+  // const seacrh_HandleSelect = (e) => {
+  //   const { id, name, value, key } = e.target;
+  //   const val = value === null ? null : value[key];
 
-    if (name === "city") {
-      setFareSearch(prev => ({
-        ...prev,
-        area: null,
-        [name]: val,
-      }));
-    } else {
-      setFareSearch(prev => ({
-        ...prev,
-        [name]: val,
-      }));
-    }
+  //   if (name === "city") {
+  //     setFareSearch(prev => ({
+  //       ...prev,
+  //       area: null,
+  //       [name]: val,
+  //     }));
+  //   } else {
+  //     setFareSearch(prev => ({
+  //       ...prev,
+  //       [name]: val,
+  //     }));
+  //   }
+  // };
+
+  /**
+   * 預約及車資計算跳轉
+   */
+  const confirm_Click = ({ type }) => {
+    navigate(`/Reserve?type=${type}`)
+  };
+
+  // [事件]預約送機 & 預約接機 打開 Modal
+  const reserve_Click = ({ e, type }) => {
+    useDialog.current.handleOpen();
+    setDialogData({
+      id: type,
+      maxWidth: "sm",
+      DialogTitle: type === "go" ? "預約送機" : "預約接機",
+      DialogContent: <DialogsInner type={type} ref={useDialogInner} html={type === "go" ? modalA : modalB} />,
+      DialogActions: (
+        <React.Fragment>
+          <Button color="secondary" variant='outlined' onClick={dialogClose}>
+            取消
+          </Button>
+          <Button color="secondary" variant='contained' onClick={() => confirm_Click({ type: type })}>
+            前往預約
+          </Button>
+        </React.Fragment>)
+    });
+  }
+
+  /**關閉Dialog  */
+  const dialogClose = () => {
+    useDialog.current.handleClose();
   };
 
   return (
-    <Box className="container mx-auto">
-      <Helmet>
-        <link rel="icon" href={ICO ? `${imageURL + ICO.path}` : ""} />
-        <title>
-          {websiteSetting ? `${websiteSetting.website_name} | 登入` : ""}
-        </title>
-      </Helmet>
-      <Box className="flex justify-center pt-10 pb-2.5 border-b">
-        <h1 className="text-[#192F64]">加價服務項目及收費標準</h1>
-      </Box>
-      <Box className="container mx-auto my-5 space-y-5">
-        <Grid container>
+    <React.Fragment>
+      <Box className="container mx-auto">
+        <Helmet>
+          <link rel="icon" href={ICO ? `${imageURL + ICO.path}` : ""} />
+          <title>
+            {websiteSetting ? `${websiteSetting.website_name} | 登入` : ""}
+          </title>
+        </Helmet>
+        <Box className="flex justify-center pt-10 pb-2.5 border-b">
+          <h1 className="text-[#192F64]">加價服務項目及收費標準</h1>
+        </Box>
+        <Box className="container mx-auto my-5 space-y-5">
+          {/* <Grid container>
           <Grid item lg={6} sm={6} xs={12}>
             <CusOutlinedSelect
               id={"add--city"}
@@ -209,38 +292,68 @@ export default function Login() {
               </Box>
             </Box>
           </Box>
-        </Box>
-        <Box className="border rounded-lg">
-          <Box className="flex max-md:flex-col">
-            <Box className="w-3/6 max-md:w-full border-r pb-5 space-y-5">
-              <Box className="bg-[#192F64] h-[60px] rounded-tl-lg max-md:rounded-t-lg flex justify-center items-center">
-                <h2 className="text-[#FFF] self-center">夜間加成(23:00~05:59)</h2>
+        </Box> */}
+          <Box className="border rounded-lg">
+            <Box className="flex max-md:flex-col">
+              <Box className="w-3/6 max-md:w-full border-r pb-5 space-y-5">
+                <Box className="bg-[#192F64] h-[60px] rounded-tl-lg max-md:rounded-t-lg flex justify-center items-center">
+                  <h2 className="text-[#FFF] self-center">夜間加成(23:00~05:59)</h2>
+                </Box>
+                <Box className="flex flex-col justify-center items-center p-10">
+                  <Box sx={{ p: "1rem" }}>
+                    <Box dangerouslySetInnerHTML={{ __html: night }} />
+                  </Box>
+                </Box>
               </Box>
-              <Box className="flex flex-col justify-center items-center p-10">
-                <h1>200 元</h1>
-                <h1>夜間計算方式</h1>
-                <h1>送機：指定用車時間</h1>
-                <h1>接機：航班抵達時間</h1>
-              </Box>
-            </Box>
-            <Box className="w-3/6 max-md:w-full pb-5 space-y-5">
-              <Box className="bg-[#192F64] h-[60px] rounded-tr-lg max-md:rounded-t-lg flex justify-center items-center">
-                <h2 className="text-[#FFF] self-center">加價服務</h2>
-              </Box>
-              <Box className="flex flex-wrap justify-center items-center gap-2.5 p-20">
-                {extraList.map((item, index) => (
-                  <Box key={item.es_id + index} className="bg-[#EEEEEE] text-info p-2 rounded-lg">{`${item.name} $${item.price}`}</Box>
-                ))}
+              <Box className="w-3/6 max-md:w-full pb-5 space-y-5">
+                <Box className="bg-[#192F64] h-[60px] rounded-tr-lg max-md:rounded-t-lg flex justify-center items-center">
+                  <h2 className="text-[#FFF] self-center">加價服務</h2>
+                </Box>
+                <Box className="flex flex-wrap justify-center items-center gap-2.5 p-20">
+                  {extraList.map((item, index) => (
+                    <Box key={item.es_id + index} className="bg-[#EEEEEE] text-info p-2 rounded-lg">{`${item.name} $${item.price}`}</Box>
+                  ))}
+                </Box>
               </Box>
             </Box>
           </Box>
+          <Box className="container mx-auto p-5">
+            <WebTextIconButton3
+              className={"h-20 rounded-full"}
+              fullWidth={true}
+              size={"medium"}
+              color={"primary"}
+              text={"立即預約"}
+              onClick={() => reserve_Click({ type: "go" })} />
+          </Box>
         </Box>
       </Box>
-    </Box>
+      <WebDialog3 ref={useDialog} info={dialogData} />
+    </React.Fragment>
   )
 }
 
+/** [內容]Dialog*/
+const DialogsInner = forwardRef((props, ref) => {
+  const { type, html } = props;
 
-
+  if (type === "go") {
+    return (
+      <React.Fragment>
+        <Box sx={{ p: "1rem" }}>
+          <Box dangerouslySetInnerHTML={{ __html: html }} />
+        </Box>
+      </React.Fragment>
+    )
+  } else if (type === "leave") {
+    return (
+      <React.Fragment>
+        <Box sx={{ p: "1rem" }}>
+          <Box dangerouslySetInnerHTML={{ __html: html }} />
+        </Box>
+      </React.Fragment>
+    )
+  }
+})
 
 

@@ -17,7 +17,7 @@ import { NoResults } from '../../../../components/CusError';
 import { CusOutlinedSelect } from '../../../../components/CusSelect';
 import { CusTextIconButton, CusIconButton, CusTextButton } from '../../../../components/CusButton';
 import { CusDatePicker } from '../../../../components/CusDatePicker';
-import { UserAPI, OptionList, DDMenu, ATS_FareSettings, ATS_CityAreaSettings, ATS_AirportTerminalSettings, ImportData } from '../../../../js/APITS';
+import { UserAPI, OptionList, DDMenu, ATS_FareSettings, ATS_CityAreaSettings, ATS_AirportTerminalSettings, ATS_CarModelSettings, ImportData } from '../../../../js/APITS';
 import { useCheckLogInXPermission, get_ECC_indexedDB_factory } from '../../../../js/Function';
 import { isNullOrEmpty } from '../../../../js/FunctionTS';
 import { exportURL, ImportSampleURL } from '../../../../js/DomainTS';
@@ -71,6 +71,7 @@ export default function Fare() {
         areaOptions: [],
         airportOptions: [],
         terminalOptions: [],
+        carModelOptions: [],
     });
 
     // 提示框
@@ -104,6 +105,7 @@ export default function Fare() {
      * 查詢城市區域選單
      */
     const seacrhOptions = async () => {
+        // 城市區域選單
         ATS_CityAreaSettings.ATS_CityAreaSettingsSearch({
             visible: "Y",
             cas_id: null,
@@ -148,6 +150,7 @@ export default function Fare() {
             }
         })
 
+        // 機場航廈選單
         ATS_AirportTerminalSettings.ATS_AirportTerminalSettingsSearch({
             visible: "Y",
             ats_id: null,
@@ -186,6 +189,27 @@ export default function Fare() {
                         terminalOptions,
                     };
                 });
+            }
+        })
+
+        // 車型選單
+        ATS_CarModelSettings.ATS_CarModelSettingsSearch({
+            visible: "Y",
+            cms_id: null,
+            name: null,
+            max_passengers: null,
+            max_luggage: null,
+            max_child_seats: null,
+            max_service_extras: null,
+            page: 0,
+            num_per_page: 0,
+            excel: "",
+        }).then(async res => {
+            if (res.success) {
+                setOptions(prev => ({
+                    ...prev,
+                    carModelOptions: res.data,
+                }));
             }
         })
     }
@@ -267,6 +291,7 @@ export default function Fare() {
                     <TableCell>{item.section}</TableCell>
                     <TableCell>{item.airport}</TableCell>
                     <TableCell>{item.terminal}</TableCell>
+                    <TableCell>{item.cms_name}</TableCell>
                     <TableCell>{item.price}</TableCell>
                     <TableCell>
                         {permission.Delete
@@ -528,6 +553,17 @@ export default function Fare() {
                                     disabled={pageSearch.airport ? false : true}
                                 />
                             </Grid>
+                            <Grid item xs={12} sm={3} lg={3}>
+                                <CusOutlinedSelect
+                                    id={"search--cms_id"}
+                                    name={"cms_id"}
+                                    label={"車型"}
+                                    options={options.carModelOptions}
+                                    optionKey={"cms_id"}
+                                    value={options.carModelOptions.some(item => item.cms_id === pageSearch.cms_id) ? options.carModelOptions.find(item => item.cms_id === pageSearch.cms_id) : null}
+                                    onChangeEvent={(e) => search_handleSelect(e)}
+                                />
+                            </Grid>
                             <Grid item xs={12} display={"flex"} justifyContent={"end"}>
                                 <CusTextIconButton
                                     color={"default"}
@@ -576,6 +612,7 @@ export default function Fare() {
                                                     { name: "段" },
                                                     { name: "機場" },
                                                     { name: "航廈" },
+                                                    { name: "車型" },
                                                     { name: "金額" },
                                                     { name: "操作" },
                                                 ]}

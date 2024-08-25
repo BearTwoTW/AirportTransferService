@@ -288,7 +288,7 @@ export default function GA() {
     /**[確認]刪除加價 */
     const del_Confirm = useCallback((e, _id) => {
         e.stopPropagation();
-        ATS_GASettings.ATS_GASettingsDelete({ es_id: _id }).then(res => {
+        ATS_GASettings.ATS_GASettingsDelete({ gas_id: _id }).then(res => {
             if (res.success) {
                 dialogClose();
                 searchGA(pageSearch);
@@ -410,7 +410,7 @@ export default function GA() {
                                     ? GAList.length > 0
                                         ? <React.Fragment>
                                             <CusBasicTableTS
-                                                hasRowsPerPage={true}
+                                                // hasRowsPerPage={true}
                                                 rowsPerPage={pageSearch.num_per_page}
                                                 onPageChange={handleChangePage}
                                                 count={pageCount}
@@ -426,11 +426,11 @@ export default function GA() {
                                                 ]}
                                                 tableBody={<TableBodyContent />}
                                             />
-                                            <PaginationActionsTS
+                                            {/* <PaginationActionsTS
                                                 totalPage={pageCount}
                                                 page={pageSearch.page}
                                                 onPageChange={(e, nowPage) => handleChangePage(e, nowPage)}
-                                            />
+                                            /> */}
                                         </React.Fragment>
                                         : <NoResults />
                                     : <CircularLoading />}

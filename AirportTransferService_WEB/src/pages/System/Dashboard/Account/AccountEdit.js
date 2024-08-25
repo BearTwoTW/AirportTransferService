@@ -503,7 +503,7 @@ const TabPanelAccountInfo = React.memo((props) => {
                             onChangeEvent={(e) => edit_handelInput(e)}
                           />
                         </Grid>
-                        <Grid item lg={4} sm={4} xs={12}>
+                        {/* <Grid item lg={4} sm={4} xs={12}>
                           <CusDatePicker
                             id={"edit--on_board_date"}
                             name={"on_board_date"}
@@ -527,7 +527,7 @@ const TabPanelAccountInfo = React.memo((props) => {
                             value={sysOptions.some(item => item.sps_id === data.home_page) ? sysOptions.find(item => item.sps_id === data.home_page) : null}
                             onChangeEvent={(e) => edit_handelSelect(e)}
                           />
-                        </Grid>
+                        </Grid> */}
                       </>
                     }
                   />
@@ -537,7 +537,7 @@ const TabPanelAccountInfo = React.memo((props) => {
                     label={"基本資料"}
                     content={
                       <>
-                        <Grid item lg={4} sm={4} xs={12}>
+                        <Grid item lg={6} sm={6} xs={12}>
                           <CusInput
                             id={"edit--name"}
                             name={"name"}
@@ -548,7 +548,7 @@ const TabPanelAccountInfo = React.memo((props) => {
                             onChangeEvent={(e) => edit_handelInput(e)}
                           />
                         </Grid>
-                        <Grid item lg={4} sm={4} xs={12}>
+                        <Grid item lg={6} sm={6} xs={12}>
                           <CusOutlinedSelect
                             id={"edit--gender"}
                             name={"gender"}
@@ -559,7 +559,7 @@ const TabPanelAccountInfo = React.memo((props) => {
                             onChangeEvent={(e) => edit_handelSelect(e)}
                           />
                         </Grid>
-                        <Grid item lg={4} sm={4} xs={12}>
+                        {/* <Grid item lg={4} sm={4} xs={12}>
                           <CusInput
                             id={"edit--blood_type"}
                             name={"blood_type"}
@@ -586,8 +586,8 @@ const TabPanelAccountInfo = React.memo((props) => {
                             value={data.birthday}
                             onChangeEvent={(e) => edit_handelInput(e)}
                           />
-                        </Grid>
-                        <Grid item lg={4} sm={4} xs={12}>
+                        </Grid> */}
+                        <Grid item lg={6} sm={6} xs={12}>
                           <CusInput
                             id={"edit--mobile_phone"}
                             name={"mobile_phone"}
@@ -596,7 +596,7 @@ const TabPanelAccountInfo = React.memo((props) => {
                             onChangeEvent={(e) => edit_handelInput(e)}
                           />
                         </Grid>
-                        <Grid item lg={4} sm={4} xs={12}>
+                        {/* <Grid item lg={4} sm={4} xs={12}>
                           <CusInput
                             id={"edit--telephone"}
                             name={"telephone"}
@@ -604,8 +604,8 @@ const TabPanelAccountInfo = React.memo((props) => {
                             value={data.telephone}
                             onChangeEvent={(e) => edit_handelInput(e)}
                           />
-                        </Grid>
-                        <Grid item lg={8} sm={8} xs={12}>
+                        </Grid> */}
+                        <Grid item lg={6} sm={6} xs={12}>
                           <CusInput
                             id={"edit--email"}
                             name={"email"}
@@ -618,7 +618,7 @@ const TabPanelAccountInfo = React.memo((props) => {
                     }
                   />
                 </Grid>
-                <Grid item xs={12} md={12} lg={12}>
+                {/* <Grid item xs={12} md={12} lg={12}>
                   <CusInfoTitle
                     label={"聯絡地址"}
                     content={
@@ -699,7 +699,7 @@ const TabPanelAccountInfo = React.memo((props) => {
                       </>
                     }
                   />
-                </Grid>
+                </Grid> */}
                 <Grid item xs={12} md={12} lg={12}>
                   <CusInfoTitle
                     label={"其它"}
@@ -791,7 +791,7 @@ const TabPanelAccountInfo = React.memo((props) => {
               </React.Fragment>}
             />
           </Grid>
-          <Grid item xs={12}>
+          {/* <Grid item xs={12}>
             <CusCard content={
               <React.Fragment>
                 <Grid item xs={12} md={12} lg={12}>
@@ -828,7 +828,7 @@ const TabPanelAccountInfo = React.memo((props) => {
                 </Grid>
               </React.Fragment>}
             />
-          </Grid>
+          </Grid> */}
         </Grid>
       </TabPanel>
     </React.Fragment >

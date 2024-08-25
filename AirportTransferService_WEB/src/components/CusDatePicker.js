@@ -64,30 +64,6 @@ const CusDatePicker = (props) => {
     props.onChangeEvent(e);
   }
 
-  const setMaxDate = (arr) => {
-    const now = arr[0] ? new Date(arr[0]) : new Date();
-    const nowDays = now.setDate(now.getDate() + arr[1]);
-    return moment(dayjs(nowDays).format("YYYY/MM/DD"));
-  };
-
-  const setMinDate = (arr) => {
-    const now = arr[0] ? new Date(arr[0]) : new Date();
-    const nowDays = now.setDate(now.getDate() - arr[1]);
-    return moment(dayjs(nowDays).format("YYYY/MM/DD"));
-  };
-
-  const setMaxMonth = (arr) => {
-    const now = arr[0] ? new Date(arr[0]) : new Date();
-    const nowDays = now.setMonth(now.getMonth() + arr[1]);
-    return moment(dayjs(nowDays).format("YYYY/MM"));
-  };
-
-  const setMinMonth = (arr) => {
-    const now = arr[0] ? new Date(arr[0]) : new Date();
-    const nowDays = now.setMonth(now.getMonth() - arr[1]);
-    return moment(dayjs(nowDays).format("YYYY/MM"));
-  };
-
   return (
     <LocalizationProvider dateAdapter={AdapterMoment}>
       <DatePicker
@@ -117,16 +93,8 @@ const CusDatePicker = (props) => {
         disablePast={props.disablePast}
         disableFuture={props.disableFuture}
         displayWeekNumber={props.displayWeekNumber}
-        maxDate={props.maxDate
-          ? props.format === "YYYY/MM"
-            ? setMaxMonth(props.maxDate)
-            : setMaxDate(props.maxDate)
-          : null}
-        minDate={props.minDate
-          ? props.format === "YYYY/MM"
-            ? setMinMonth(props.minDate)
-            : setMinDate(props.minDate)
-          : null}
+        maxDate={props.maxDate}
+        minDate={props.minDate}
         onChange={(e) => checkInputData({
           moment: e,
           target: {

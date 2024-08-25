@@ -27,10 +27,8 @@ const status = sessionStorage.getItem("themeStatus") === null ? "LightON" : sess
  * @param {string} helperText        錯誤驗證訊息
  * @param {string} label             大標題
  * @param {string} format            格式
- * @param {number} minDate           最小值
- * @param {number} minDateTime       最小值
- * @param {number} minDate           最大值
- * @param {number} minDateTime       最大值
+ * @param {number} maxTime           最大值
+ * @param {number} minTime           最小值
  * @param {string} openTo            開啟時顯示哪個Array<'day' | 'hours' | 'minutes' | 'month' | 'seconds' | 'year'>
  * @param {string} margin            間距
  * @param {func}   onChange          觸發事件
@@ -47,16 +45,18 @@ const CusTimePicker = (props) => {
   const [value, setValue] = React.useState(null);
 
   useEffect(() => {
-    setValue(props.value ? moment(props.value, props.format.replace(/\//g, "").replace(/:/g, "").replace(/\s/g, "")) : null)
-  }, [props.value]);
+    // 確保傳遞給 moment 的格式是正確的
+    setValue(props.value ? moment(props.value, props.format.replace(/\//g, "").replace(/:/g, "").replace(/\s/g, "")) : null);
+  }, [props.value, props.format]);
 
   const checkInputData = (e) => {
-    setValue(e.moment);
+    const momentValue = e.moment; // Moment.js 物件
+    setValue(momentValue); // 確保 value 是 Moment.js 物件
     e.target.name = props.name;
     e.target.label = props.label;
-    e.target.value = e.moment ? moment(e.moment).format("HH:mm") : null;
+    e.target.value = momentValue ? moment(momentValue).format("HH:mm") : null; // 確保正確格式
     props.onChangeEvent(e);
-  }
+  };
 
   return (
     <LocalizationProvider dateAdapter={AdapterMoment}>
@@ -66,17 +66,19 @@ const CusTimePicker = (props) => {
           paddingRight: { sm: "0.5rem", xs: "0rem" },
           margin: "0.5rem 0",
           label: {
-            color: Variables[status + "__DefaultContrastText"],
+            color: props.labelColor || 'inherit', // 確保使用正確的顏色屬性
           },
           input: {
-            color: Variables[status + "__DefaultContrastText"]
+            color: props.inputColor || 'inherit', // 確保使用正確的顏色屬性
           },
         }}
+        maxTime={props.maxTime ? moment(props.maxTime) : undefined} // 確保 maxTime 是 Moment.js 物件或 undefined
+        minTime={props.minTime ? moment(props.minTime) : undefined} // 確保 minTime 是 Moment.js 物件或 undefined
         views={props.views}
         openTo={props.openTo}
         fullWidth={true}
         label={props.label}
-        value={value}
+        value={value} // 確保 value 是 Moment.js 物件或 null
         format={props.format}
         disabled={props.disabled}
         color={props.color}
@@ -93,36 +95,36 @@ const CusTimePicker = (props) => {
             "key": (props.optionKey === undefined ? "" : props.optionKey),
           }
         })}
-        slotProps={
-          {
-            openPickerButton: {
-              sx: {
-                color: Variables[status + "__DefaultContrastText"],
-              }
-            },
-            textField: {
-              id: props.id,
-              size: props.size,
-              fullWidth: true,
-              required: props.required,
-              helperText: props.helperText,
-              error: props.error,
-              color: "secondary",
-            },
-            actionBar: {
-              actions: ["clear"]
+        slotProps={{
+          openPickerButton: {
+            sx: {
+              color: props.buttonColor || 'inherit', // 確保使用正確的顏色屬性
             }
+          },
+          textField: {
+            id: props.id,
+            size: props.size,
+            fullWidth: true,
+            required: props.required,
+            helperText: props.helperText,
+            error: props.error,
+            color: "secondary",
+          },
+          actionBar: {
+            actions: ["clear"]
           }
-        }
+        }}
       />
     </LocalizationProvider>
   );
-}
+};
 
 CusTimePicker.defaultProps = {
   className: 'CusTimePicker',
   label: '',
   format: "HH:mm",
+  maxTime: '',
+  minTime: '',
   views: ["hours", "minutes"],
   openTo: "hours",
   disabled: false,
@@ -142,6 +144,8 @@ CusTimePicker.prototype = {
   value: PropTypes.string,
   error: PropTypes.bool,
   format: PropTypes.string,
+  maxTime: PropTypes.string,
+  minTime: PropTypes.string,
   views: PropTypes.object,
   openTo: PropTypes.string,
   disabled: PropTypes.bool,

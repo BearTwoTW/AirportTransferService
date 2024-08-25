@@ -4,7 +4,7 @@ import { Box, Grid, Tabs, Tab, Typography, TextField, Autocomplete, Button, Divi
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
-import moment, { Moment } from 'moment';
+import moment, { max, Moment } from 'moment';
 import "moment/locale/zh-tw";
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import FormGroup from '@mui/material/FormGroup';
@@ -133,10 +133,7 @@ export default function Reserve() {
     extraOptions: [], // 加價服務
     passengerOptions: [], // 人數
     bagsOptions: [], // 行李數
-    extraCount: [
-      { key: 0, name: "1" },
-      { key: 1, name: "2" },
-    ], // 加價服務
+    extraCount: [], // 加價服務
   });
 
   // Tabs 狀態
@@ -226,7 +223,7 @@ export default function Reserve() {
         }
 
         // 生成行李數下拉選單選項
-        const luggageOptions = [];
+        const luggageOptions = [{ key: 0, name: '0' }];
         for (let i = 1; i <= maxPassengers; i++) {
           luggageOptions.push({ key: i - 1, name: i.toString() });
         }
@@ -447,8 +444,11 @@ const GoTabPanel = forwardRef((props, ref) => {
     phone_passenger: false,
     email_passenger: false,
   }
+
+  const [optionsItems, setOptionsItems] = useState(options);
   const [orderAddCheck, setOrderAddCheck] = useState(initOrderAddCheck);
   const [carModelOptions, setCarModelOptions] = useState(options.carModelOptions);
+  const [num, setNum] = useState(0); // 初始化 num 的狀態
 
   // checkbox 狀態
   const [checkboxState, setCheckboxState] = useState({
@@ -456,6 +456,11 @@ const GoTabPanel = forwardRef((props, ref) => {
     extra: false,
     sameDetail: false,
   });
+
+  // 根據 extraNum 生成選項範圍，不包含 0
+  const generateOptions = (num) => {
+    return Array.from({ length: num }, (_, i) => ({ name: (i + 1).toString(), value: i + 1 }));
+  };
 
   /**新增 input */
   const add_handelInput = e => {
@@ -481,12 +486,17 @@ const GoTabPanel = forwardRef((props, ref) => {
         [name]: val
       }));
     }
+    setOrderAddCheck(prev => ({
+      ...prev,
+      [name]: !val ? true : false,
+    }));
   };
 
   /**[事件]下拉選單 */
-  const add_HandleSelect = (e) => {
+  const add_HandleSelect = (e, es_id) => {
     const { id, name, value, key } = e.target;
     const val = value === null ? null : value[key];
+    const num = e.target.value ? e.target.value.max_service_extras : null;
 
     if (name === "city") {
       setOrderAdd(prev => ({
@@ -524,6 +534,19 @@ const GoTabPanel = forwardRef((props, ref) => {
       const filteredVehicles = options.carModelOptions.filter(item => item.max_passengers >= passengerCount && item.max_luggage >= luggageCount);
 
       setCarModelOptions(filteredVehicles);
+    } else if (name === "cms_id") {
+      setNum(num);
+      // 更新車型選擇並生成新的 extraCount 選項
+      setOptionsItems(prevOptions => ({
+        ...prevOptions,
+        extraCount: generateOptions(num)
+      }));
+
+      setOrderAdd(prev => ({
+        ...prev,
+        es_ids: null,
+        [name]: val,
+      }));
     } else if (name === "es_ids") {
       let arr = orderAdd.es_ids ? [...orderAdd.es_ids] : []; // 使用展開運算符號來複製陣列
       const index = arr.findIndex(item => item.es_id === id); // 找到相同 es_id 的物件索引
@@ -548,12 +571,11 @@ const GoTabPanel = forwardRef((props, ref) => {
         ...prev,
         [name]: arr.length > 0 ? arr : null,
       }))
-    } else {
-      setOrderAdd(prev => ({
-        ...prev,
-        [name]: val,
-      }));
     }
+    setOrderAddCheck(prev => ({
+      ...prev,
+      [name]: !val ? true : false,
+    }));
   };
 
   const handleCheckboxChange = (event) => {
@@ -575,19 +597,18 @@ const GoTabPanel = forwardRef((props, ref) => {
         ...prev,
         es_ids: checked ? arr : null,
       }))
-    } else if (name === "sameDetail" && checked) { // 同訂購人
+    } else if (name === "sameDetail") { // 同訂購人
       setOrderAdd(prev => ({
         ...prev,
-        name_passenger: orderAdd.name_purchaser,
-        phone_passenger: orderAdd.phone_purchaser,
-        email_passenger: orderAdd.email_purchaser,
+        name_passenger: checked ? orderAdd.name_purchaser : null,
+        phone_passenger: checked ? orderAdd.phone_purchaser : null,
+        email_passenger: checked ? orderAdd.email_purchaser : null,
       }));
-    } else {
-      setOrderAdd(prev => ({
+      setOrderAddCheck(prev => ({
         ...prev,
-        name_passenger: null,
-        phone_passenger: null,
-        email_passenger: null,
+        name_passenger: checked ? false : true,
+        phone_passenger: checked ? false : true,
+        email_passenger: checked ? false : true,
       }));
     }
 
@@ -599,7 +620,7 @@ const GoTabPanel = forwardRef((props, ref) => {
 
   const confrm_Click = ({ e, type, cal, orderAdd, signboard, extra, sameDetail }) => {
     if (!orderAdd.type || !orderAdd.city || !orderAdd.area || !orderAdd.road || !orderAdd.address
-      || !orderAdd.airport || !orderAdd.terminal || !orderAdd.flght_number || !orderAdd.date_travel || !orderAdd.time_travel
+      || !orderAdd.airport || !orderAdd.terminal || !orderAdd.date_travel || !orderAdd.time_travel
       || !orderAdd.number_passenger || !orderAdd.number_bags || !orderAdd.cms_id
       || !orderAdd.name_purchaser || !orderAdd.phone_purchaser || !orderAdd.email_purchaser
       || !orderAdd.name_passenger || !orderAdd.phone_passenger || !orderAdd.email_passenger
@@ -612,7 +633,6 @@ const GoTabPanel = forwardRef((props, ref) => {
         address: !orderAdd.address ? true : false,
         airport: !orderAdd.airport ? true : false,
         terminal: !orderAdd.terminal ? true : false,
-        flght_number: !orderAdd.flght_number ? true : false,
         date_travel: !orderAdd.date_travel ? true : false,
         time_travel: !orderAdd.time_travel ? true : false,
         number_passenger: !orderAdd.number_passenger ? true : false,
@@ -753,7 +773,6 @@ const GoTabPanel = forwardRef((props, ref) => {
                   id={"add--flght_number"}
                   name={"flght_number"}
                   label={"航班號碼"}
-                  error={orderAddCheck.flght_number}
                   value={orderAdd.flght_number}
                   onChangeEvent={(e) => add_handelInput(e)}
                 />
@@ -764,6 +783,7 @@ const GoTabPanel = forwardRef((props, ref) => {
                   name={"date_travel"}
                   label={"出發日期"}
                   views={["year", "month", "day"]}
+                  minDate={moment().add(48, 'hours')}
                   error={orderAddCheck.date_travel}
                   value={orderAdd.date_travel}
                   onChangeEvent={(e) => add_handelInput(e)}
@@ -775,6 +795,7 @@ const GoTabPanel = forwardRef((props, ref) => {
                   name={"time_travel"}
                   label={orderAdd.type === "送機" ? "乘車時間" : "航班抵達時間"}
                   views={['hours', 'minutes']}
+                  minTime={moment().add(48, 'hours').add(5, 'minutes')}
                   error={orderAddCheck.time_travel}
                   value={orderAdd.time_travel}
                   onChangeEvent={(e) => add_handelInput(e)}
@@ -898,9 +919,9 @@ const GoTabPanel = forwardRef((props, ref) => {
                         id={mapEle.es_id}
                         name={"es_ids"}
                         label={mapEle.name}
-                        options={options.extraCount}
+                        options={optionsItems.extraCount}
                         optionKey={"name"}
-                        value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
+                        value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? optionsItems.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
                         onChangeEvent={(e) => add_HandleSelect(e)}
                       />
                     </Grid>
@@ -1071,7 +1092,6 @@ const LeaveTabPanel = forwardRef((props, ref) => {
   const add_handelInput = e => {
     const { name, value } = e.target;
     const val = value === "" ? null : value;
-    console.log(val)
 
     if (name === "date_travel") {
       let formattedValue = val;
@@ -1092,6 +1112,10 @@ const LeaveTabPanel = forwardRef((props, ref) => {
         [name]: val
       }));
     }
+    setOrderAddCheck(prev => ({
+      ...prev,
+      [name]: !val ? true : false,
+    }));
   };
 
   /**[事件]下拉選單 */
@@ -1165,6 +1189,10 @@ const LeaveTabPanel = forwardRef((props, ref) => {
         [name]: val,
       }));
     }
+    setOrderAddCheck(prev => ({
+      ...prev,
+      [name]: !val ? true : false,
+    }));
   };
 
   const handleCheckboxChange = (event) => {
@@ -1186,19 +1214,18 @@ const LeaveTabPanel = forwardRef((props, ref) => {
         ...prev,
         es_ids: checked ? arr : null,
       }))
-    } else if (name === "sameDetail" && checked) { // 同訂購人
+    } else if (name === "sameDetail") { // 同訂購人
       setOrderAdd(prev => ({
         ...prev,
-        name_passenger: orderAdd.name_purchaser,
-        phone_passenger: orderAdd.phone_purchaser,
-        email_passenger: orderAdd.email_purchaser,
+        name_passenger: checked ? orderAdd.name_purchaser : null,
+        phone_passenger: checked ? orderAdd.phone_purchaser : null,
+        email_passenger: checked ? orderAdd.email_purchaser : null,
       }));
-    } else {
-      setOrderAdd(prev => ({
+      setOrderAddCheck(prev => ({
         ...prev,
-        name_passenger: null,
-        phone_passenger: null,
-        email_passenger: null,
+        name_passenger: checked ? false : true,
+        phone_passenger: checked ? false : true,
+        email_passenger: checked ? false : true,
       }));
     }
 
@@ -1375,6 +1402,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                   name={"date_travel"}
                   label={"出發日期"}
                   views={["year", "month", "day"]}
+                  minDate={moment().add(48, 'hours')}
                   error={orderAddCheck.date_travel}
                   value={orderAdd.date_travel}
                   onChangeEvent={(e) => add_handelInput(e)}
@@ -1385,6 +1413,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                   id={"add--time_travel"}
                   name={"time_travel"}
                   label={orderAdd.type === "送機" ? "乘車時間" : "航班抵達時間"}
+                  minTime={moment().add(48, 'hours').add(5, 'minutes')}
                   views={['hours', 'minutes']}
                   error={orderAddCheck.time_travel}
                   value={orderAdd.time_travel}
@@ -1629,7 +1658,7 @@ const DialogsInner = forwardRef((props, ref) => {
               <Typography color="secondary" fontWeight="bold">上車地點</Typography>
             </Box>
             <Box className="mt-2.5">
-              <Typography color="info" fontWeight="bold">{orderAdd.city + orderAdd.area + orderAdd.road + orderAdd.section + orderAdd.address}</Typography>
+              <Typography color="info" fontWeight="bold">{orderAdd.city + orderAdd.area + (orderAdd.road && orderAdd.road.includes("路") ? orderAdd.road : orderAdd.road + "路") + (orderAdd.section ? (orderAdd.section.includes("段") ? orderAdd.section : orderAdd.section + "段") : "") + orderAdd.address}</Typography>
             </Box>
           </Grid>
           <Grid item xs={12} md={6} lg={6}>
@@ -1646,7 +1675,13 @@ const DialogsInner = forwardRef((props, ref) => {
               <CalendarMonth color={"secondary"} />
               <Typography color="secondary" fontWeight="bold">預約乘車日期及時間</Typography>
             </Box>
-            <Grid container className="mt-2.5">
+            <Grid container className="mt-2.5 space-y-2.5">
+              <Grid item xs={12}>
+                <Box className="flex gap-2">
+                  <FlightTakeoffIcon color={"info"} />
+                  <Typography color="info" fontWeight="bold">{orderAdd.flght_number}</Typography>
+                </Box>
+              </Grid>
               <Grid item xs={6}>
                 <Box className="flex gap-2">
                   <CalendarMonth color={"info"} />
@@ -1729,6 +1764,25 @@ const DialogsInner = forwardRef((props, ref) => {
                   label="兒童座椅及增高墊 (+$200)"
                 />
               </FormGroup>
+              <Grid container>
+                {extra ?
+                  options.extraOptions.filter(filterEle => filterEle.type !== "舉牌").map((mapEle, index) => {
+                    return (
+                      <Grid key={mapEle.es_id} item lg={6} sm={6} xs={12}>
+                        <CusOutlinedSelect
+                          id={mapEle.es_id}
+                          name={"es_ids"}
+                          label={mapEle.name}
+                          options={options.extraCount}
+                          optionKey={"name"}
+                          value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
+                          disabled
+                        />
+                      </Grid>
+                    )
+                  })
+                  : null}
+              </Grid>
             </Box>
           </Grid>
           <Grid item xs={12} md={6} lg={6}>
@@ -1789,7 +1843,7 @@ const DialogsInner = forwardRef((props, ref) => {
               <Typography color="secondary" fontWeight="bold">下車地點</Typography>
             </Box>
             <Box className="mt-2.5">
-              <Typography color="info" fontWeight="bold">{orderAdd.city + orderAdd.area + orderAdd.road + orderAdd.section + orderAdd.address}</Typography>
+              <Typography color="info" fontWeight="bold">{orderAdd.city + orderAdd.area + (orderAdd.road && orderAdd.road.includes("路") ? orderAdd.road : orderAdd.road + "路") + (orderAdd.section ? (orderAdd.section.includes("段") ? orderAdd.section : orderAdd.section + "段") : "") + orderAdd.address}</Typography>
             </Box>
           </Grid>
           <Grid item xs={12} md={6} lg={6}>
@@ -1797,7 +1851,13 @@ const DialogsInner = forwardRef((props, ref) => {
               <CalendarMonth color={"secondary"} />
               <Typography color="secondary" fontWeight="bold">預約乘車日期及時間</Typography>
             </Box>
-            <Grid container className="mt-2.5">
+            <Grid container className="mt-2.5 space-y-2.5">
+              <Grid item xs={12}>
+                <Box className="flex gap-2">
+                  <FlightLandIcon color={"info"} />
+                  <Typography color="info" fontWeight="bold">{orderAdd.flght_number}</Typography>
+                </Box>
+              </Grid>
               <Grid item xs={6}>
                 <Box className="flex gap-2">
                   <CalendarMonth color={"info"} />
@@ -1880,6 +1940,25 @@ const DialogsInner = forwardRef((props, ref) => {
                   label="兒童座椅及增高墊 (+$200)"
                 />
               </FormGroup>
+              <Grid container>
+                {extra ?
+                  options.extraOptions.filter(filterEle => filterEle.type !== "舉牌").map((mapEle, index) => {
+                    return (
+                      <Grid key={mapEle.es_id} item lg={6} sm={6} xs={12}>
+                        <CusOutlinedSelect
+                          id={mapEle.es_id}
+                          name={"es_ids"}
+                          label={mapEle.name}
+                          options={options.extraCount}
+                          optionKey={"name"}
+                          value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
+                          disabled
+                        />
+                      </Grid>
+                    )
+                  })
+                  : null}
+              </Grid>
             </Box>
           </Grid>
           <Grid item xs={12} md={6} lg={6}>

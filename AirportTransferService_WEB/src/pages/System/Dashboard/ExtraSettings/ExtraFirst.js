@@ -217,7 +217,7 @@ export default function Extra() {
         setDialogData(({
             id: 'add',
             DialogTitle: '新增機場航廈',
-            DialogContent: <DialogsInner type={'add'} ref={useDialogInner} />,
+            DialogContent: <DialogsInner type={'add'} ref={useDialogInner} options={options} />,
             DialogActions: (
                 <>
                     <CusTextButton autoFocus onClick={dialogClose} color="default" text="取消" />
@@ -265,7 +265,7 @@ export default function Extra() {
         setDialogData(({
             id: 'edit',
             DialogTitle: '修改',
-            DialogContent: <DialogsInner type={'edit'} ref={useDialogInner} getEditData={getEditData} es_id={id} />,
+            DialogContent: <DialogsInner type={'edit'} ref={useDialogInner} getEditData={getEditData} options={options} es_id={id} />,
             DialogActions: (
                 <React.Fragment>
                     <CusTextButton autoFocus onClick={dialogClose} color="default" text="取消" />
@@ -488,7 +488,7 @@ export default function Extra() {
 
 /**新增modal內容*/
 const DialogsInner = forwardRef((props, ref) => {
-    const { type, name, getEditData, es_id } = props;
+    const { type, name, getEditData, options, es_id } = props;
     // 新增加價
     const [extraAdd, setExtraAdd] = useState({
         visible: "Y",
@@ -516,6 +516,17 @@ const DialogsInner = forwardRef((props, ref) => {
     };
     const [editFieldCheck, setEditFieldCheck] = useState(editInitCheckState);
 
+    /**[事件]下拉選單 */
+    const add_HandleSelect = (e) => {
+        const { id, name, value, key } = e.target;
+        const val = value === null ? null : value[key];
+
+        setExtraAdd(prev => ({
+            ...prev,
+            [name]: val,
+        }));
+    };
+
     /**新增 input */
     const add_handelInput = e => {
         const { name, value } = e.target;
@@ -524,6 +535,20 @@ const DialogsInner = forwardRef((props, ref) => {
         setExtraAdd(prev => ({
             ...prev,
             [name]: val
+        }));
+    };
+
+    /**[事件]下拉選單 */
+    const edit_HandleSelect = (e) => {
+        const { id, name, value, key } = e.target;
+        const val = value === null ? null : value[key];
+
+        setEditData(prevData => ({
+            ...prevData,
+            updData: {
+                ...prevData.updData,
+                [name]: val
+            }
         }));
     };
 
@@ -558,18 +583,20 @@ const DialogsInner = forwardRef((props, ref) => {
             <React.Fragment>
                 <Grid container>
                     <Grid item xs={12}>
-                        <CusInput
-                            id={"search--type"}
+                        <CusOutlinedSelect
+                            id={"add--type"}
                             name={"type"}
                             label={"加價類型"}
                             error={extraAddCheck.type}
-                            value={extraAdd.type}
-                            onChangeEvent={(e) => add_handelInput(e)}
+                            options={options.typeOptions}
+                            optionKey={"name"}
+                            value={options.typeOptions.some(item => item.name === extraAdd.type) ? options.typeOptions.find(item => item.name === extraAdd.type) : null}
+                            onChangeEvent={(e) => add_HandleSelect(e)}
                         />
                     </Grid>
                     <Grid item xs={12}>
                         <CusInput
-                            id={"search--name"}
+                            id={"add--name"}
                             name={"name"}
                             label={"加價名稱"}
                             error={extraAddCheck.name}
@@ -579,7 +606,7 @@ const DialogsInner = forwardRef((props, ref) => {
                     </Grid>
                     <Grid item xs={12}>
                         <CusInput
-                            id={"search--price"}
+                            id={"add--price"}
                             name={"price"}
                             label={"加價金額"}
                             type={"number"}
@@ -599,15 +626,15 @@ const DialogsInner = forwardRef((props, ref) => {
         return (
             <React.Fragment>
                 <Grid item xs={12}>
-                    <CusInput
-                        id={'edit--type'}
-                        name={'type'}
-                        label={'加價類型'}
-                        type={'text'}
-                        required={true}
-                        error={editFieldCheck.type}
-                        value={data.type}
-                        onChangeEvent={(e) => edit_HandleInput(e)}
+                    <CusOutlinedSelect
+                        id={"edit--type"}
+                        name={"type"}
+                        label={"加價類型"}
+                        error={extraAddCheck.type}
+                        options={options.typeOptions}
+                        optionKey={"name"}
+                        value={options.typeOptions.some(item => item.name === data.type) ? options.typeOptions.find(item => item.name === data.type) : null}
+                        onChangeEvent={(e) => edit_HandleSelect(e)}
                     />
                 </Grid>
                 <Grid item xs={12}>

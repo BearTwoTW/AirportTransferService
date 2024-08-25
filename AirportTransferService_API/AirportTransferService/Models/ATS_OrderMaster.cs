@@ -909,7 +909,7 @@ namespace AirportTransferService.Models
         /// <summary>
         /// 航班號碼
         /// </summary>
-        [Display(Name = "航班號碼"), Required(ErrorMessage = "請輸入{0}")]
+        [Display(Name = "航班號碼")]
         public string? flght_number { get; set; } = "";
 
         /// <summary>

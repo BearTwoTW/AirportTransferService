@@ -57,7 +57,11 @@ export default function Extra() {
     // 下拉選單
     const [options, setOptions] = useState({
         extraOptions: [],
-        typeOptions: [],
+        typeOptions: [
+            { name: "舉牌" },
+            { name: "合併" },
+            { name: "其它" }
+        ],
     });
 
     // 提示框
@@ -172,7 +176,7 @@ export default function Extra() {
     };
 
     useEffect(() => {
-        seacrhOptions();
+        // seacrhOptions();
         searchExtra(pageSearch);
     }, [pageSearch.search, pageSearch.page, pageSearch.num_per_page]);
 

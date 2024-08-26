@@ -435,7 +435,7 @@ export default function CarModel() {
                                     id={"search--max_service_extras"}
                                     name={"max_service_extras"}
                                     type={"number"}
-                                    label={"服務加成項目上限"}
+                                    label={"安全座椅及增高墊上限"}
                                     value={pageSearch.max_service_extras}
                                     onChangeEvent={(e) => search_handleInput(e)}
                                 />
@@ -487,7 +487,7 @@ export default function CarModel() {
                                                     { name: "乘車人數上限" },
                                                     { name: "行李數上限" },
                                                     { name: "安全座椅上限" },
-                                                    { name: "服務加成項目上限" },
+                                                    { name: "安全座椅及增高墊上限" },
                                                     { name: "操作" },
                                                 ]}
                                                 tableBody={<TableBodyContent />}
@@ -636,7 +636,7 @@ const DialogsInner = forwardRef((props, ref) => {
                             id={"search--max_service_extras"}
                             name={"max_service_extras"}
                             type="number"
-                            label={"服務加成項目上限"}
+                            label={"安全座椅及增高墊上限"}
                             error={carModelAddCheck.max_service_extras}
                             value={carModelAdd.max_service_extras}
                             onChangeEvent={(e) => add_handelInput(e)}
@@ -700,7 +700,7 @@ const DialogsInner = forwardRef((props, ref) => {
                     <CusInput
                         id={'edit--max_service_extras'}
                         name={'max_service_extras'}
-                        label={'服務加成項目上限'}
+                        label={'安全座椅及增高墊上限'}
                         type={'number'}
                         error={editFieldCheck.max_service_extras}
                         value={data.max_service_extras}

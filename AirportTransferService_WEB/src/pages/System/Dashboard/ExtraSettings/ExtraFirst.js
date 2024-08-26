@@ -125,7 +125,7 @@ export default function Extra() {
     }
 
     /**
-     * 查詢機場航廈
+     * 查詢加價項目
      */
     const searchExtra = async (searchPrams) => {
         setIsLoading(true);
@@ -188,7 +188,7 @@ export default function Extra() {
                     hover
                     key={item.es_id}>
                     <TableCell>{index + 1}</TableCell>
-                    <TableCell>{item.type}</TableCell>
+                    {/* <TableCell>{item.type}</TableCell> */}
                     <TableCell>{item.name}</TableCell>
                     <TableCell>{item.price}</TableCell>
                     <TableCell>
@@ -220,7 +220,7 @@ export default function Extra() {
         useDialog.current.handleOpen();
         setDialogData(({
             id: 'add',
-            DialogTitle: '新增機場航廈',
+            DialogTitle: '新增加價項目',
             DialogContent: <DialogsInner type={'add'} ref={useDialogInner} options={options} />,
             DialogActions: (
                 <>
@@ -390,7 +390,7 @@ export default function Extra() {
                 <Grid item xs={12}>
                     <CusCard content={
                         <React.Fragment>
-                            <Grid item xs={12} sm={3} lg={3}>
+                            {/* <Grid item xs={12} sm={3} lg={3}>
                                 <CusOutlinedSelect
                                     id={"search--type"}
                                     name={"type"}
@@ -400,7 +400,7 @@ export default function Extra() {
                                     value={options.typeOptions.some(item => item.name === pageSearch.type) ? options.typeOptions.find(item => item.name === pageSearch.type) : null}
                                     onChangeEvent={(e) => search_handleSelect(e)}
                                 />
-                            </Grid>
+                            </Grid> */}
                             <Grid item xs={12} sm={3} lg={3}>
                                 <CusOutlinedSelect
                                     id={"search--name"}
@@ -465,7 +465,7 @@ export default function Extra() {
                                                 onRowsPerPageChange={onRowsPerPageChange}
                                                 tableHead={[
                                                     { name: "排序" },
-                                                    { name: "加價類型" },
+                                                    // { name: "加價類型" },
                                                     { name: "加價名稱" },
                                                     { name: "加價金額" },
                                                     { name: "操作" },
@@ -496,7 +496,7 @@ const DialogsInner = forwardRef((props, ref) => {
     // 新增加價
     const [extraAdd, setExtraAdd] = useState({
         visible: "Y",
-        type: null,
+        type: "其它",
         name: null,
         price: null,
     });
@@ -586,7 +586,7 @@ const DialogsInner = forwardRef((props, ref) => {
         return (
             <React.Fragment>
                 <Grid container>
-                    <Grid item xs={12}>
+                    {/* <Grid item xs={12}>
                         <CusOutlinedSelect
                             id={"add--type"}
                             name={"type"}
@@ -597,7 +597,7 @@ const DialogsInner = forwardRef((props, ref) => {
                             value={options.typeOptions.some(item => item.name === extraAdd.type) ? options.typeOptions.find(item => item.name === extraAdd.type) : null}
                             onChangeEvent={(e) => add_HandleSelect(e)}
                         />
-                    </Grid>
+                    </Grid> */}
                     <Grid item xs={12}>
                         <CusInput
                             id={"add--name"}
@@ -629,7 +629,7 @@ const DialogsInner = forwardRef((props, ref) => {
         }
         return (
             <React.Fragment>
-                <Grid item xs={12}>
+                {/* <Grid item xs={12}>
                     <CusOutlinedSelect
                         id={"edit--type"}
                         name={"type"}
@@ -640,7 +640,7 @@ const DialogsInner = forwardRef((props, ref) => {
                         value={options.typeOptions.some(item => item.name === data.type) ? options.typeOptions.find(item => item.name === data.type) : null}
                         onChangeEvent={(e) => edit_HandleSelect(e)}
                     />
-                </Grid>
+                </Grid> */}
                 <Grid item xs={12}>
                     <CusInput
                         id={'edit--name'}

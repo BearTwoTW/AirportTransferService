@@ -364,7 +364,7 @@ export default function Order() {
             signboard_title: null,
             signboard_content: null,
             o_id: null,
-            visible: null,
+            visible: "Y",
             type: null,
             city: null,
             area: null,
@@ -412,7 +412,8 @@ export default function Order() {
                     <TableCell>{item.area}</TableCell>
                     <TableCell>{item.road}</TableCell>
                     <TableCell>{item.flght_number}</TableCell>
-                    <TableCell>{item.date_travel + " " + item.time_travel.slice(0, 5)}</TableCell>
+                    <TableCell>{item.date_travel}</TableCell>
+                    <TableCell>{item.time_travel.slice(0, 5)}</TableCell>
                     <TableCell>{item.name_purchaser}</TableCell>
                     <TableCell>{item.phone_purchaser}</TableCell>
                     <TableCell>{item.price}</TableCell>
@@ -678,15 +679,6 @@ export default function Order() {
                     <CusCard content={
                         <React.Fragment>
                             <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
-                                    id={"search--o_id"}
-                                    name={"o_id"}
-                                    label={"訂單編號"}
-                                    value={pageSearch.o_id}
-                                    onChangeEvent={(e) => search_handleInput(e)}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={3} lg={3}>
                                 <CusOutlinedSelect
                                     id={"search--visible"}
                                     name={"visible"}
@@ -698,6 +690,15 @@ export default function Order() {
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3} lg={3}>
+                                <CusInput
+                                    id={"search--o_id"}
+                                    name={"o_id"}
+                                    label={"訂單編號"}
+                                    value={pageSearch.o_id}
+                                    onChangeEvent={(e) => search_handleInput(e)}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={3} lg={3}>
                                 <CusOutlinedSelect
                                     id={"search--type"}
                                     name={"type"}
@@ -706,15 +707,6 @@ export default function Order() {
                                     optionKey={"name"}
                                     value={options.orderTypeOptions.some(item => item.name === pageSearch.type) ? options.orderTypeOptions.find(item => item.name === pageSearch.type) : null}
                                     onChangeEvent={(e) => search_handleSelect(e)}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={3} lg={3}>
-                                <CusInput
-                                    id={"search--flght_number"}
-                                    name={"flght_number"}
-                                    label={"航班號碼"}
-                                    value={pageSearch.flght_number}
-                                    onChangeEvent={(e) => search_handleInput(e)}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3} lg={3}>
@@ -746,6 +738,15 @@ export default function Order() {
                                     name={"road"}
                                     label={"路"}
                                     value={pageSearch.road}
+                                    onChangeEvent={(e) => search_handleInput(e)}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={3} lg={3}>
+                                <CusInput
+                                    id={"search--flght_number"}
+                                    name={"flght_number"}
+                                    label={"航班號碼"}
+                                    value={pageSearch.flght_number}
                                     onChangeEvent={(e) => search_handleInput(e)}
                                 />
                             </Grid>
@@ -842,6 +843,7 @@ export default function Order() {
                                                     { name: "區域" },
                                                     { name: "路" },
                                                     { name: "航班號碼" },
+                                                    { name: "出發日期" },
                                                     { name: "乘車時間" },
                                                     { name: "訂購人姓名" },
                                                     { name: "訂購人電話" },

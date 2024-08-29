@@ -98,6 +98,11 @@ namespace AirportTransferService.Controllers
                     max_child_seats: data.max_child_seats,
                     max_service_extras: data.max_service_extras));
 
+                ATS_FareSettingsController aTS_FareSettingsController = new(_baseService, _ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings) { ControllerContext = ControllerContext };
+                aTS_FareSettingsController.ATS_FareSettingsSystemUpdate(
+                    [new ATS_FareSettingsCreate { cms_id = data.cms_id },
+                     new ATS_FareSettingsCreate { visible = data.visible, cms_id = data.cms_id }]);
+
                 tx.Complete();
             }
 

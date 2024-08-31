@@ -4,8 +4,8 @@
     [upd_userid]      VARCHAR (50)   NULL,
     [upd_time]        DATETIME       NULL,
     [gas_id]          VARCHAR (10)   NOT NULL,
-    [tracking_code]   NVARCHAR (255) NULL,
-    [keyword]         NVARCHAR (255) NULL,
+    [tracking_code]   NVARCHAR (MAX) NULL,
+    [keyword]         NVARCHAR (MAX) NULL,
     [summary]         NVARCHAR (MAX) NULL,
     [descriptive_url] NVARCHAR (MAX) NULL,
     CONSTRAINT [PK_ATS_GASettings] PRIMARY KEY CLUSTERED ([gas_id] ASC)

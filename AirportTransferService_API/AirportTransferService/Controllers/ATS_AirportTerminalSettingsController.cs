@@ -97,7 +97,7 @@ namespace AirportTransferService.Controllers
                 ATS_FareSettingsController aTS_FareSettingsController = new(_baseService, _ATS_FareSettings, _ATS_AirportTerminalSettings, _ATS_CarModelSettings, _ATS_CityAreaSettings) { ControllerContext = ControllerContext };
                 aTS_FareSettingsController.ATS_FareSettingsSystemUpdate(
                     [new ATS_FareSettingsCreate { airport = search_own_result.airport, terminal = search_own_result.terminal },
-                     new ATS_FareSettingsCreate { airport = data.airport, terminal = data.terminal }]);
+                     new ATS_FareSettingsCreate { visible = data.visible, airport = data.airport, terminal = data.terminal }]);
 
                 tx.Complete();
             }

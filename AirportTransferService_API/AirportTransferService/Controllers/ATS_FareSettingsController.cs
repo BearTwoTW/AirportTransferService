@@ -84,7 +84,7 @@ namespace AirportTransferService.Controllers
             //string? road = data.road == Appsettings.api_string_param_no_pass ? search_own_result.road : data.road;
             //string? section = data.section == Appsettings.api_string_param_no_pass ? search_own_result.section : data.section;
             ////檢查重複
-            //if (search_results.Exists(x => x.cms_id == cms_id && x.city == city && x.area == area && x.road == road && x.section == section && data.fs_id != x.fs_id))
+            //if (search_results.Exists(airport_terminal => airport_terminal.cms_id == cms_id && airport_terminal.city == city && airport_terminal.area == area && airport_terminal.road == road && airport_terminal.section == section && data.fs_id != airport_terminal.fs_id))
             //    return new ResultObject<string> { success = false, message = "車資重複" };
 
             using (TransactionScope tx = new())
@@ -263,19 +263,19 @@ namespace AirportTransferService.Controllers
             //將所有機場航廈、車型、城市區域組合成車資設定
             List<CreateATS_FareSettingsParam> createATS_FareSettingsParams =
                 airport_terminal_settings.Count > 0 && car_model_settings.Count > 0 && city_area_settings.Count > 0
-                ? airport_terminal_settings.SelectMany(x =>
-                  car_model_settings.SelectMany(y =>
-                  city_area_settings.Select(z => new CreateATS_FareSettingsParam(
+                ? airport_terminal_settings.SelectMany(airport_terminal =>
+                  car_model_settings.SelectMany(car_model =>
+                  city_area_settings.Select(city_area => new CreateATS_FareSettingsParam(
                       cre_userid: jwtObject.user_id,
                       cre_time: cre_time,
                       visible: "Y",
-                      cms_id: y.cms_id,
-                      city: z.city,
-                      area: z.area,
-                      road: z.road,
-                      section: z.section,
-                      airport: x.airport,
-                      terminal: x.terminal,
+                      cms_id: car_model.cms_id,
+                      city: city_area.city,
+                      area: city_area.area,
+                      road: city_area.road,
+                      section: city_area.section,
+                      airport: airport_terminal.airport,
+                      terminal: airport_terminal.terminal,
                       price: null)))).ToList()
                 : [];
 
@@ -285,17 +285,17 @@ namespace AirportTransferService.Controllers
                 ["cms_id", "city", "area", "road", "section", "airport", "terminal"], [],
                 out _);
             //將不存在的車資設定新增
-            createATS_FareSettingsParams.ForEach(x =>
+            createATS_FareSettingsParams.ForEach(fare_settings_new =>
             {
-                if (!search_results.Exists(y =>
-                y.cms_id == x.cms_id &&
-                y.city == x.city &&
-                y.area == x.area &&
-                y.road == x.road &&
-                y.section == x.section &&
-                y.airport == x.airport &&
-                y.terminal == x.terminal))
-                    _ATS_FareSettings.CreateATS_FareSettings(x);
+                if (!search_results.Exists(fare_settings_old =>
+                fare_settings_old.cms_id == fare_settings_new.cms_id &&
+                fare_settings_old.city == fare_settings_new.city &&
+                fare_settings_old.area == fare_settings_new.area &&
+                fare_settings_old.road == fare_settings_new.road &&
+                fare_settings_old.section == fare_settings_new.section &&
+                fare_settings_old.airport == fare_settings_new.airport &&
+                fare_settings_old.terminal == fare_settings_new.terminal))
+                    _ATS_FareSettings.CreateATS_FareSettings(fare_settings_new);
             });
         }
 
@@ -329,6 +329,7 @@ namespace AirportTransferService.Controllers
                         upd_userid: jwtObject.user_id,
                         upd_time: upd_time,
                         fs_id: x.fs_id,
+                        visible: string.IsNullOrEmpty(data[1].visible) ? Appsettings.api_string_param_no_pass : data[1].visible,
                         cms_id: string.IsNullOrEmpty(data[1].cms_id) ? Appsettings.api_string_param_no_pass : data[1].cms_id,
                         city: string.IsNullOrEmpty(data[1].city) ? Appsettings.api_string_param_no_pass : data[1].city,
                         area: string.IsNullOrEmpty(data[1].area) ? Appsettings.api_string_param_no_pass : data[1].area,

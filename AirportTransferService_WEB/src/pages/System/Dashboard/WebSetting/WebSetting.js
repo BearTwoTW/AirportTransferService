@@ -126,6 +126,19 @@ export default function WebSetting() {
         html3: "",
     });
 
+    // 加價 文字設定 & 是否可見
+    const [extra, setExtra] = useState({
+        ws_id: "00010",
+        title: "extra",
+        image: "",
+        text1: "",
+        text2: "",
+        text3: "",
+        html1: "",
+        html2: "",
+        html3: "",
+    });
+
     // 加價服務 是否顯示於前台
     const [checked, setChecked] = useState("Y");
 
@@ -291,6 +304,17 @@ export default function WebSetting() {
     })
 
     /**
+     * @description [事件]加價文字說明-input
+     */
+    const extra_handleInput = useCallback((e) => {
+        const { name, value } = e.target
+        setExtra(prevData => ({
+            ...prevData,
+            [name]: value
+        }));
+    })
+
+    /**
      * @description [事件]注意事項-儲存修改
      */
     const saveF_handelClick = useCallback((e) => {
@@ -392,24 +416,23 @@ export default function WebSetting() {
      */
     const extraOnChecked = useCallback((e) => {
         setChecked(checked === "N" ? "Y" : "N");
-        ATS_WebSetting.ATS_WebSettingsUpdate({
-            ws_id: "00010",
-            title: "extra",
-            image: "",
-            text1: checked === "N" ? "Y" : "N",
-            text2: "",
-            text3: "",
-            html1: "",
-            html2: "",
-            html3: "",
-        }).then(res => {
+        setExtra((prevData) => ({ ...prevData, text1: checked === "N" ? "Y" : "N" }))
+    }, [checked])
+
+    /**
+     * @description 加價顯示 儲存修改
+     */
+    const saveExtra_handelClick = useCallback((e) => {
+        ATS_WebSetting.ATS_WebSettingsUpdate(extra).then(res => {
             if (res.success) {
                 enqueueSnackbar("修改成功", { variant: 'success' });
             } else {
                 enqueueSnackbar("修改失敗", { variant: 'error' });
             }
         });
-    }, [checked])
+    })
+
+    console.log(extra)
 
     // 提示框
     const { enqueueSnackbar } = useSnackbar();
@@ -863,12 +886,40 @@ export default function WebSetting() {
                                     <Grid item xs={12} md={6} lg={6}>
                                         <CusInfoTitle
                                             label={"加價服務"}
+                                            buttonType={"button"}
+                                            buttonGroup={
+                                                [{
+                                                    variant: "contained",
+                                                    color: "info",
+                                                    icon: <Save />,
+                                                    name: "儲存",
+                                                    onClick: (e) => saveExtra_handelClick(e)
+                                                }]}
                                             content={
-                                                <Grid item xs={12}>
-                                                    <CusSwitch color={"success"} label={"是否於前台顯示"} checked={checked} onChange={(e) => extraOnChecked(e)} />
+                                                <Grid container>
+                                                    <Grid item xs={12}>
+                                                        <CusSwitch color={"success"} label={"是否於前台顯示"} checked={checked} onChange={(e) => extraOnChecked(e)} />
+                                                    </Grid>
+                                                    {checked === "N" ?
+                                                        <Grid item xs={12}>
+                                                            <CusInput
+                                                                multiline={true}
+                                                                rows={4}
+                                                                id={"text2"}
+                                                                label={"文字說明"}
+                                                                placeholder={"請輸入加價服務關閉後的文字說明，文字將會顯示於網頁上。"}
+                                                                size={"Normal"}
+                                                                name={"text2"}
+                                                                type={"text"}
+                                                                value={extra.text2}
+                                                                onChangeEvent={(e) => extra_handleInput(e)}
+                                                            />
+                                                        </Grid>
+                                                        : null}
                                                 </Grid>
                                             }
                                         />
+
                                     </Grid>
                                 </Grid>
                                 : <CircularLoading />}

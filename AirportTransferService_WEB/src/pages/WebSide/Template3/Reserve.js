@@ -156,6 +156,7 @@ export default function Reserve() {
   });
 
   const [extraVisible, setExtraVisible] = useState(false);
+  const [extraText, setExtraText] = useState();
 
   // Tabs 狀態
   // 將 'type' 參數轉換為 tab 的 index
@@ -172,8 +173,8 @@ export default function Reserve() {
   const getWebSetting = () => {
     ATS_WebSetting.ATS_WebSettingsSearch(webSettingSearch).then(res => {
       if (res.success) {
-        console.log(res.data)
         setExtraVisible(res.data.filter(e => e.ws_id === "00010")[0].text1 === "Y" ? true : false);
+        setExtraText(res.data.filter(e => e.ws_id === "00010")[0].text2);
       }
     });
   };
@@ -401,6 +402,7 @@ export default function Reserve() {
               reserve_next={reserve_next}
               reserve_error={reserve_error}
               extraVisible={extraVisible}
+              extraText={extraText}
               ref={useTabContent.current[0]}
             />
             <LeaveTabPanel
@@ -410,6 +412,7 @@ export default function Reserve() {
               reserve_next={reserve_next}
               reserve_error={reserve_error}
               extraVisible={extraVisible}
+              extraText={extraText}
               ref={useTabContent.current[1]}
             />
           </Box>
@@ -424,7 +427,7 @@ export default function Reserve() {
 
 /** [內容]送機 */
 const GoTabPanel = forwardRef((props, ref) => {
-  const { value, index, options, reserve_next, reserve_error, extraVisible } = props
+  const { value, index, options, reserve_next, reserve_error, extraVisible, extraText } = props
 
   // 新增訂單
   const [orderAdd, setOrderAdd] = useState({
@@ -946,7 +949,7 @@ const GoTabPanel = forwardRef((props, ref) => {
             </Grid>
           </Box>
         </Grid>
-        {extraVisible ?
+        {extraVisible === "Y" ?
           <Grid item xs={12}>
             <Box className="">
               <Box className="flex items-center border-b pb-2.5 gap-2">
@@ -1009,7 +1012,9 @@ const GoTabPanel = forwardRef((props, ref) => {
               </Grid>
             </Box>
           </Grid>
-          : null}
+          :
+          <Typography color="error" fontWeight="bold">{extraText}</Typography>
+        }
         <Grid item xs={12}>
           <Box className="space-y-1">
             <Box className="flex items-center border-b pb-2.5 gap-2">
@@ -1103,7 +1108,7 @@ const GoTabPanel = forwardRef((props, ref) => {
 
 /** [內容]送機 */
 const LeaveTabPanel = forwardRef((props, ref) => {
-  const { value, index, options, reserve_next, reserve_error, extraVisible } = props
+  const { value, index, options, reserve_next, reserve_error, extraVisible, extraText } = props
 
   // 新增訂單
   const [orderAdd, setOrderAdd] = useState({
@@ -1624,7 +1629,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
             </Grid>
           </Box>
         </Grid>
-        {extraVisible ?
+        {extraVisible === "Y" ?
           <Grid item xs={12}>
             <Box className="">
               <Box className="flex items-center border-b pb-2.5 gap-2">
@@ -1721,7 +1726,9 @@ const LeaveTabPanel = forwardRef((props, ref) => {
               </Grid>
             </Box>
           </Grid>
-          : null}
+          :
+          <Typography color="error" fontWeight="bold">{extraText}</Typography>
+        }
         <Grid item xs={12}>
           <Box className="space-y-1">
             <Box className="flex items-center border-b pb-2.5 gap-2">

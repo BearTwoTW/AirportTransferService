@@ -25,7 +25,7 @@ import { CusTimePicker } from '../../../components/CusTimePicker';
 import { CustomerAPI } from "../../../js/APITS";
 import { localStorageClear } from "../../../js/Function";
 import { OfficeSiteContext } from '../../../store/OfficeSiteContext'
-import { ATS_OrderMaster, ATS_CityAreaSettings, ATS_AirportTerminalSettings, ATS_CarModelSettings, ATS_ExtraSettings, ATS_PriceLinkSettings } from '../../../js/APITS';
+import { ATS_OrderMaster, ATS_CityAreaSettings, ATS_AirportTerminalSettings, ATS_CarModelSettings, ATS_ExtraSettings, ATS_PriceLinkSettings, ATS_WebSetting } from '../../../js/APITS';
 
 export default function Reserve() {
   const location = useLocation();
@@ -67,6 +67,22 @@ export default function Reserve() {
     email_passenger: null,
     calculation: null,
   });
+
+  // 網站設定查詢
+  const [webSettingSearch, setWebSettingSearch] = useState({
+    ws_id: "",
+    title: "",
+    image: "",
+    text1: "",
+    text2: "",
+    text3: "",
+    html1: "",
+    html2: "",
+    html3: "",
+    page: 0,
+    num_per_page: 0,
+    excel: "",
+  })
 
   // 城市區域查詢
   const [cityAreaSearch, setCityAreaSearch] = useState({
@@ -139,6 +155,8 @@ export default function Reserve() {
     ], // 加價服務
   });
 
+  const [extraVisible, setExtraVisible] = useState(false);
+
   // Tabs 狀態
   // 將 'type' 參數轉換為 tab 的 index
   const tabMapping = {
@@ -149,6 +167,16 @@ export default function Reserve() {
   const [tabsValue, setTabsValue] = useState(initialTab);
   const useTabContent = useRef([]);
   useTabContent.current = [0, 1].map(() => React.createRef())
+
+  /**網站設定查詢 */
+  const getWebSetting = () => {
+    ATS_WebSetting.ATS_WebSettingsSearch(webSettingSearch).then(res => {
+      if (res.success) {
+        console.log(res.data)
+        setExtraVisible(res.data.filter(e => e.ws_id === "00010")[0].text1 === "Y" ? true : false);
+      }
+    });
+  };
 
   const searchSelectOption = async () => {
     // 查城市區域 (下拉選單用)
@@ -251,6 +279,7 @@ export default function Reserve() {
   }
 
   useEffect(() => {
+    getWebSetting();
     searchSelectOption();
   }, [cityAreaSearch, airPortSearch, carModelSearch, extraSearch]);
 
@@ -270,13 +299,13 @@ export default function Reserve() {
   };
 
   // [事件]預約送機 & 預約接機 打開 Modal
-  const reserve_next = ({ e, type, orderAdd, signboard, extra, sameDetail, price }) => {
+  const reserve_next = ({ e, type, orderAdd, signboard, extra, other, sameDetail, price }) => {
     useDialog.current.handleOpen();
     setDialogData({
       id: type,
       maxWidth: "md",
       DialogTitle: "車資金額確認及前往付款",
-      DialogContent: <DialogsInner type={type} ref={useDialogInner} orderAdd={orderAdd} price={price} options={options} signboard={signboard} extra={extra} sameDetail={sameDetail} />,
+      DialogContent: <DialogsInner type={type} ref={useDialogInner} orderAdd={orderAdd} price={price} options={options} signboard={signboard} extra={extra} other={other} sameDetail={sameDetail} />,
       DialogActions: (
         <React.Fragment>
           <Button color="secondary" variant='outlined' onClick={dialogClose}>
@@ -371,6 +400,7 @@ export default function Reserve() {
               options={options}
               reserve_next={reserve_next}
               reserve_error={reserve_error}
+              extraVisible={extraVisible}
               ref={useTabContent.current[0]}
             />
             <LeaveTabPanel
@@ -379,6 +409,7 @@ export default function Reserve() {
               options={options}
               reserve_next={reserve_next}
               reserve_error={reserve_error}
+              extraVisible={extraVisible}
               ref={useTabContent.current[1]}
             />
           </Box>
@@ -393,7 +424,7 @@ export default function Reserve() {
 
 /** [內容]送機 */
 const GoTabPanel = forwardRef((props, ref) => {
-  const { value, index, options, reserve_next, reserve_error } = props
+  const { value, index, options, reserve_next, reserve_error, extraVisible } = props
 
   // 新增訂單
   const [orderAdd, setOrderAdd] = useState({
@@ -455,6 +486,7 @@ const GoTabPanel = forwardRef((props, ref) => {
   const [checkboxState, setCheckboxState] = useState({
     signboard: false,
     extra: false,
+    other: false,
     sameDetail: false,
   });
 
@@ -469,17 +501,29 @@ const GoTabPanel = forwardRef((props, ref) => {
     const val = value === "" ? null : value;
 
     if (name === "date_travel") {
-      let formattedValue = val;
-      formattedValue = formattedValue.split('T')[0];
+      let formattedValue = val ? val.split('T')[0] : null; // 格式化日期為 YYYY-MM-DD
 
       setOrderAdd(prev => ({
         ...prev,
         [name]: formattedValue
       }));
+
+      // 檢查是否為三天後的日期
+      if (formattedValue && moment(formattedValue).isSame(moment().add(3, 'days'), 'day')) {
+        setOrderAdd(prev => ({
+          ...prev,
+          minTime: moment().format('HH:mm:ss'), // 如果是三天後，設定 minTime 為當前時間
+        }));
+      } else {
+        setOrderAdd(prev => ({
+          ...prev,
+          minTime: null, // 否則取消時間限制
+        }));
+      }
     } else if (name === "time_travel") {
       setOrderAdd(prev => ({
         ...prev,
-        [name]: val + ":00"
+        [name]: val ? val + ":00" : null
       }));
     } else {
       setOrderAdd(prev => ({
@@ -494,7 +538,7 @@ const GoTabPanel = forwardRef((props, ref) => {
   };
 
   /**[事件]下拉選單 */
-  const add_HandleSelect = (e, es_id) => {
+  const add_HandleSelect = (e, type) => {
     const { id, name, value, key } = e.target;
     const val = value === null ? null : value[key];
     // const num = e.target.value ? e.target.value.max_service_extras : null;
@@ -552,7 +596,20 @@ const GoTabPanel = forwardRef((props, ref) => {
         arr.push({
           es_id: id,
           count: val,
+          extraType: type,
         });
+      }
+
+      if (type === "合併") {
+        setOrderAddCheck(prev => ({
+          ...prev,
+          es_ids_merge: false,
+        }));
+      } else {
+        setOrderAddCheck(prev => ({
+          ...prev,
+          es_ids_other: false,
+        }));
       }
 
       setOrderAdd(prev => ({
@@ -584,12 +641,33 @@ const GoTabPanel = forwardRef((props, ref) => {
             count: "1",
           }
         );
+      } else {
+        setOrderAdd(prev => ({
+          ...prev,
+          signboard_title: null,
+          signboard_content: null,
+        }));
       }
       // 更新加購
       setOrderAdd(prev => ({
         ...prev,
         es_ids: checked ? arr : null,
       }))
+    } else if (name === "extra") {
+      // 如果取消勾選, 就把加購清空
+      if (!checked) {
+        setOrderAdd(prev => ({
+          ...prev,
+          es_ids: prev.es_ids ? prev.es_ids.filter(item => item.extraType !== "合併") : null,
+        }));
+      }
+    } else if (name === "other") {
+      if (!checked) {
+        setOrderAdd(prev => ({
+          ...prev,
+          es_ids: prev.es_ids ? prev.es_ids.filter(item => item.extraType !== "其它") : null,
+        }));
+      }
     } else if (name === "sameDetail") { // 同訂購人
       setOrderAdd(prev => ({
         ...prev,
@@ -611,38 +689,51 @@ const GoTabPanel = forwardRef((props, ref) => {
     });
   };
 
-  const confrm_Click = ({ e, type, cal, orderAdd, signboard, extra, sameDetail }) => {
-    if (!orderAdd.type || !orderAdd.city || !orderAdd.area || !orderAdd.road || !orderAdd.address
-      || !orderAdd.airport || !orderAdd.terminal || !orderAdd.date_travel || !orderAdd.time_travel
-      || !orderAdd.number_passenger || !orderAdd.number_bags || !orderAdd.cms_id
-      || !orderAdd.name_purchaser || !orderAdd.phone_purchaser || !orderAdd.email_purchaser
-      || !orderAdd.name_passenger || !orderAdd.phone_passenger || !orderAdd.email_passenger
-    ) {
+  const confrm_Click = ({ e, type, cal, orderAdd, signboard, extra, sameDetail, other }) => {
+    // 定義需要檢查的欄位
+    const requiredFields = {
+      type: !orderAdd.type,
+      city: !orderAdd.city,
+      area: !orderAdd.area,
+      road: !orderAdd.road,
+      address: !orderAdd.address,
+      airport: !orderAdd.airport,
+      terminal: !orderAdd.terminal,
+      date_travel: !orderAdd.date_travel,
+      time_travel: !orderAdd.time_travel,
+      number_passenger: !orderAdd.number_passenger,
+      number_bags: !orderAdd.number_bags,
+      cms_id: !orderAdd.cms_id,
+      name_purchaser: !orderAdd.name_purchaser,
+      phone_purchaser: !orderAdd.phone_purchaser,
+      email_purchaser: !orderAdd.email_purchaser,
+      name_passenger: !orderAdd.name_passenger,
+      phone_passenger: !orderAdd.phone_passenger,
+      email_passenger: !orderAdd.email_passenger,
+    };
+
+    // 檢查下拉選單的錯誤狀態
+    const mergeError =
+      checkboxState.extra && !orderAdd.es_ids?.some((item) => item.extraType === "合併");
+
+    // 檢查下拉選單的錯誤狀態 - 其它
+    const otherError =
+      checkboxState.other && !orderAdd.es_ids?.some((item) => item.extraType === "其它");
+
+    // 檢查是否有任何必填欄位未填
+    const hasError = Object.values(requiredFields).some(Boolean) || mergeError || otherError;
+
+    if (hasError) {
       setOrderAddCheck({
-        type: !orderAdd.type ? true : false,
-        city: !orderAdd.city ? true : false,
-        area: !orderAdd.area ? true : false,
-        road: !orderAdd.road ? true : false,
-        address: !orderAdd.address ? true : false,
-        airport: !orderAdd.airport ? true : false,
-        terminal: !orderAdd.terminal ? true : false,
-        date_travel: !orderAdd.date_travel ? true : false,
-        time_travel: !orderAdd.time_travel ? true : false,
-        number_passenger: !orderAdd.number_passenger ? true : false,
-        number_bags: !orderAdd.number_bags ? true : false,
-        cms_id: !orderAdd.cms_id ? true : false,
-        name_purchaser: !orderAdd.name_purchaser ? true : false,
-        phone_purchaser: !orderAdd.phone_purchaser ? true : false,
-        email_purchaser: !orderAdd.email_purchaser ? true : false,
-        name_passenger: !orderAdd.name_passenger ? true : false,
-        phone_passenger: !orderAdd.phone_passenger ? true : false,
-        email_passenger: !orderAdd.email_passenger ? true : false,
-      })
+        ...requiredFields,
+        es_ids_merge: mergeError,
+        es_ids_other: otherError,
+      });
     } else {
       // 金額試算
       ATS_OrderMaster.ATS_OrderMasterCreate(orderAdd).then(async res => {
         if (res.success) {
-          reserve_next({ e: e, type: type, orderAdd: orderAdd, signboard: signboard, extra: extra, sameDetail: sameDetail, price: res.data })
+          reserve_next({ e: e, type: type, orderAdd: orderAdd, signboard: signboard, extra: extra, sameDetail: sameDetail, other: other, price: res.data })
         } else {
           reserve_error({ e: e, type: "error", message: res.message })
         }
@@ -775,7 +866,7 @@ const GoTabPanel = forwardRef((props, ref) => {
                   name={"date_travel"}
                   label={"出發日期"}
                   views={["year", "month", "day"]}
-                  minDate={moment().add(48, 'hours')}
+                  minDate={moment().add(3, 'days')}
                   error={orderAddCheck.date_travel}
                   value={orderAdd.date_travel}
                   onChangeEvent={(e) => add_handelInput(e)}
@@ -787,10 +878,11 @@ const GoTabPanel = forwardRef((props, ref) => {
                   name={"time_travel"}
                   label={orderAdd.type === "送機" ? "乘車時間" : "航班抵達時間"}
                   views={['hours', 'minutes']}
-                  minTime={moment().add(48, 'hours').add(5, 'minutes')}
+                  minTime={orderAdd.minTime ? moment(orderAdd.minTime, 'HH:mm:ss') : null}  // 動態設定 minTime
                   error={orderAddCheck.time_travel}
                   value={orderAdd.time_travel}
                   onChangeEvent={(e) => add_handelInput(e)}
+                  disabled={orderAdd.date_travel ? false : true}
                 />
               </Grid>
             </Grid>
@@ -854,75 +946,70 @@ const GoTabPanel = forwardRef((props, ref) => {
             </Grid>
           </Box>
         </Grid>
-        <Grid item xs={12}>
-          <Box className="">
-            <Box className="flex items-center border-b pb-2.5 gap-2">
-              <Add color={"secondary"} />
-              <Typography color="secondary" fontWeight="bold">加價服務</Typography>
+        {extraVisible ?
+          <Grid item xs={12}>
+            <Box className="">
+              <Box className="flex items-center border-b pb-2.5 gap-2">
+                <Add color={"secondary"} />
+                <Typography color="secondary" fontWeight="bold">加價服務</Typography>
+              </Box>
+              <Grid container>
+                <Grid item lg={12} sm={12} xs={12}>
+                  <FormGroup>
+                    <FormControlLabel
+                      control={<Checkbox name="extra" checked={checkboxState.extra} onChange={handleCheckboxChange} />}
+                      label="加購兒童安全座椅及增高墊 (+$200)"
+                    />
+                  </FormGroup>
+                </Grid>
+                {checkboxState.extra ?
+                  options.extraOptions.filter(filterEle => filterEle.type === "合併").map((mapEle, index) => {
+                    return (
+                      <Grid key={mapEle.es_id} item lg={4} sm={4} xs={12}>
+                        <CusOutlinedSelect
+                          id={mapEle.es_id}
+                          name={"es_ids"}
+                          label={mapEle.name}
+                          error={orderAddCheck.es_ids_merge}
+                          options={options.extraCount}
+                          optionKey={"name"}
+                          value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
+                          onChangeEvent={(e) => add_HandleSelect(e, mapEle.type)}
+                        />
+                      </Grid>
+                    )
+                  })
+                  : null}
+                <Grid item lg={12} sm={12} xs={12}>
+                  <FormGroup>
+                    <FormControlLabel
+                      control={<Checkbox name="other" checked={checkboxState.other} onChange={handleCheckboxChange} />}
+                      label="加購其它服務"
+                    />
+                  </FormGroup>
+                </Grid>
+                {checkboxState.other ?
+                  options.extraOptions.filter(filterEle => filterEle.type === "其它").map((mapEle, index) => {
+                    return (
+                      <Grid key={mapEle.es_id} item lg={4} sm={4} xs={12}>
+                        <CusOutlinedSelect
+                          id={mapEle.es_id}
+                          name={"es_ids"}
+                          label={mapEle.name}
+                          error={orderAddCheck.es_ids_other}
+                          options={options.extraCount}
+                          optionKey={"name"}
+                          value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
+                          onChangeEvent={(e) => add_HandleSelect(e, mapEle.type)}
+                        />
+                      </Grid>
+                    )
+                  })
+                  : null}
+              </Grid>
             </Box>
-            <Grid container>
-              <Grid item lg={12} sm={12} xs={12}>
-                <FormGroup>
-                  <FormControlLabel
-                    control={<Checkbox name="signboard" checked={checkboxState.signboard} onChange={handleCheckboxChange} />}
-                    label="接機舉牌 (+$200)"
-                  />
-                </FormGroup>
-              </Grid>
-              {checkboxState.signboard ?
-                <React.Fragment>
-                  <Grid item lg={12} sm={12} xs={12}>
-                    <CusInput
-                      id={"add--signboard_title"}
-                      name={"signboard_title"}
-                      label={"舉牌標題"}
-                      error={orderAddCheck.signboard_title}
-                      value={orderAdd.signboard_title}
-                      onChangeEvent={(e) => add_handelInput(e)}
-                    />
-                  </Grid>
-                  <Grid item lg={12} sm={12} xs={12}>
-                    <CusInput
-                      multiline
-                      rows={4}
-                      id={"add--signboard_content"}
-                      name={"signboard_content"}
-                      label={"舉牌內容"}
-                      error={orderAddCheck.signboard_content}
-                      value={orderAdd.signboard_content}
-                      onChangeEvent={(e) => add_handelInput(e)}
-                    />
-                  </Grid>
-                </React.Fragment>
-                : null}
-              <Grid item lg={12} sm={12} xs={12}>
-                <FormGroup>
-                  <FormControlLabel
-                    control={<Checkbox name="extra" checked={checkboxState.extra} onChange={handleCheckboxChange} />}
-                    label="加購兒童安全座椅及增高墊 (+$200)"
-                  />
-                </FormGroup>
-              </Grid>
-              {checkboxState.extra ?
-                options.extraOptions.filter(filterEle => filterEle.type !== "舉牌").map((mapEle, index) => {
-                  return (
-                    <Grid key={mapEle.es_id} item lg={4} sm={4} xs={12}>
-                      <CusOutlinedSelect
-                        id={mapEle.es_id}
-                        name={"es_ids"}
-                        label={mapEle.name}
-                        options={options.extraCount}
-                        optionKey={"name"}
-                        value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
-                        onChangeEvent={(e) => add_HandleSelect(e)}
-                      />
-                    </Grid>
-                  )
-                })
-                : null}
-            </Grid>
-          </Box>
-        </Grid>
+          </Grid>
+          : null}
         <Grid item xs={12}>
           <Box className="space-y-1">
             <Box className="flex items-center border-b pb-2.5 gap-2">
@@ -1004,7 +1091,7 @@ const GoTabPanel = forwardRef((props, ref) => {
                 size={"medium"}
                 color={"secondary"}
                 text={"下一步"}
-                onClick={(e) => confrm_Click({ e: e, type: "go", cal: "Y", orderAdd: orderAdd, signboard: checkboxState.signboard, extra: checkboxState.extra, sameDetail: checkboxState.sameDetail })}
+                onClick={(e) => confrm_Click({ e: e, type: "go", cal: "Y", orderAdd: orderAdd, signboard: checkboxState.signboard, extra: checkboxState.extra, sameDetail: checkboxState.sameDetail, other: checkboxState.other })}
               />
             </Box>
           </Box>
@@ -1016,7 +1103,7 @@ const GoTabPanel = forwardRef((props, ref) => {
 
 /** [內容]送機 */
 const LeaveTabPanel = forwardRef((props, ref) => {
-  const { value, index, options, reserve_next, reserve_error } = props
+  const { value, index, options, reserve_next, reserve_error, extraVisible } = props
 
   // 新增訂單
   const [orderAdd, setOrderAdd] = useState({
@@ -1077,6 +1164,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
   const [checkboxState, setCheckboxState] = useState({
     signboard: false,
     extra: false,
+    other: false,
     sameDetail: false,
   });
 
@@ -1086,17 +1174,29 @@ const LeaveTabPanel = forwardRef((props, ref) => {
     const val = value === "" ? null : value;
 
     if (name === "date_travel") {
-      let formattedValue = val;
-      formattedValue = formattedValue.split('T')[0];
+      let formattedValue = val ? val.split('T')[0] : null; // 格式化日期為 YYYY-MM-DD
 
       setOrderAdd(prev => ({
         ...prev,
         [name]: formattedValue
       }));
+
+      // 檢查是否為三天後的日期
+      if (formattedValue && moment(formattedValue).isSame(moment().add(3, 'days'), 'day')) {
+        setOrderAdd(prev => ({
+          ...prev,
+          minTime: moment().format('HH:mm:ss'), // 如果是三天後，設定 minTime 為當前時間
+        }));
+      } else {
+        setOrderAdd(prev => ({
+          ...prev,
+          minTime: null, // 否則取消時間限制
+        }));
+      }
     } else if (name === "time_travel") {
       setOrderAdd(prev => ({
         ...prev,
-        [name]: val + ":00"
+        [name]: val ? val + ":00" : null
       }));
     } else {
       setOrderAdd(prev => ({
@@ -1111,7 +1211,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
   };
 
   /**[事件]下拉選單 */
-  const add_HandleSelect = (e) => {
+  const add_HandleSelect = (e, type) => {
     const { id, name, value, key } = e.target;
     const val = value === null ? null : value[key];
 
@@ -1168,7 +1268,20 @@ const LeaveTabPanel = forwardRef((props, ref) => {
         arr.push({
           es_id: id,
           count: val,
+          extraType: type,
         });
+      }
+
+      if (type === "合併") {
+        setOrderAddCheck(prev => ({
+          ...prev,
+          es_ids_merge: false,
+        }));
+      } else {
+        setOrderAddCheck(prev => ({
+          ...prev,
+          es_ids_other: false,
+        }));
       }
 
       setOrderAdd(prev => ({
@@ -1200,12 +1313,33 @@ const LeaveTabPanel = forwardRef((props, ref) => {
             count: "1",
           }
         );
+      } else {
+        setOrderAdd(prev => ({
+          ...prev,
+          signboard_title: null,
+          signboard_content: null,
+        }));
       }
       // 更新加購
       setOrderAdd(prev => ({
         ...prev,
         es_ids: checked ? arr : null,
       }))
+    } else if (name === "extra") {
+      // 如果取消勾選, 就把加購清空
+      if (!checked) {
+        setOrderAdd(prev => ({
+          ...prev,
+          es_ids: prev.es_ids ? prev.es_ids.filter(item => item.extraType !== "合併") : null,
+        }));
+      }
+    } else if (name === "other") {
+      if (!checked) {
+        setOrderAdd(prev => ({
+          ...prev,
+          es_ids: prev.es_ids ? prev.es_ids.filter(item => item.extraType !== "其它") : null,
+        }));
+      }
     } else if (name === "sameDetail") { // 同訂購人
       setOrderAdd(prev => ({
         ...prev,
@@ -1227,39 +1361,56 @@ const LeaveTabPanel = forwardRef((props, ref) => {
     });
   };
 
-  const confrm_Click = ({ e, type, cal, orderAdd, signboard, extra, sameDetail }) => {
-    if (!orderAdd.type || !orderAdd.city || !orderAdd.area || !orderAdd.road || !orderAdd.address
-      || !orderAdd.airport || !orderAdd.terminal || !orderAdd.flght_number || !orderAdd.date_travel || !orderAdd.time_travel
-      || !orderAdd.number_passenger || !orderAdd.number_bags || !orderAdd.cms_id
-      || !orderAdd.name_purchaser || !orderAdd.phone_purchaser || !orderAdd.email_purchaser
-      || !orderAdd.name_passenger || !orderAdd.phone_passenger || !orderAdd.email_passenger
-    ) {
+  const confrm_Click = ({ e, type, cal, orderAdd, signboard, extra, sameDetail, other }) => {
+    // 定義需要檢查的欄位
+    const requiredFields = {
+      type: !orderAdd.type,
+      city: !orderAdd.city,
+      area: !orderAdd.area,
+      road: !orderAdd.road,
+      address: !orderAdd.address,
+      airport: !orderAdd.airport,
+      terminal: !orderAdd.terminal,
+      flght_number: !orderAdd.flght_number,
+      date_travel: !orderAdd.date_travel,
+      time_travel: !orderAdd.time_travel,
+      number_passenger: !orderAdd.number_passenger,
+      number_bags: !orderAdd.number_bags,
+      cms_id: !orderAdd.cms_id,
+      name_purchaser: !orderAdd.name_purchaser,
+      phone_purchaser: !orderAdd.phone_purchaser,
+      email_purchaser: !orderAdd.email_purchaser,
+      name_passenger: !orderAdd.name_passenger,
+      phone_passenger: !orderAdd.phone_passenger,
+      email_passenger: !orderAdd.email_passenger,
+      signboard_title: checkboxState.signboard && !orderAdd.signboard_title,
+      signboard_content: checkboxState.signboard && !orderAdd.signboard_content,
+    };
+
+    // 檢查下拉選單的錯誤狀態 - 合併
+    const mergeError =
+      checkboxState.extra &&
+      !orderAdd.es_ids?.some((item) => item.extraType === "合併" && item.es_id !== "00001");
+
+    // 檢查下拉選單的錯誤狀態 - 其它
+    const otherError =
+      checkboxState.other &&
+      !orderAdd.es_ids?.some((item) => item.extraType === "其它" && item.es_id !== "00001");
+
+    // 檢查是否有任何必填欄位未填
+    const hasError = Object.values(requiredFields).some(Boolean) || mergeError || otherError;
+
+    if (hasError) {
       setOrderAddCheck({
-        type: !orderAdd.type ? true : false,
-        city: !orderAdd.city ? true : false,
-        area: !orderAdd.area ? true : false,
-        road: !orderAdd.road ? true : false,
-        address: !orderAdd.address ? true : false,
-        airport: !orderAdd.airport ? true : false,
-        terminal: !orderAdd.terminal ? true : false,
-        flght_number: !orderAdd.flght_number ? true : false,
-        date_travel: !orderAdd.date_travel ? true : false,
-        time_travel: !orderAdd.time_travel ? true : false,
-        number_passenger: !orderAdd.number_passenger ? true : false,
-        number_bags: !orderAdd.number_bags ? true : false,
-        cms_id: !orderAdd.cms_id ? true : false,
-        name_purchaser: !orderAdd.name_purchaser ? true : false,
-        phone_purchaser: !orderAdd.phone_purchaser ? true : false,
-        email_purchaser: !orderAdd.email_purchaser ? true : false,
-        name_passenger: !orderAdd.name_passenger ? true : false,
-        phone_passenger: !orderAdd.phone_passenger ? true : false,
-        email_passenger: !orderAdd.email_passenger ? true : false,
-      })
+        ...requiredFields,
+        es_ids_merge: mergeError,
+        es_ids_other: otherError,
+      });
     } else {
       // 金額試算
       ATS_OrderMaster.ATS_OrderMasterCreate(orderAdd).then(async res => {
         if (res.success) {
-          reserve_next({ e: e, type: type, orderAdd: orderAdd, signboard: signboard, extra: extra, sameDetail: sameDetail, price: res.data })
+          reserve_next({ e: e, type: type, orderAdd: orderAdd, signboard: signboard, extra: extra, sameDetail: sameDetail, other: other, price: res.data })
         } else {
           reserve_error({ e: e, type: "error", message: res.message })
         }
@@ -1393,7 +1544,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                   name={"date_travel"}
                   label={"出發日期"}
                   views={["year", "month", "day"]}
-                  minDate={moment().add(48, 'hours')}
+                  minDate={moment().add(3, 'days')}
                   error={orderAddCheck.date_travel}
                   value={orderAdd.date_travel}
                   onChangeEvent={(e) => add_handelInput(e)}
@@ -1404,11 +1555,12 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                   id={"add--time_travel"}
                   name={"time_travel"}
                   label={orderAdd.type === "送機" ? "乘車時間" : "航班抵達時間"}
-                  minTime={moment().add(48, 'hours').add(5, 'minutes')}
+                  minTime={orderAdd.minTime ? moment(orderAdd.minTime, 'HH:mm:ss') : null}  // 動態設定 minTime
                   views={['hours', 'minutes']}
                   error={orderAddCheck.time_travel}
                   value={orderAdd.time_travel}
                   onChangeEvent={(e) => add_handelInput(e)}
+                  disabled={orderAdd.date_travel ? false : true}
                 />
               </Grid>
             </Grid>
@@ -1472,75 +1624,104 @@ const LeaveTabPanel = forwardRef((props, ref) => {
             </Grid>
           </Box>
         </Grid>
-        <Grid item xs={12}>
-          <Box className="">
-            <Box className="flex items-center border-b pb-2.5 gap-2">
-              <Add color={"secondary"} />
-              <Typography color="secondary" fontWeight="bold">加價服務</Typography>
-            </Box>
-            <Grid container>
-              <Grid item lg={12} sm={12} xs={12}>
-                <FormGroup>
-                  <FormControlLabel
-                    control={<Checkbox name="signboard" checked={checkboxState.signboard} onChange={handleCheckboxChange} />}
-                    label="接機舉牌 (+$200)"
-                  />
-                </FormGroup>
-              </Grid>
-              {checkboxState.signboard ?
-                <React.Fragment>
-                  <Grid item lg={12} sm={12} xs={12}>
-                    <CusInput
-                      id={"add--signboard_title"}
-                      name={"signboard_title"}
-                      label={"舉牌標題"}
-                      error={orderAddCheck.signboard_title}
-                      value={orderAdd.signboard_title}
-                      onChangeEvent={(e) => add_handelInput(e)}
+        {extraVisible ?
+          <Grid item xs={12}>
+            <Box className="">
+              <Box className="flex items-center border-b pb-2.5 gap-2">
+                <Add color={"secondary"} />
+                <Typography color="secondary" fontWeight="bold">加價服務</Typography>
+              </Box>
+              <Grid container>
+                <Grid item lg={12} sm={12} xs={12}>
+                  <FormGroup>
+                    <FormControlLabel
+                      control={<Checkbox name="signboard" checked={checkboxState.signboard} onChange={handleCheckboxChange} />}
+                      label="接機舉牌 (+$200)"
                     />
-                  </Grid>
-                  <Grid item lg={12} sm={12} xs={12}>
-                    <CusInput
-                      multiline
-                      rows={4}
-                      id={"add--signboard_content"}
-                      name={"signboard_content"}
-                      label={"舉牌內容"}
-                      error={orderAddCheck.signboard_content}
-                      value={orderAdd.signboard_content}
-                      onChangeEvent={(e) => add_handelInput(e)}
-                    />
-                  </Grid>
-                </React.Fragment>
-                : null}
-              <Grid item lg={12} sm={12} xs={12}>
-                <FormGroup>
-                  <FormControlLabel
-                    control={<Checkbox name="extra" checked={checkboxState.extra} onChange={handleCheckboxChange} />}
-                    label="加購兒童安全座椅及增高墊 (+$200)"
-                  />
-                </FormGroup>
-              </Grid>
-              {checkboxState.extra ?
-                options.extraOptions.filter(filterEle => filterEle.type !== "舉牌").map((mapEle, index) => {
-                  return (
-                    <Grid key={mapEle.es_id} item lg={4} sm={4} xs={12}>
-                      <CusOutlinedSelect
-                        id={mapEle.es_id}
-                        name={"es_ids"}
-                        label={mapEle.name}
-                        options={options.extraCount}
-                        optionKey={"name"}
-                        value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
-                        onChangeEvent={(e) => add_HandleSelect(e)}
+                  </FormGroup>
+                </Grid>
+                {checkboxState.signboard ?
+                  <React.Fragment>
+                    <Grid item lg={12} sm={12} xs={12}>
+                      <CusInput
+                        id={"add--signboard_title"}
+                        name={"signboard_title"}
+                        label={"舉牌標題"}
+                        error={orderAddCheck.signboard_title}
+                        value={orderAdd.signboard_title}
+                        onChangeEvent={(e) => add_handelInput(e)}
                       />
                     </Grid>
-                  )
-                })
-                : null}
-            </Grid>
-          </Box>
-        </Grid>
+                    <Grid item lg={12} sm={12} xs={12}>
+                      <CusInput
+                        multiline
+                        rows={4}
+                        id={"add--signboard_content"}
+                        name={"signboard_content"}
+                        label={"舉牌內容"}
+                        error={orderAddCheck.signboard_content}
+                        value={orderAdd.signboard_content}
+                        onChangeEvent={(e) => add_handelInput(e)}
+                      />
+                    </Grid>
+                  </React.Fragment>
+                  : null}
+                <Grid item lg={12} sm={12} xs={12}>
+                  <FormGroup>
+                    <FormControlLabel
+                      control={<Checkbox name="extra" checked={checkboxState.extra} onChange={handleCheckboxChange} />}
+                      label="加購兒童安全座椅及增高墊 (+$200)"
+                    />
+                  </FormGroup>
+                </Grid>
+                {checkboxState.extra ?
+                  options.extraOptions.filter(filterEle => filterEle.type === "合併").map((mapEle, index) => {
+                    return (
+                      <Grid key={mapEle.es_id} item lg={4} sm={4} xs={12}>
+                        <CusOutlinedSelect
+                          id={mapEle.es_id}
+                          name={"es_ids"}
+                          label={mapEle.name}
+                          error={orderAddCheck.es_ids_merge}
+                          options={options.extraCount}
+                          optionKey={"name"}
+                          value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
+                          onChangeEvent={(e) => add_HandleSelect(e, mapEle.type)}
+                        />
+                      </Grid>
+                    )
+                  })
+                  : null}
+                <Grid item lg={12} sm={12} xs={12}>
+                  <FormGroup>
+                    <FormControlLabel
+                      control={<Checkbox name="other" checked={checkboxState.other} onChange={handleCheckboxChange} />}
+                      label="加購其它服務"
+                    />
+                  </FormGroup>
+                </Grid>
+                {checkboxState.other ?
+                  options.extraOptions.filter(filterEle => filterEle.type === "其它").map((mapEle, index) => {
+                    return (
+                      <Grid key={mapEle.es_id} item lg={4} sm={4} xs={12}>
+                        <CusOutlinedSelect
+                          id={mapEle.es_id}
+                          name={"es_ids"}
+                          label={mapEle.name}
+                          error={orderAddCheck.es_ids_other}
+                          options={options.extraCount}
+                          optionKey={"name"}
+                          value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
+                          onChangeEvent={(e) => add_HandleSelect(e, mapEle.type)}
+                        />
+                      </Grid>
+                    )
+                  })
+                  : null}
+              </Grid>
+            </Box>
+          </Grid>
+          : null}
         <Grid item xs={12}>
           <Box className="space-y-1">
             <Box className="flex items-center border-b pb-2.5 gap-2">
@@ -1622,7 +1803,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                 size={"medium"}
                 color={"secondary"}
                 text={"下一步"}
-                onClick={(e) => confrm_Click({ e: e, type: "leave", cal: "Y", orderAdd: orderAdd, signboard: checkboxState.signboard, extra: checkboxState.extra, sameDetail: checkboxState.sameDetail })}
+                onClick={(e) => confrm_Click({ e: e, type: "leave", cal: "Y", orderAdd: orderAdd, signboard: checkboxState.signboard, extra: checkboxState.extra, sameDetail: checkboxState.sameDetail, other: checkboxState.other })}
               />
             </Box>
           </Box>
@@ -1634,7 +1815,8 @@ const LeaveTabPanel = forwardRef((props, ref) => {
 
 /** [內容]Dialog*/
 const DialogsInner = forwardRef((props, ref) => {
-  const { type, orderAdd, options, signboard, extra, sameDetail, price, message } = props;
+  const { type, orderAdd, options, signboard, extra, sameDetail, other, price, message } = props;
+  console.log(other)
   if (type === "go") {
     // 日期格式yyyy-mm-dd
     const date_travel = new Date(orderAdd.date_travel).toISOString().split('T')[0];
@@ -1721,43 +1903,38 @@ const DialogsInner = forwardRef((props, ref) => {
             <Box>
               <FormGroup>
                 <FormControlLabel
-                  control={<Checkbox name="signboard" checked={signboard} disabled />}
-                  label="接機舉牌 (+$200)"
-                />
-              </FormGroup>
-              {signboard ?
-                <Grid container>
-                  <Grid item xs={12} >
-                    <CusInput
-                      disabled
-                      id={"add--signboard_title"}
-                      name={"signboard_title"}
-                      label={"舉牌標題"}
-                      value={orderAdd.signboard_title}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <CusInput
-                      disabled
-                      multiline
-                      rows={4}
-                      id={"add--signboard_content"}
-                      name={"signboard_content"}
-                      label={"舉牌內容"}
-                      value={orderAdd.signboard_content}
-                    />
-                  </Grid>
-                </Grid>
-                : null}
-              <FormGroup>
-                <FormControlLabel
                   control={<Checkbox name="signboard" checked={extra} disabled />}
                   label="兒童座椅及增高墊 (+$200)"
                 />
               </FormGroup>
               <Grid container>
                 {extra ?
-                  options.extraOptions.filter(filterEle => filterEle.type !== "舉牌").map((mapEle, index) => {
+                  options.extraOptions.filter(filterEle => filterEle.type === "合併").map((mapEle, index) => {
+                    return (
+                      <Grid key={mapEle.es_id} item lg={6} sm={6} xs={12}>
+                        <CusOutlinedSelect
+                          id={mapEle.es_id}
+                          name={"es_ids"}
+                          label={mapEle.name}
+                          options={options.extraCount}
+                          optionKey={"name"}
+                          value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
+                          disabled
+                        />
+                      </Grid>
+                    )
+                  })
+                  : null}
+              </Grid>
+              <FormGroup>
+                <FormControlLabel
+                  control={<Checkbox name="other" checked={other} disabled />}
+                  label="其它服務"
+                />
+              </FormGroup>
+              <Grid container>
+                {other ?
+                  options.extraOptions.filter(filterEle => filterEle.type === "其它").map((mapEle, index) => {
                     return (
                       <Grid key={mapEle.es_id} item lg={6} sm={6} xs={12}>
                         <CusOutlinedSelect
@@ -1933,7 +2110,32 @@ const DialogsInner = forwardRef((props, ref) => {
               </FormGroup>
               <Grid container>
                 {extra ?
-                  options.extraOptions.filter(filterEle => filterEle.type !== "舉牌").map((mapEle, index) => {
+                  options.extraOptions.filter(filterEle => filterEle.type === "合併").map((mapEle, index) => {
+                    return (
+                      <Grid key={mapEle.es_id} item lg={6} sm={6} xs={12}>
+                        <CusOutlinedSelect
+                          id={mapEle.es_id}
+                          name={"es_ids"}
+                          label={mapEle.name}
+                          options={options.extraCount}
+                          optionKey={"name"}
+                          value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
+                          disabled
+                        />
+                      </Grid>
+                    )
+                  })
+                  : null}
+              </Grid>
+              <FormGroup>
+                <FormControlLabel
+                  control={<Checkbox name="other" checked={other} disabled />}
+                  label="其它服務"
+                />
+              </FormGroup>
+              <Grid container>
+                {other ?
+                  options.extraOptions.filter(filterEle => filterEle.type === "其它").map((mapEle, index) => {
                     return (
                       <Grid key={mapEle.es_id} item lg={6} sm={6} xs={12}>
                         <CusOutlinedSelect

@@ -7,6 +7,12 @@ import { inputLabelClasses } from "@mui/material/InputLabel";
 const status = sessionStorage.getItem("themeStatus") === null ? "LightON" : sessionStorage.getItem("themeStatus")
 
 const CusOutlinedSelect = (props) => {
+  // 輸入後模糊查詢 option 內的選項
+  const filterOptions = (options, { inputValue }) => {
+    return options.filter((option) =>
+      option.name.toLowerCase().includes(inputValue.toLowerCase())
+    );
+  };
   return (
     <Autocomplete
       slotProps={{
@@ -43,7 +49,7 @@ const CusOutlinedSelect = (props) => {
       disabled={props.disabled}
       readOnly={props.readOnly}
       options={props.options || []}
-      filterOptions={(x) => x}
+      filterOptions={filterOptions}
       openOnFocus={true}
       autoComplete={true}
       includeInputInList={true}

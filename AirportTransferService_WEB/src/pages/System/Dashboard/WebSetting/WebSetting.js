@@ -15,6 +15,7 @@ import { CircularLoading } from '../../../../components/CusProgress';
 import { CusVerticalLinearStepper1 } from '../../../../components/CusStepper';
 import { NoResults } from '../../../../components/CusError';
 import { CusSpan } from '../../../../components/CusSpanTS';
+import { CusSwitch } from '../../../../components/CusSwitchTS';
 import { useCheckLogInXPermission, tryCatchError } from '../../../../js/Function';
 import { DDMenu, ATS_WebSetting, FilesAPI } from '../../../../js/APITS';
 import { imageURL } from '../../../../js/Domain';
@@ -125,6 +126,9 @@ export default function WebSetting() {
         html3: "",
     });
 
+    // 加價服務 是否顯示於前台
+    const [checked, setChecked] = useState("Y");
+
     // 查詢狀態 & 網站設定查詢結果
     const [isLoading, setIsLoading] = useState(true);
 
@@ -145,6 +149,7 @@ export default function WebSetting() {
                 setModalA(res.data.filter(item => item.ws_id === "00007")[0])
                 setModalB(res.data.filter(item => item.ws_id === "00008")[0])
                 setNight(res.data.filter(item => item.ws_id === "00009")[0])
+                setChecked(res.data.filter(item => item.ws_id === "00010")[0].text1)
             }
             setIsLoading(false);
         });
@@ -381,6 +386,30 @@ export default function WebSetting() {
             }
         });
     })
+
+    /**
+     * @description 加價是否可見
+     */
+    const extraOnChecked = useCallback((e) => {
+        setChecked(checked === "N" ? "Y" : "N");
+        ATS_WebSetting.ATS_WebSettingsUpdate({
+            ws_id: "00010",
+            title: "extra",
+            image: "",
+            text1: checked === "N" ? "Y" : "N",
+            text2: "",
+            text3: "",
+            html1: "",
+            html2: "",
+            html3: "",
+        }).then(res => {
+            if (res.success) {
+                enqueueSnackbar("修改成功", { variant: 'success' });
+            } else {
+                enqueueSnackbar("修改失敗", { variant: 'error' });
+            }
+        });
+    }, [checked])
 
     // 提示框
     const { enqueueSnackbar } = useSnackbar();
@@ -828,6 +857,16 @@ export default function WebSetting() {
                                                         </Box>
                                                     </Grid>
                                                 </React.Fragment>
+                                            }
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={6} lg={6}>
+                                        <CusInfoTitle
+                                            label={"加價服務"}
+                                            content={
+                                                <Grid item xs={12}>
+                                                    <CusSwitch color={"success"} label={"是否於前台顯示"} checked={checked} onChange={(e) => extraOnChecked(e)} />
+                                                </Grid>
                                             }
                                         />
                                     </Grid>

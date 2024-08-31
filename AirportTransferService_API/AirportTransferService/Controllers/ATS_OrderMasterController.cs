@@ -125,7 +125,7 @@ namespace AirportTransferService.Controllers
 
                 // 拿價錢查連結
                 List<SearchATS_PriceLinkSettingsResult> resultSearchATS_PriceLinkSettings = _ATS_PriceLinkSettings.SearchATS_PriceLinkSettings(
-                    new SearchATS_PriceLinkSettingsParam(price: price),
+                    new SearchATS_PriceLinkSettingsParam(type: data.type, price: price),
                     ["link"], [],
                     out int _);
                 if (resultSearchATS_PriceLinkSettings.Count == 0) return new ResultObject<object> { success = false, message = "價錢連結不存在" };
@@ -204,7 +204,7 @@ namespace AirportTransferService.Controllers
             using (TransactionScope tx = new())
             {
                 // 如果有新的加購項目
-                if (exists_es_ids != null && exists_es_ids.Count > 0)
+                if (exists_es_ids != null)
                 {
                     // 刪除原來的加購項目
                     List<SearchATS_OrderDetailResult> resultSearchATS_OrderDetail = _ATS_OrderDetail.SearchATS_OrderDetail(
@@ -331,7 +331,7 @@ namespace AirportTransferService.Controllers
             {
                 List<SearchATS_OrderDetailResult> resultSearchATS_OrderDetail = _ATS_OrderDetail.SearchATS_OrderDetail(
                 new SearchATS_OrderDetailParam(o_id: result.o_id),
-                ["es_id", "es_name", "count"], [new SQL.SQLOrder_obj { sort_column = "es_id", is_desc = false }],
+                ["es_id", "es_type", "es_name", "count"], [new SQL.SQLOrder_obj { sort_column = "es_id", is_desc = false }],
                 out int _);
                 List<ExtraItem> es_ids = [];
                 foreach (SearchATS_OrderDetailResult item in resultSearchATS_OrderDetail)
@@ -339,6 +339,7 @@ namespace AirportTransferService.Controllers
                     es_ids.Add(new ExtraItem
                     {
                         es_id = item.es_id,
+                        es_type = item.es_type,
                         es_name = item.es_name,
                         count = item.count,
                         type = "Update"

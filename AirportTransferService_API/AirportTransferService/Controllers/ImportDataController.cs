@@ -202,7 +202,7 @@ namespace AirportTransferService.Controllers
                     else if (dsexcelRecords != null && dsexcelRecords.Tables.Count > 0)
                     {
                         DataTable dtPriceLink = dsexcelRecords.Tables[0];
-                        List<string> column = ["價錢", "連結"];
+                        List<string> column = ["價錢", "接/送機", "連結"];
 
                         // 欄位檢查
                         foreach (string item in column)
@@ -212,6 +212,7 @@ namespace AirportTransferService.Controllers
 
                         // 檢查資料型態
                         if (dtPriceLink.AsEnumerable().ToList().Exists(x => !decimal.TryParse(x["價錢"].ToString(), out _))) return new ResultObject { success = false, message = String.Format("{0}必須為數字", "價錢") };
+                        if (dtPriceLink.AsEnumerable().ToList().Exists(x => !Enum.TryParse(x["接/送機"].ToString(), out OrderType _))) return new ResultObject { success = false, message = String.Format("{0}資料錯誤", "類別(接機/送機)") };
                         if (dtPriceLink.AsEnumerable().ToList().Exists(x => string.IsNullOrWhiteSpace(x["連結"].ToString()))) return new ResultObject { success = false, message = String.Format("{0}不得為空白", "連結") };
 
                         // 塞資料
@@ -220,17 +221,19 @@ namespace AirportTransferService.Controllers
                             using (TransactionScope tx = new())
                             {
                                 decimal price = (dtPriceLink.Columns.Contains("價錢") && !DBNull.Value.Equals(dtPriceLink.Columns.Contains("價錢"))) ? Convert.ToDecimal(row["價錢"]) : 0;
+                                string type = (dtPriceLink.Columns.Contains("接/送機") && !DBNull.Value.Equals(dtPriceLink.Columns.Contains("接/送機"))) ? row["接/送機"].ToString() ?? "" : "";
                                 string link = (dtPriceLink.Columns.Contains("連結") && !DBNull.Value.Equals(dtPriceLink.Columns.Contains("連結"))) ? row["連結"].ToString() ?? "" : "";
                                 // 先查出價錢連結設定
                                 List<SearchATS_PriceLinkSettingsResult> resultSearchATS_PriceLinkSettings = _ATS_PriceLinkSettings.SearchATS_PriceLinkSettings(
                                     new SearchATS_PriceLinkSettingsParam(
+                                        type: type,
                                         price: price,
                                         page: 0,
                                         num_per_page: 0),
-                                    ["pls_id", "price"], [],
+                                    ["pls_id", "type", "price"], [],
                                     out int _);
                                 // 如果有符合的價錢，就更新連結
-                               if (resultSearchATS_PriceLinkSettings.Count > 0)
+                                if (resultSearchATS_PriceLinkSettings.Count > 0)
                                 {
                                     _ATS_PriceLinkSettings.UpdateATS_PriceLinkSettings(
                                         new UpdateATS_PriceLinkSettingsParam(
@@ -239,6 +242,7 @@ namespace AirportTransferService.Controllers
                                             upd_time: DateTime.Now,
                                             pls_id: resultSearchATS_PriceLinkSettings[0].pls_id,
                                             visible: Appsettings.api_string_param_no_pass,
+                                            type: Appsettings.api_string_param_no_pass,
                                             price: Appsettings.api_numeric_param_no_pass,
                                             link: link));
                                 }
@@ -249,6 +253,7 @@ namespace AirportTransferService.Controllers
                                             cre_time: DateTime.Now,
                                             cre_userid: jwtObject.user_id,
                                             visible: "Y",
+                                            type: type,
                                             price: price,
                                             link: link));
                                 }

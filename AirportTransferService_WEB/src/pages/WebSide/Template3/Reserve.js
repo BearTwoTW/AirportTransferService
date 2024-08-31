@@ -178,7 +178,7 @@ export default function Reserve() {
       }
     });
   };
-
+  console.log(extraVisible);
   const searchSelectOption = async () => {
     // 查城市區域 (下拉選單用)
     ATS_CityAreaSettings.ATS_CityAreaSettingsSearch(cityAreaSearch).then(async res => {
@@ -949,7 +949,7 @@ const GoTabPanel = forwardRef((props, ref) => {
             </Grid>
           </Box>
         </Grid>
-        {extraVisible === "Y" ?
+        {extraVisible ?
           <Grid item xs={12}>
             <Box className="">
               <Box className="flex items-center border-b pb-2.5 gap-2">
@@ -1629,7 +1629,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
             </Grid>
           </Box>
         </Grid>
-        {extraVisible === "Y" ?
+        {extraVisible ?
           <Grid item xs={12}>
             <Box className="">
               <Box className="flex items-center border-b pb-2.5 gap-2">

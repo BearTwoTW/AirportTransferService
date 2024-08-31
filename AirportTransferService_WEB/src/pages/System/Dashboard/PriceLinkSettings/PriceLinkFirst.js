@@ -34,6 +34,7 @@ export default function PriceLink() {
     const [pageSearch, setPageSearch] = useState({
         visible: null,
         pls_id: null,
+        type: null,
         price: null,
         link: null,
         page: 1,
@@ -52,6 +53,14 @@ export default function PriceLink() {
     const [priceLinkList, setPriceLinkList] = useState([]);
     const [pageCount, setPageCount] = useState(0);
     const [backdropOpen, setBackdropOpen] = useState(false);
+
+    // 下拉選單
+    const [options, setOptions] = useState({
+        typeOptions: [
+            { name: "接機" },
+            { name: "送機" }
+        ]
+    });
 
     // Dialog
     const useDialog = useRef();
@@ -128,6 +137,7 @@ export default function PriceLink() {
             ...prevData,
             visible: null,
             pls_id: null,
+            type: null,
             price: null,
             link: null,
             page: 1,
@@ -149,6 +159,7 @@ export default function PriceLink() {
                     key={item.pls_id}>
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>{item.price}</TableCell>
+                    <TableCell>{item.type}</TableCell>
                     <TableCell>{item.link}</TableCell>
                     <TableCell>
                         {permission.Edit ?
@@ -180,7 +191,7 @@ export default function PriceLink() {
         setDialogData(({
             id: 'add',
             DialogTitle: '新增價錢連結',
-            DialogContent: <DialogsInner type={'add'} ref={useDialogInner} />,
+            DialogContent: <DialogsInner type={'add'} ref={useDialogInner} options={options} />,
             DialogActions: (
                 <>
                     <CusTextButton autoFocus onClick={dialogClose} color="default" text="取消" />
@@ -194,8 +205,9 @@ export default function PriceLink() {
     /**[新建確認]價錢連結 */
     const add_Confirm = () => {
         const { priceLinkAdd, initPriceLinkAddCheck, setPriceLinkAddCheck } = useDialogInner.current;
-        if (!priceLinkAdd.price || !priceLinkAdd.link) {
+        if (!priceLinkAdd.type || !priceLinkAdd.price || !priceLinkAdd.link) {
             setPriceLinkAddCheck({
+                type: !priceLinkAdd.type ? true : false,
                 price: !priceLinkAdd.price ? true : false,
                 link: !priceLinkAdd.link ? true : false,
             })
@@ -227,7 +239,7 @@ export default function PriceLink() {
         setDialogData(({
             id: 'edit',
             DialogTitle: '修改',
-            DialogContent: <DialogsInner type={'edit'} ref={useDialogInner} getEditData={getEditData} pls_id={id} />,
+            DialogContent: <DialogsInner type={'edit'} ref={useDialogInner} getEditData={getEditData} options={options} pls_id={id} />,
             DialogActions: (
                 <React.Fragment>
                     <CusTextButton autoFocus onClick={dialogClose} color="default" text="取消" />
@@ -274,7 +286,7 @@ export default function PriceLink() {
         setDialogData(({
             id: 'del',
             DialogTitle: '刪除',
-            DialogContent: <DialogsInner type={'del'} ref={useDialogInner} name={name} id={id} />,
+            DialogContent: <DialogsInner type={'del'} ref={useDialogInner} name={name} options={options} id={id} />,
             DialogActions: (
                 <React.Fragment>
                     <CusTextButton autoFocus onClick={dialogClose} color="default" text="取消" />
@@ -319,6 +331,7 @@ export default function PriceLink() {
                 type={"import"}
                 ref={useDialogInner}
                 exampleDownload={exampleDownload}
+                options={options}
             />,
             DialogActions: (
                 <React.Fragment>
@@ -375,6 +388,17 @@ export default function PriceLink() {
         }));
     };
 
+    /**[事件]下拉選單 */
+    const search_handleSelect = (e) => {
+        const { id, name, value, key } = e.target;
+        const val = value === null ? null : value[key];
+
+        setPageSearch(prev => ({
+            ...prev,
+            [name]: val,
+        }));
+    };
+
     /**選擇分頁顯示行數 */
     const onRowsPerPageChange = async (e) => {
         setPageSearch((prevData) => ({
@@ -411,6 +435,17 @@ export default function PriceLink() {
                                     type={"number"}
                                     value={pageSearch.price}
                                     onChangeEvent={(e) => search_handleInput(e)}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={3} lg={3}>
+                                <CusOutlinedSelect
+                                    id={"search--type"}
+                                    name={"type"}
+                                    label={"接/送機"}
+                                    options={options.typeOptions}
+                                    optionKey={"name"}
+                                    value={options.typeOptions.some(item => item.name === pageSearch.type) ? options.typeOptions.find(item => item.name === pageSearch.type) : null}
+                                    onChangeEvent={(e) => search_handleSelect(e)}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3} lg={3}>
@@ -473,6 +508,7 @@ export default function PriceLink() {
                                                 tableHead={[
                                                     { name: "排序" },
                                                     { name: "價錢" },
+                                                    { name: "接/送機" },
                                                     { name: "連結" },
                                                     { name: "操作" },
                                                 ]}
@@ -499,16 +535,20 @@ export default function PriceLink() {
 
 /**新增modal內容*/
 const DialogsInner = forwardRef((props, ref) => {
-    const { type, name, getEditData, pls_id, exampleDownload } = props;
+    const { type, name, getEditData, pls_id, exampleDownload, options } = props;
     const [file, setFile] = useState(null);
+
+    const typeOptions = options.typeOptions; // 接/送機
 
     // 新增價錢連結
     const [priceLinkAdd, setPriceLinkAdd] = useState({
         visible: "Y",
+        type: null,
         price: null,
         link: null,
     });
     const initPriceLinkAddCheck = {
+        type: false,
         price: false,
         link: false,
     }
@@ -521,10 +561,22 @@ const DialogsInner = forwardRef((props, ref) => {
     });
 
     const editInitCheckState = {
+        type: false,
         price: false,
         link: false,
     };
     const [editFieldCheck, setEditFieldCheck] = useState(editInitCheckState);
+
+    /**[事件]下拉選單 */
+    const add_HandleSelect = (e) => {
+        const { id, name, value, key } = e.target;
+        const val = value === null ? null : value[key];
+
+        setPriceLinkAdd(prev => ({
+            ...prev,
+            [name]: val,
+        }));
+    };
 
     /**新增 input */
     const add_handelInput = e => {
@@ -548,6 +600,21 @@ const DialogsInner = forwardRef((props, ref) => {
             updData: {
                 ...prevData.updData,
                 [name]: value
+            }
+        }));
+    };
+
+
+    /**[事件]下拉選單 */
+    const edit_HandleSelect = (e) => {
+        const { id, name, value, key } = e.target;
+        const val = value === null ? null : value[key];
+
+        setEditData(prevData => ({
+            ...prevData,
+            updData: {
+                ...prevData.updData,
+                [name]: val
             }
         }));
     };
@@ -585,7 +652,7 @@ const DialogsInner = forwardRef((props, ref) => {
                 <Grid container>
                     <Grid item xs={12}>
                         <CusInput
-                            id={"search--price"}
+                            id={"add--price"}
                             name={"price"}
                             label={"價錢"}
                             error={priceLinkAddCheck.price}
@@ -594,8 +661,20 @@ const DialogsInner = forwardRef((props, ref) => {
                         />
                     </Grid>
                     <Grid item xs={12}>
+                        <CusOutlinedSelect
+                            id={"add--type"}
+                            name={"type"}
+                            label={"接/送機"}
+                            options={typeOptions}
+                            optionKey={"name"}
+                            error={priceLinkAddCheck.type}
+                            value={typeOptions.some(item => item.name === priceLinkAdd.type) ? typeOptions.find(item => item.name === priceLinkAdd.type) : null}
+                            onChangeEvent={(e) => add_HandleSelect(e)}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
                         <CusInput
-                            id={"search--link"}
+                            id={"add--link"}
                             name={"link"}
                             label={"連結"}
                             error={priceLinkAddCheck.link}
@@ -623,6 +702,17 @@ const DialogsInner = forwardRef((props, ref) => {
                         error={editFieldCheck.price}
                         value={data.price}
                         onChangeEvent={(e) => edit_HandleInput(e)}
+                    />
+                    <CusOutlinedSelect
+                        id={'edit--type'}
+                        name={'type'}
+                        label={'接/送機'}
+                        required={true}
+                        options={typeOptions}
+                        optionKey={"name"}
+                        error={editFieldCheck.type}
+                        value={typeOptions.some(item => item.name === data.type) ? typeOptions.find(item => item.name === data.type) : null}
+                        onChangeEvent={(e) => edit_HandleSelect(e)}
                     />
                     <CusInput
                         id={'edit--link'}

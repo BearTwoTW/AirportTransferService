@@ -1376,7 +1376,6 @@ const LeaveTabPanel = forwardRef((props, ref) => {
       address: !orderAdd.address,
       airport: !orderAdd.airport,
       terminal: !orderAdd.terminal,
-      flght_number: !orderAdd.flght_number,
       date_travel: !orderAdd.date_travel,
       time_travel: !orderAdd.time_travel,
       number_passenger: !orderAdd.number_passenger,
@@ -1538,7 +1537,6 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                   id={"add--flght_number"}
                   name={"flght_number"}
                   label={"航班號碼"}
-                  error={orderAddCheck.flght_number}
                   value={orderAdd.flght_number}
                   onChangeEvent={(e) => add_handelInput(e)}
                 />

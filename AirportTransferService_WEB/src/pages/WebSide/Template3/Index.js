@@ -156,13 +156,20 @@ export default function Index() {
                         onClick={() => reserve_Click({ type: "go" })} />
                 </Box>
             </Box>
-            <Box className="relative mt-5">
-                <Box className="object-cover">
-                    <img className="w-full h-[420px] object-cover" src={imageF ? `${imageURL}${imageF}` : "https://fakeimg.pl/250x100/?text=img"}></img>
-                </Box>
-                <Box className="absolute inset-0 flex items-center justify-center text-center">
-                    <Box className="w-3/6 max-md:w-4/6">
-                        <h3>{textF}</h3>
+            <Box className="flex justify-center items-end min-h-0">
+                <Box className="w-full flex justify-center items-end min-h-0">
+                    <Box className="relative w-full flex items-end">
+                        <img
+                            className="w-full object-contain"
+                            src={imageF ? `${imageURL}${imageF}` : "https://fakeimg.pl/250x100/?text=img"}
+                            style={{ objectPosition: 'bottom' }}
+                        />
+                        {/* 文字區塊 */}
+                        <Box className="absolute inset-0 flex items-center justify-center text-center pointer-events-none">
+                            <Box className="w-3/6 max-md:w-4/6">
+                                <h3>{textF}</h3>
+                            </Box>
+                        </Box>
                     </Box>
                 </Box>
             </Box>

@@ -125,7 +125,7 @@ export const WebSwipeableSideBar3 = () => {
                 shoppingCar={shoppingCar}
                 setDelCartConfirm={setDelCartConfirm}
                 localStorageClear={localStorageClear}>
-                <Box sx={{ mt: "96px", minHeight: "100vh", animation: "fade 1s ease" }}>
+                <Box sx={{ mt: "96px", animation: "fade 1s ease" }}>
                     <Outlet />
                 </Box>
             </ShoppingCarContextProvider>

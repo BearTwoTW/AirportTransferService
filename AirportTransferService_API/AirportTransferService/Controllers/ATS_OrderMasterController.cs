@@ -62,12 +62,12 @@ namespace AirportTransferService.Controllers
                         price += (count ?? 0) * (result.price ?? 0);
                     }
                 }
-                
+
                 return new ResultObject<object> { success = true, message = "計算價錢成功", data = price.ToString() };
             }
 
             DateTime cre_time = DateTime.Now;
-            string id = "";
+            string id = "", link = "";
             using (TransactionScope tx = new())
             {
                 // 建立訂單
@@ -129,6 +129,7 @@ namespace AirportTransferService.Controllers
                     ["link"], [],
                     out int _);
                 if (resultSearchATS_PriceLinkSettings.Count == 0) return new ResultObject<object> { success = false, message = "價錢連結不存在" };
+                link = resultSearchATS_PriceLinkSettings[0].link!;
 
                 // 更新訂單價錢和連結
                 _ATS_OrderMaster.UpdateATS_OrderMaster(new UpdateATS_OrderMasterParam(
@@ -139,12 +140,12 @@ namespace AirportTransferService.Controllers
                         date_travel: Appsettings.api_dateonly_param_no_pass,
                         time_travel: Appsettings.api_timeonly_param_no_pass,
                         price: price,
-                        link: resultSearchATS_PriceLinkSettings[0].link));
+                        link: link));
 
                 tx.Complete();
             }
 
-            return new ResultObject<object> { success = true, message = "新增成功", data = id };
+            return new ResultObject<object> { success = true, message = "新增成功", data = new { o_id = id, link } };
         }
 
         /// <summary>
@@ -181,13 +182,13 @@ namespace AirportTransferService.Controllers
                 //number_passenger = data.number_passenger == Appsettings.api_numeric_param_no_pass ? search_own_result.number_passenger : data.number_passenger,
                 //number_bags = data.number_bags == Appsettings.api_numeric_param_no_pass ? search_own_result.number_bags : data.number_bags,
                 //cms_id = data.cms_id == Appsettings.api_string_param_no_pass ? search_own_result.cms_id : data.cms_id,
-                type = string.IsNullOrEmpty(data.type) || data.type == Appsettings.api_string_param_no_pass  ? search_own_result.type : data.type,
-                city = string.IsNullOrEmpty(data.city) || data.city == Appsettings.api_string_param_no_pass  ? search_own_result.city : data.city,
-                area = string.IsNullOrEmpty(data.area) || data.area == Appsettings.api_string_param_no_pass  ? search_own_result.area : data.area,
-                road = string.IsNullOrEmpty(data.road) || data.road == Appsettings.api_string_param_no_pass  ? search_own_result.road : data.road,
-                section = string.IsNullOrEmpty(data.section) || data.section == Appsettings.api_string_param_no_pass  ? search_own_result.section : data.section,
-                airport = string.IsNullOrEmpty(data.airport) || data.airport == Appsettings.api_string_param_no_pass  ? search_own_result.airport : data.airport,
-                terminal = string.IsNullOrEmpty(data.terminal) || data.terminal == Appsettings.api_string_param_no_pass  ? search_own_result.terminal : data.terminal,
+                type = string.IsNullOrEmpty(data.type) || data.type == Appsettings.api_string_param_no_pass ? search_own_result.type : data.type,
+                city = string.IsNullOrEmpty(data.city) || data.city == Appsettings.api_string_param_no_pass ? search_own_result.city : data.city,
+                area = string.IsNullOrEmpty(data.area) || data.area == Appsettings.api_string_param_no_pass ? search_own_result.area : data.area,
+                road = string.IsNullOrEmpty(data.road) || data.road == Appsettings.api_string_param_no_pass ? search_own_result.road : data.road,
+                section = string.IsNullOrEmpty(data.section) || data.section == Appsettings.api_string_param_no_pass ? search_own_result.section : data.section,
+                airport = string.IsNullOrEmpty(data.airport) || data.airport == Appsettings.api_string_param_no_pass ? search_own_result.airport : data.airport,
+                terminal = string.IsNullOrEmpty(data.terminal) || data.terminal == Appsettings.api_string_param_no_pass ? search_own_result.terminal : data.terminal,
                 date_travel = data.date_travel,
                 time_travel = data.time_travel,
                 number_passenger = data.number_passenger,
@@ -648,8 +649,8 @@ namespace AirportTransferService.Controllers
         [NonAction]
         private static string CheckRoadFormat(string road)
         {
-            if (string.IsNullOrEmpty(road) 
-                || road == Appsettings.api_string_param_no_pass 
+            if (string.IsNullOrEmpty(road)
+                || road == Appsettings.api_string_param_no_pass
                 || road.Contains('路', StringComparison.CurrentCulture)) return road;
             return $"{road}路";
         }
@@ -662,8 +663,8 @@ namespace AirportTransferService.Controllers
         [NonAction]
         private static string CheckSectionFormat(string section)
         {
-            if (string.IsNullOrEmpty(section) 
-                || section == Appsettings.api_string_param_no_pass 
+            if (string.IsNullOrEmpty(section)
+                || section == Appsettings.api_string_param_no_pass
                 || section.Contains('段', StringComparison.CurrentCulture)) return section;
             return $"{section}段";
         }
@@ -701,7 +702,7 @@ namespace AirportTransferService.Controllers
                     section: data.section,
                     airport: data.airport,
                     terminal: data.terminal),
-                ["road","section","price"], [],
+                ["road", "section", "price"], [],
                 out int _);
 
             // 如果查詢有結果

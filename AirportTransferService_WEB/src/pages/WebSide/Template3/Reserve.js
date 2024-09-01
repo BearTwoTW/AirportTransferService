@@ -428,7 +428,7 @@ export default function Reserve() {
 /** [內容]送機 */
 const GoTabPanel = forwardRef((props, ref) => {
   const { value, index, options, reserve_next, reserve_error, extraVisible, extraText } = props
-
+  const otherExtra = options.extraOptions.filter(option => option.type === "其它");
   // 新增訂單
   const [orderAdd, setOrderAdd] = useState({
     visible: "Y",
@@ -983,14 +983,16 @@ const GoTabPanel = forwardRef((props, ref) => {
                     )
                   })
                   : null}
-                <Grid item lg={12} sm={12} xs={12}>
-                  <FormGroup>
-                    <FormControlLabel
-                      control={<Checkbox name="other" checked={checkboxState.other} onChange={handleCheckboxChange} />}
-                      label="加購其它服務"
-                    />
-                  </FormGroup>
-                </Grid>
+                {otherExtra ?
+                  <Grid item lg={12} sm={12} xs={12}>
+                    <FormGroup>
+                      <FormControlLabel
+                        control={<Checkbox name="other" checked={checkboxState.other} onChange={handleCheckboxChange} />}
+                        label="加購其它服務"
+                      />
+                    </FormGroup>
+                  </Grid>
+                  : null}
                 {checkboxState.other ?
                   options.extraOptions.filter(filterEle => filterEle.type === "其它").map((mapEle, index) => {
                     return (
@@ -1109,7 +1111,7 @@ const GoTabPanel = forwardRef((props, ref) => {
 /** [內容]送機 */
 const LeaveTabPanel = forwardRef((props, ref) => {
   const { value, index, options, reserve_next, reserve_error, extraVisible, extraText } = props
-
+  const otherExtra = options.extraOptions.filter(option => option.type === "其它");
   // 新增訂單
   const [orderAdd, setOrderAdd] = useState({
     visible: "Y",
@@ -1695,14 +1697,16 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                     )
                   })
                   : null}
-                <Grid item lg={12} sm={12} xs={12}>
-                  <FormGroup>
-                    <FormControlLabel
-                      control={<Checkbox name="other" checked={checkboxState.other} onChange={handleCheckboxChange} />}
-                      label="加購其它服務"
-                    />
-                  </FormGroup>
-                </Grid>
+                {otherExtra ?
+                  <Grid item lg={12} sm={12} xs={12}>
+                    <FormGroup>
+                      <FormControlLabel
+                        control={<Checkbox name="other" checked={checkboxState.other} onChange={handleCheckboxChange} />}
+                        label="加購其它服務"
+                      />
+                    </FormGroup>
+                  </Grid>
+                  : null}
                 {checkboxState.other ?
                   options.extraOptions.filter(filterEle => filterEle.type === "其它").map((mapEle, index) => {
                     return (

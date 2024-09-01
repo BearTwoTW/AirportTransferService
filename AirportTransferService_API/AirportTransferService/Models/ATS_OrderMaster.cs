@@ -1015,6 +1015,12 @@ namespace AirportTransferService.Models
         public string? es_id { get; set; } = "";
 
         /// <summary>
+        /// es_type
+        /// </summary>
+        [Display(Name = "es_type")]
+        public string? es_type { get; set; } = "";
+
+        /// <summary>
         /// es_name
         /// </summary>
         [Display(Name = "es_name")]
@@ -1202,7 +1208,7 @@ namespace AirportTransferService.Models
         /// 加購項目
         /// </summary>
         [Display(Name = "加購項目")]
-        public List<ExtraItem>? es_ids { get; set; } = [];
+        public List<ExtraItem>? es_ids { get; set; } = null;
     }
 
     /// <summary>

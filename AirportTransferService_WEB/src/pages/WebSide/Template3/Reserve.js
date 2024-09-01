@@ -326,22 +326,34 @@ export default function Reserve() {
       calculation: "N",
     }).then(async res => {
       if (res.success) {
-        ATS_PriceLinkSettings.ATS_PriceLinkSettingsSearch({
-          visible: "Y",
-          price: price,
-        }).then(async res => {
-          if (res.success) {
-            setBackdropOpen(true);
+        // ATS_OrderMasterCreate 直接回傳連結 2024-09-01 Beck
+        let o_id = res.data.o_id;
+        let link = res.data.link;
+        setBackdropOpen(true);
+        // 延遲兩秒才call api，看起來比較有在等待的感覺?
+        setTimeout(() => {
+          dialogClose();
+          setBackdropOpen(false);
+          // 跳轉
+          window.location.href = link;
+        }, 2000);
 
-            // 延遲兩秒才call api，看起來比較有在等待的感覺?
-            setTimeout(() => {
-              dialogClose();
-              setBackdropOpen(false);
-              // 跳轉
-              window.location.href = res.data[0].link;
-            }, 2000);
-          }
-        })
+        // ATS_PriceLinkSettings.ATS_PriceLinkSettingsSearch({
+        //   visible: "Y",
+        //   price: price,
+        // }).then(async res => {
+        //   if (res.success) {
+        //     setBackdropOpen(true);
+
+        //     // 延遲兩秒才call api，看起來比較有在等待的感覺?
+        //     setTimeout(() => {
+        //       dialogClose();
+        //       setBackdropOpen(false);
+        //       // 跳轉
+        //       window.location.href = res.data[0].link;
+        //     }, 2000);
+        //   }
+        // })
       } else {
         console.log("訂單建立失敗!")
       }

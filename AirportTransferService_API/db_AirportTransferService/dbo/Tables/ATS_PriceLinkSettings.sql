@@ -5,6 +5,7 @@
     [upd_time]   DATETIME       NULL,
     [pls_id]     VARCHAR (10)   NULL,
     [visible]    VARCHAR (2)    DEFAULT ('Y') NULL,
+    [type] VARCHAR(4) NULL,
     [price]      DECIMAL (10)   NULL,
     [link]       NVARCHAR (MAX) NULL
 );
@@ -51,3 +52,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'ATS_PriceLinkSettings',
     @level2type = NULL,
     @level2name = NULL
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'類別(接機/送機)',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'ATS_PriceLinkSettings',
+    @level2type = N'COLUMN',
+    @level2name = N'type'

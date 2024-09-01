@@ -23,17 +23,25 @@ namespace AirportTransferService.Controllers
         {
             DateTime cre_time = DateTime.Now;
 
+            #region 檢查類別
+            if (!data.type!.Equals(Appsettings.api_string_param_no_pass))
+            {
+                if (!Enum.TryParse(data.type, out OrderType _)) return new ResultObject<string> { success = false, message = "類別(接機/送機)錯誤" };
+            }
+            #endregion
+
             List<SearchATS_PriceLinkSettingsResult> search_results = _ATS_PriceLinkSettings.SearchATS_PriceLinkSettings(
                 new SearchATS_PriceLinkSettingsParam(),
-                ["price"], [],
+                ["type", "price"], [],
                 out _);
-            if (search_results.Exists(x => x.price == data.price)) return new ResultObject<string> { success = false, message = "價錢重複" };
+            if (search_results.Exists(x => x.type == data.type && x.price == data.price)) return new ResultObject<string> { success = false, message = "價錢重複" };
 
             string id = _ATS_PriceLinkSettings.CreateATS_PriceLinkSettings(
                 new CreateATS_PriceLinkSettingsParam(
                     cre_userid: jwtObject.user_id,
                     cre_time: cre_time,
                     visible: data.visible,
+                    type: data.type,
                     price: data.price,
                     link: data.link));
 
@@ -50,20 +58,28 @@ namespace AirportTransferService.Controllers
         {
             DateTime upd_time = DateTime.Now;
 
+            #region 檢查類別
+            if (data.type != null && !data.type.Equals(Appsettings.api_string_param_no_pass))
+            {
+                if (!Enum.TryParse(data.type, out OrderType _)) return new ResultObject<string> { success = false, message = "類別(接機/送機)錯誤" };
+            }
+            #endregion
+
             //查自己
             SearchATS_PriceLinkSettingsResult? search_own_result = _ATS_PriceLinkSettings.SearchATS_PriceLinkSettings(
                 new SearchATS_PriceLinkSettingsParam(pls_id: data.pls_id),
-                ["pls_id"], [],
+                ["pls_id", "type", "price"], [],
                 out _).FirstOrDefault();
             if (search_own_result == null) return new ResultObject<string> { success = false, message = "修改失敗，查無價錢連結設定" };
             //查要檢查重複的東西
             List<SearchATS_PriceLinkSettingsResult> search_results = _ATS_PriceLinkSettings.SearchATS_PriceLinkSettings(
                 new SearchATS_PriceLinkSettingsParam(),
-                ["pls_id", "price"], [],
+                ["pls_id", "type", "price"], [],
                 out _);
+            string? type = data.type == Appsettings.api_string_param_no_pass ? search_own_result.type : data.type;
             decimal? price = data.price == Appsettings.api_numeric_param_no_pass ? search_own_result.price : data.price;
             //檢查重複
-            if (search_results.Exists(x => x.price == price && data.pls_id != x.pls_id)) return new ResultObject<string> { success = false, message = "價錢重複" };
+            if (search_results.Exists(x => x.type == type && x.price == price && x.pls_id != data.pls_id)) return new ResultObject<string> { success = false, message = "價錢重複" };
 
             using (TransactionScope tx = new())
             {
@@ -73,6 +89,7 @@ namespace AirportTransferService.Controllers
                     upd_time: upd_time,
                     pls_id: data.pls_id,
                     visible: data.visible,
+                    type: data.type,
                     price: data.price,
                     link: data.link));
 
@@ -94,11 +111,12 @@ namespace AirportTransferService.Controllers
                 new SearchATS_PriceLinkSettingsParam(
                     pls_id: data.pls_id,
                     visible: data.visible,
+                    type: data.type,
                     price: data.price,
                     link: data.link,
                     page: data.page,
                     num_per_page: data.num_per_page),
-                ["pls_id", "visible", "price", "link"], [],
+                ["pls_id", "visible", "type", "price", "link"], [],
                 out int page_count);
 
             List<ATS_PriceLinkSettingsSearchResponse> response = [];
@@ -108,6 +126,7 @@ namespace AirportTransferService.Controllers
                 {
                     pls_id = result.pls_id,
                     visible = result.visible,
+                    type = result.type,
                     price = result.price,
                     link = result.link
                 });
@@ -118,11 +137,13 @@ namespace AirportTransferService.Controllers
                 // 建立DataTable欄位
                 DataTable dt_excel = new();
                 dt_excel.Columns.Add("價錢", typeof(decimal));
+                dt_excel.Columns.Add("接/送機", typeof(string));
                 dt_excel.Columns.Add("連結", typeof(string));
                 foreach (ATS_PriceLinkSettingsSearchResponse obj in response)
                 {
                     DataRow dr_excel = dt_excel.NewRow();
                     dr_excel["價錢"] = obj.price;
+                    dr_excel["接/送機"] = obj.type;
                     dr_excel["連結"] = obj.link;
                     dt_excel.Rows.Add(dr_excel);
                 }

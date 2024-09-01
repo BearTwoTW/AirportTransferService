@@ -11,6 +11,7 @@ namespace AirportTransferService.Models
     /// <param name="upd_time"></param>
     /// <param name="pls_id"></param>
     /// <param name="visible"></param>
+    /// <param name="type"></param>
     /// <param name="price"></param>
     /// <param name="link"></param>
     public class ATS_PriceLinkSettings(
@@ -20,6 +21,7 @@ namespace AirportTransferService.Models
         DateTime? upd_time = null,
         string? pls_id = null,
         string? visible = null,
+        string? type = null,
         decimal? price = null,
         string? link = null)
     {
@@ -50,17 +52,22 @@ namespace AirportTransferService.Models
         public string? pls_id { get; } = pls_id;
 
         /// <summary>
-        /// title
+        /// visible
         /// </summary>
         public string? visible { get; } = visible;
+        
+        /// <summary>
+        /// type
+        /// </summary>
+        public string? type { get; } = type;
 
         /// <summary>
-        /// image
+        /// price
         /// </summary>
         public decimal? price { get; } = price;
 
         /// <summary>
-        /// text1
+        /// link
         /// </summary>
         public string? link { get; } = link;
     }
@@ -71,17 +78,20 @@ namespace AirportTransferService.Models
     /// <param name="cre_userid"></param>
     /// <param name="cre_time"></param>
     /// <param name="visible"></param>
+    /// <param name="type"></param>
     /// <param name="price"></param>
     /// <param name="link"></param>
     public class CreateATS_PriceLinkSettingsParam(
         string? cre_userid,
         DateTime? cre_time,
         string? visible,
+        string? type,
         decimal? price,
         string? link) : ATS_PriceLinkSettings(
             cre_userid: cre_userid,
             cre_time: cre_time,
             visible: visible,
+            type: type,
             price: price,
             link: link)
     {
@@ -96,6 +106,7 @@ namespace AirportTransferService.Models
     /// <param name="pls_id"></param>
     /// <param name="cre_userid"></param>
     /// <param name="visible"></param>
+    /// <param name="type"></param>
     /// <param name="price"></param>
     /// <param name="link"></param>
     public class UpdateATS_PriceLinkSettingsParam(
@@ -105,6 +116,7 @@ namespace AirportTransferService.Models
         string? pls_id,
         string? cre_userid = api_string_param_no_pass,
         string? visible = api_string_param_no_pass,
+        string? type = api_string_param_no_pass,
         decimal? price = api_numeric_param_no_pass,
         string? link = api_string_param_no_pass) : ATS_PriceLinkSettings(
             cre_userid: cre_userid,
@@ -113,6 +125,7 @@ namespace AirportTransferService.Models
             upd_time: upd_time,
             pls_id: pls_id,
             visible: visible,
+            type: type,
             price: price,
             link: link)
     {
@@ -123,6 +136,7 @@ namespace AirportTransferService.Models
     /// </summary>
     /// <param name="pls_id"></param>
     /// <param name="visible"></param>
+    /// <param name="type"></param>
     /// <param name="price"></param>
     /// <param name="link"></param>
     /// <param name="page"></param>
@@ -130,6 +144,7 @@ namespace AirportTransferService.Models
     public class SearchATS_PriceLinkSettingsParam(
         string? pls_id = null,
         string? visible = null,
+        string? type = null,
         decimal? price = null,
         string? link = null,
         int page = 0,
@@ -146,6 +161,12 @@ namespace AirportTransferService.Models
         /// </summary>
         [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_PriceLinkSettings.visible")]
         public string? visible { get; } = visible;
+
+        /// <summary>
+        /// type
+        /// </summary>
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_PriceLinkSettings.type")]
+        public string? type { get; } = type;
 
         /// <summary>
         /// price
@@ -212,6 +233,12 @@ namespace AirportTransferService.Models
         public string? visible { get; set; }
 
         /// <summary>
+        /// type
+        /// </summary>
+        [SQLSource("ATS_PriceLinkSettings.type")]
+        public string? type { get; set; }
+
+        /// <summary>
         /// price
         /// </summary>
         [SQLSource("ATS_PriceLinkSettings.price")]
@@ -259,6 +286,12 @@ namespace AirportTransferService.Models
         public string? visible { get; set; } = "Y";
 
         /// <summary>
+        /// 類別(接機/送機)
+        /// </summary>
+        [Display(Name = "類別(接機/送機)"), Required(ErrorMessage = "請輸入{0}")]
+        public string? type { get; set; }
+
+        /// <summary>
         /// 價錢
         /// </summary>
         [Display(Name = "價錢"), Required(ErrorMessage = "請輸入{0}")]
@@ -287,6 +320,12 @@ namespace AirportTransferService.Models
         /// </summary>
         [Display(Name = "是否可見")]
         public string? visible { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 類別(接機/送機)
+        /// </summary>
+        [Display(Name = "類別(接機/送機)")]
+        public string? type { get; set; } = api_string_param_no_pass;
 
         /// <summary>
         /// 價錢
@@ -335,6 +374,12 @@ namespace AirportTransferService.Models
         /// </summary>
         [Display(Name = "是否可見"), YN]
         public string? visible { get; set; } = "N";
+
+        /// <summary>
+        /// 類別(接機/送機)
+        /// </summary>
+        [Display(Name = "類別(接機/送機)")]
+        public string? type { get; set; } = "";
 
         /// <summary>
         /// 價錢

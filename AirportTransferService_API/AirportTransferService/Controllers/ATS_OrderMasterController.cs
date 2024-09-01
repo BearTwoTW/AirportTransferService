@@ -161,10 +161,70 @@ namespace AirportTransferService.Controllers
             data.section = CheckSectionFormat(data.section!);
             // 查自己
             SearchATS_OrderMasterResult? search_own_result = _ATS_OrderMaster.SearchATS_OrderMaster(
-            new SearchATS_OrderMasterParam(o_id: data.o_id),
-            ["o_id", "type", "city", "area", "road", "section", "airport", "terminal", "date_travel", "time_travel", "number_passenger", "number_bags", "cms_id"], [],
-            out int _).FirstOrDefault();
+                new SearchATS_OrderMasterParam(o_id: data.o_id),
+                ["o_id", "type", "city", "area", "road", "section", "airport", "terminal", "date_travel", "time_travel", "number_passenger", "number_bags", "cms_id"], [],
+                out int _).FirstOrDefault();
             if (search_own_result == null) return new ResultObject<object> { success = false, message = "修改失敗，查無訂單" };
+            // 查明細
+            List<SearchATS_OrderDetailResult> resultSearchATS_OrderDetail = _ATS_OrderDetail.SearchATS_OrderDetail(
+                new SearchATS_OrderDetailParam(o_id: data.o_id),
+                ["od_id", "es_id", "es_type", "es_name", "count"], [],
+                out int _);
+            // 把明細加入 data.es_ids，一起驗證訂單資料
+            List<ExtraItem> es_ids = [];
+            switch (data.es_ids)
+            {
+                // data.es_ids = null 代表不修改加購項目
+                case null:
+                    foreach (SearchATS_OrderDetailResult orderDetail in resultSearchATS_OrderDetail)
+                    {
+                        es_ids.Add(new ExtraItem
+                        {
+                            es_id = orderDetail.es_id,
+                            es_type = orderDetail.es_type,
+                            es_name = orderDetail.es_name,
+                            count = orderDetail.count,
+                            type = ExtraActionType.Create.ToString()
+                        });
+                    }
+                    break;
+                // data.es_ids = [] 代表刪除所有加購項目
+                case { } when data.es_ids.Count == 0:
+                    foreach (SearchATS_OrderDetailResult orderDetail in resultSearchATS_OrderDetail)
+                    {
+                        es_ids.Add(new ExtraItem
+                        {
+                            es_id = orderDetail.es_id,
+                            es_type = orderDetail.es_type,
+                            es_name = orderDetail.es_name,
+                            count = orderDetail.count,
+                            type = "Delete"
+                        });
+                    }
+                    break;
+                // data.es_ids 是只有調整的加購項目
+                // 如果有找到，就把找到的加購項目加進去
+                // 如果沒找到，就把原本的加購項目加進去
+                case { } when data.es_ids.Count > 0:
+                    es_ids = data.es_ids;
+                    foreach (SearchATS_OrderDetailResult orderDetail in resultSearchATS_OrderDetail)
+                    {
+                        if (!es_ids.Exists(x => x.es_id == orderDetail.es_id))
+                        {
+                            es_ids.Add(new ExtraItem
+                            {
+                                es_id = orderDetail.es_id,
+                                es_type = orderDetail.es_type,
+                                es_name = orderDetail.es_name,
+                                count = orderDetail.count,
+                                type = ExtraActionType.Create.ToString()
+                            });
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
 
             // 驗證訂單資料
             ResultObject<ValidateOrderResult> validateResult = ValidateOrder(new ATS_OrderMasterCreate
@@ -194,7 +254,7 @@ namespace AirportTransferService.Controllers
                 number_passenger = data.number_passenger,
                 number_bags = data.number_bags,
                 cms_id = string.IsNullOrEmpty(data.cms_id) || data.cms_id == Appsettings.api_string_param_no_pass ? search_own_result.cms_id : data.cms_id,
-                es_ids = data.es_ids
+                es_ids = es_ids
             });
             if (!validateResult.success) return new ResultObject<object> { success = validateResult.success, message = validateResult.message, data = validateResult.data };
             ValidateOrderResult validateResultData = validateResult.data!;
@@ -204,14 +264,10 @@ namespace AirportTransferService.Controllers
             DateTime now_time = DateTime.Now;
             using (TransactionScope tx = new())
             {
-                // 如果有新的加購項目
+                // 如果有加購項目
                 if (exists_es_ids != null)
                 {
                     // 刪除原來的加購項目
-                    List<SearchATS_OrderDetailResult> resultSearchATS_OrderDetail = _ATS_OrderDetail.SearchATS_OrderDetail(
-                        new SearchATS_OrderDetailParam(o_id: data.o_id),
-                        ["od_id"], [],
-                        out int _);
                     foreach (SearchATS_OrderDetailResult item in resultSearchATS_OrderDetail)
                     {
                         _ATS_OrderDetail.DeleteATS_OrderDetail(od_id: item.od_id!);
@@ -582,6 +638,7 @@ namespace AirportTransferService.Controllers
                     if (!Enum.TryParse(item.type, out ExtraActionType _)) return new ResultObject<ValidateOrderResult> { success = false, message = "加購動作類別錯誤" };
                     #endregion
                     if (Enum.Parse<ExtraActionType>(item.type!) == ExtraActionType.Delete) continue;
+                    if (string.IsNullOrEmpty(item.es_id) || item.es_id == Appsettings.api_string_param_no_pass) return new ResultObject<ValidateOrderResult> { success = false, message = "加購項目ID錯誤" };
 
                     List<SearchATS_ExtraSettingsResult> resultSearchATS_ExtraSettings = _ATS_ExtraSettings.SearchATS_ExtraSettings(
                         new SearchATS_ExtraSettingsParam(

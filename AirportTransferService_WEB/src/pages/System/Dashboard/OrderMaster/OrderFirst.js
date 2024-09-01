@@ -564,7 +564,7 @@ export default function Order() {
             date_travel: !data.date_travel,
             time_travel: !data.time_travel,
             number_passenger: !data.number_passenger,
-            number_bags: !data.number_bags,
+            number_bags: data.number_bags === null || data.number_bags === "" || data.number_bags === undefined, // !data.number_bags 會把 0 當成 true
             cms_id: !data.cms_id,
             name_purchaser: !data.name_purchaser,
             phone_purchaser: !data.phone_purchaser,
@@ -578,12 +578,11 @@ export default function Order() {
 
         // 檢查下拉選單的錯誤狀態
         const mergeError =
-            checkboxState.extra && !data.es_ids?.some((item) => item.extraType === "合併");
+            checkboxState.extra && data.es_ids?.some((item) => item.extraType === "合併" && !item.count);
 
         // 檢查下拉選單的錯誤狀態 - 其它
         const otherError =
-            checkboxState.other && !data.es_ids?.some((item) => item.extraType === "其它");
-        console.log("data:", data)
+            checkboxState.other && data.es_ids?.some((item) => item.extraType === "其它" && !item.count);
 
         // 檢查是否有任何必填欄位未填
         const hasError = Object.values(requiredFields).some(Boolean) || mergeError || otherError;
@@ -1136,41 +1135,84 @@ const DialogsInner = forwardRef((props, ref) => {
     // 編輯加價勾選
     const handleCheckboxChangeEdit = (event) => {
         const { name, checked } = event.target;
-        let data = {
-            ...editData.dtlData,
-            ...editData.updData
-        }
+        console.log('1138,editData', editData);
+        // let data = {
+        //     ...editData.dtlData,
+        //     ...editData.updData
+        // }
+        let dtlData = editData.dtlData;
+        let updData = editData.updData;
         if (name === "signboard") { // 舉牌
             // 如果勾選, 就把舉牌加入es_ids欄位
-            let arr = [];
-            console.log("arr: ", arr)
+            let arr = updData ? updData.es_ids ? updData.es_ids : [] : [];
+            console.log("1148,arr: ", arr);
             if (checked) {
-                arr.push({
-                    es_id: options.extraOptions.find(item => item.type === "舉牌").es_id,
-                    count: "1",
-                    extraType: "舉牌",
-                });
-
+                // 如果本來就有這個加價項目，還能把checkbox打勾，就是已經經過一次取消勾選了
+                if (dtlData.es_ids.some(item => item.es_id === options.extraOptions.find(item => item.type === "舉牌").es_id)) {
+                    // 調整新的array
+                    arr = arr.filter(item => item.es_id !== options.extraOptions.find(item => item.type === "舉牌").es_id);
+                    // 調整原本的array
+                    let arrEs_id = dtlData.es_ids.filter(item => item.es_id === options.extraOptions.find(item => item.type === "舉牌").es_id)[0];
+                    arrEs_id.count = 1;
+                    let newDtlData = dtlData.es_ids.filter(item => item.es_id !== options.extraOptions.find(item => item.type === "舉牌").es_id);
+                    newDtlData.push(arrEs_id);
+                    setEditData(prev => ({
+                        ...prev,
+                        dtlData: {
+                            ...prev.dtlData,
+                            es_ids: newDtlData,
+                        }
+                    }));
+                } else {
+                    arr.push({
+                        es_id: options.extraOptions.find(item => item.type === "舉牌").es_id,
+                        count: "1",
+                        type: "Create",
+                    });
+                }
+                console.log("1173,arr: ", arr);
                 // 更新加購
                 setEditData(prev => ({
                     ...prev,
                     updData: {
                         ...prev.updData,
-                        es_ids: checked ? arr : null,
+                        es_ids: arr,
                     }
                 }));
             } else {
+                // 如果本來就有這個加價項目，把checkbox取消，就是要刪除
+                if (dtlData.es_ids.some(item => item.es_id === options.extraOptions.find(item => item.type === "舉牌").es_id)) {
+                    // 加到調整的array
+                    arr.push({
+                        es_id: options.extraOptions.find(item => item.type === "舉牌").es_id,
+                        count: "1",
+                        type: "Delete",
+                    });
+                    // 調整原本的array
+                    let arrEs_id = dtlData.es_ids.filter(item => item.es_id === options.extraOptions.find(item => item.type === "舉牌").es_id)[0];
+                    arrEs_id.count = 0;
+                    let newDtlData = dtlData.es_ids.filter(item => item.es_id !== options.extraOptions.find(item => item.type === "舉牌").es_id);
+                    newDtlData.push(arrEs_id);
+                    setEditData(prev => ({
+                        ...prev,
+                        dtlData: {
+                            ...prev.dtlData,
+                            es_ids: newDtlData,
+                        }
+                    }));
+                }
+                else arr = arr.filter(item => item.es_id !== options.extraOptions.find(item => item.type === "舉牌").es_id);
+                console.log("1205,arr: ", arr);
                 setEditData(prev => ({
                     ...prev,
                     updData: {
                         ...prev.updData,
                         signboard_title: null,
                         signboard_content: null,
-                        es_ids: prev.es_ids ? prev.es_ids.filter(item => item.extraType !== "舉牌") : null,
+                        es_ids: arr,
                     }
                 }));
             }
-
         } else if (name === "extra") {
             // 如果取消勾選, 就把加購清空
             if (!checked) {

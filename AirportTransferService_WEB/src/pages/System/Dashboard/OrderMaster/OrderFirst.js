@@ -1012,7 +1012,10 @@ const DialogsInner = forwardRef((props, ref) => {
     // 編輯訂單
     const [editData, setEditData] = useState({
         dtlData: getEditData,
-        updData: { o_id: o_id }
+        updData: { o_id: o_id },
+        signboardData: getEditData.es_ids ? getEditData.es_ids.filter(item => item.es_type === "舉牌") : [],
+        extraData: getEditData.es_ids ? getEditData.es_ids.filter(item => item.es_type === "合併") : [],
+        otherData: getEditData.es_ids ? getEditData.es_ids.filter(item => item.es_type === "其它") : [],
     });
 
     // useEffect(() => {
@@ -1142,26 +1145,27 @@ const DialogsInner = forwardRef((props, ref) => {
         // }
         let dtlData = editData.dtlData;
         let updData = editData.updData;
+        let arr = updData ? updData.es_ids ? updData.es_ids : [] : [];
+        let signboardData = editData.signboardData;
+        let extraData = editData.extraData;
+        let otherData = editData.otherData;
+
         if (name === "signboard") { // 舉牌
             // 如果勾選, 就把舉牌加入es_ids欄位
-            let arr = updData ? updData.es_ids ? updData.es_ids : [] : [];
             console.log("1148,arr: ", arr);
             if (checked) {
                 // 如果本來就有這個加價項目，還能把checkbox打勾，就是已經經過一次取消勾選了
-                if (dtlData.es_ids.some(item => item.es_id === options.extraOptions.find(item => item.type === "舉牌").es_id)) {
+                if (signboardData.some(item => item.es_id === options.extraOptions.find(item => item.type === "舉牌").es_id)) {
                     // 調整新的array
                     arr = arr.filter(item => item.es_id !== options.extraOptions.find(item => item.type === "舉牌").es_id);
                     // 調整原本的array
-                    let arrEs_id = dtlData.es_ids.filter(item => item.es_id === options.extraOptions.find(item => item.type === "舉牌").es_id)[0];
+                    let arrEs_id = signboardData.filter(item => item.es_id === options.extraOptions.find(item => item.type === "舉牌").es_id)[0];
                     arrEs_id.count = 1;
-                    let newDtlData = dtlData.es_ids.filter(item => item.es_id !== options.extraOptions.find(item => item.type === "舉牌").es_id);
+                    let newDtlData = signboardData.filter(item => item.es_id !== options.extraOptions.find(item => item.type === "舉牌").es_id);
                     newDtlData.push(arrEs_id);
                     setEditData(prev => ({
                         ...prev,
-                        dtlData: {
-                            ...prev.dtlData,
-                            es_ids: newDtlData,
-                        }
+                        signboardData: newDtlData,
                     }));
                 } else {
                     arr.push({
@@ -1181,7 +1185,7 @@ const DialogsInner = forwardRef((props, ref) => {
                 }));
             } else {
                 // 如果本來就有這個加價項目，把checkbox取消，就是要刪除
-                if (dtlData.es_ids.some(item => item.es_id === options.extraOptions.find(item => item.type === "舉牌").es_id)) {
+                if (signboardData.some(item => item.es_id === options.extraOptions.find(item => item.type === "舉牌").es_id)) {
                     // 加到調整的array
                     arr.push({
                         es_id: options.extraOptions.find(item => item.type === "舉牌").es_id,
@@ -1189,16 +1193,13 @@ const DialogsInner = forwardRef((props, ref) => {
                         type: "Delete",
                     });
                     // 調整原本的array
-                    let arrEs_id = dtlData.es_ids.filter(item => item.es_id === options.extraOptions.find(item => item.type === "舉牌").es_id)[0];
+                    let arrEs_id = signboardData.filter(item => item.es_id === options.extraOptions.find(item => item.type === "舉牌").es_id)[0];
                     arrEs_id.count = 0;
-                    let newDtlData = dtlData.es_ids.filter(item => item.es_id !== options.extraOptions.find(item => item.type === "舉牌").es_id);
+                    let newDtlData = signboardData.filter(item => item.es_id !== options.extraOptions.find(item => item.type === "舉牌").es_id);
                     newDtlData.push(arrEs_id);
                     setEditData(prev => ({
                         ...prev,
-                        dtlData: {
-                            ...prev.dtlData,
-                            es_ids: newDtlData,
-                        }
+                        signboardData: newDtlData
                     }));
                 }
                 else arr = arr.filter(item => item.es_id !== options.extraOptions.find(item => item.type === "舉牌").es_id);
@@ -1214,23 +1215,66 @@ const DialogsInner = forwardRef((props, ref) => {
                 }));
             }
         } else if (name === "extra") {
-            // 如果取消勾選, 就把加購清空
             if (!checked) {
+                // 如果本來就有這個加價項目，把checkbox取消，就是要刪除
+                if (extraData.some(item => item.es_id === options.extraOptions.find(item => item.type === "合併").es_id)) {
+                    // 加到調整的array
+                    extraData.forEach(dtlItem => {
+                        arr.push({
+                            es_id: dtlItem.es_id,
+                            count: "1",
+                            type: "Delete",
+                        });
+                    });
+                    // 調整原本的array
+                    let arrEs_id = extraData.filter(item => item.es_id === options.extraOptions.find(item => item.type === "合併").es_id)[0];
+                    arrEs_id.count = 0;
+                    let newDtlData = extraData.filter(item => item.es_id !== options.extraOptions.find(item => item.type === "合併").es_id);
+                    newDtlData.push(arrEs_id);
+                    setEditData(prev => ({
+                        ...prev,
+                        extraData: newDtlData
+                    }));
+                }
+                else arr = arr.filter(item => item.es_id !== options.extraOptions.find(item => item.type === "合併").es_id);
+                console.log("1205,arr: ", arr);
                 setEditData(prev => ({
                     ...prev,
                     updData: {
                         ...prev.updData,
-                        es_ids: prev.es_ids ? prev.es_ids.filter(item => item.extraType !== "合併") : null,
+                        es_ids: arr,
                     }
                 }));
             }
         } else if (name === "other") {
             if (!checked) {
+                // 如果本來就有這個加價項目，把checkbox取消，就是要刪除
+                if (otherData.some(item => item.es_id === options.extraOptions.find(item => item.type === "其它").es_id)) {
+                    // 加到調整的array
+                    otherData.forEach(dtlItem => {
+                        arr.push({
+                            es_id: dtlItem.es_id,
+                            count: "1",
+                            type: "Delete",
+                        });
+                    });
+                    // 調整原本的array
+                    let arrEs_id = otherData.filter(item => item.es_id === options.extraOptions.find(item => item.type === "其它").es_id)[0];
+                    arrEs_id.count = 0;
+                    let newDtlData = otherData.filter(item => item.es_id !== options.extraOptions.find(item => item.type === "其它").es_id);
+                    newDtlData.push(arrEs_id);
+                    setEditData(prev => ({
+                        ...prev,
+                        otherData: newDtlData
+                    }));
+                }
+                else arr = arr.filter(item => item.es_id !== options.extraOptions.find(item => item.type === "其它").es_id);
+                console.log("1205,arr: ", arr);
                 setEditData(prev => ({
                     ...prev,
                     updData: {
                         ...prev.updData,
-                        es_ids: prev.es_ids ? prev.es_ids.filter(item => item.extraType !== "其它") : null,
+                        es_ids: arr,
                     }
                 }));
             }
@@ -1836,7 +1880,7 @@ const DialogsInner = forwardRef((props, ref) => {
                             onChangeEvent={(e) => add_HandleSelect(e)}
                         />
                     </Grid>
-                    <Grid item xs={12}>
+                    {/* <Grid item xs={12}>
                         <Typography variant="subtitle1" gutterBottom>加價服務</Typography>
                     </Grid>
                     <Grid container>
@@ -1932,7 +1976,7 @@ const DialogsInner = forwardRef((props, ref) => {
                                 )
                             })
                             : null}
-                    </Grid>
+                    </Grid> */}
                     <Grid item xs={12}>
                         <Typography variant="subtitle1" gutterBottom>基本資料</Typography>
                     </Grid>
@@ -2010,9 +2054,11 @@ const DialogsInner = forwardRef((props, ref) => {
     } else if (type === 'edit') {
         let data = {
             ...editData.dtlData,
-            ...editData.updData
+            ...editData.updData,
+            signboardData: editData.signboardData,
+            extraData: editData.extraData,
+            otherData: editData.otherData,
         }
-
         return (
             <React.Fragment>
                 <Grid container>
@@ -2287,7 +2333,7 @@ const DialogsInner = forwardRef((props, ref) => {
                             onChangeEvent={(e) => edit_HandleSelect(e)}
                         />
                     </Grid>
-                    <Grid item xs={12}>
+                    {/* <Grid item xs={12}>
                         <Typography variant="subtitle1" gutterBottom>加價服務</Typography>
                     </Grid>
                     <Grid container>
@@ -2348,7 +2394,7 @@ const DialogsInner = forwardRef((props, ref) => {
                                             error={editFieldCheck.es_ids_merge}
                                             options={options.extraCount}
                                             optionKey={"name"}
-                                            value={data.es_ids ? (data.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === String(data.es_ids.find(item => item.es_id === mapEle.es_id).count)) : null) : null}
+                                            value={data.extraData ? (data.extraData.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === String(data.extraData.find(item => item.es_id === mapEle.es_id).count)) : null) : null}
                                             onChangeEvent={(e) => edit_HandleSelect(e, mapEle.type)}
                                         />
                                     </Grid>
@@ -2376,14 +2422,14 @@ const DialogsInner = forwardRef((props, ref) => {
                                             error={editFieldCheck.es_ids_other}
                                             options={options.extraCount}
                                             optionKey={"name"}
-                                            value={data.es_ids ? (data.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === String(data.es_ids.find(item => item.es_id === mapEle.es_id).count)) : null) : null}
+                                            value={data.otherData ? (data.otherData.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === String(data.otherData.find(item => item.es_id === mapEle.es_id).count)) : null) : null}
                                             onChangeEvent={(e) => edit_HandleSelect(e, mapEle.type)}
                                         />
                                     </Grid>
                                 )
                             })
                             : null}
-                    </Grid>
+                    </Grid> */}
                     <Grid item xs={12}>
                         <Typography variant="subtitle1" gutterBottom>基本資料</Typography>
                     </Grid>

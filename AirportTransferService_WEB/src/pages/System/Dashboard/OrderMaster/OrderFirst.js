@@ -1013,9 +1013,9 @@ const DialogsInner = forwardRef((props, ref) => {
     const [editData, setEditData] = useState({
         dtlData: getEditData,
         updData: { o_id: o_id },
-        signboardData: getEditData.es_ids ? getEditData.es_ids.filter(item => item.es_type === "舉牌") : [],
-        extraData: getEditData.es_ids ? getEditData.es_ids.filter(item => item.es_type === "合併") : [],
-        otherData: getEditData.es_ids ? getEditData.es_ids.filter(item => item.es_type === "其它") : [],
+        signboardData: type === "edit" ? (getEditData.es_ids ? getEditData.es_ids.filter(item => item.es_type === "舉牌") : []) : [],
+        extraData: type === "edit" ? (getEditData.es_ids ? getEditData.es_ids.filter(item => item.es_type === "合併") : []) : [],
+        otherData: type === "edit" ? (getEditData.es_ids ? getEditData.es_ids.filter(item => item.es_type === "其它") : []) : [],
     });
 
     // useEffect(() => {

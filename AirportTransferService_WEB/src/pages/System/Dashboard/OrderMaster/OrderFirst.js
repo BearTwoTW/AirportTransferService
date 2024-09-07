@@ -39,6 +39,7 @@ export default function Order() {
         signboard_content: null,
         o_id: null,
         visible: "Y",
+        order_status: null,
         type: null,
         city: null,
         area: null,
@@ -139,6 +140,7 @@ export default function Order() {
         passengerOptions: [],
         bagsOptions: [], // 行李數
         carModelOptions: [],
+        orderStatusOptions: [],
         orderTypeOptions: [
             { name: "送機" },
             { name: "接機" }
@@ -367,6 +369,7 @@ export default function Order() {
             signboard_content: null,
             o_id: null,
             visible: "Y",
+            order_status: null,
             type: null,
             city: null,
             area: null,
@@ -396,6 +399,17 @@ export default function Order() {
     };
 
     useEffect(() => {
+        // 初始化下拉選單
+        async function awaitJsonList() {
+            const orderStatusArr = await DDMenu.selectorCode('OS');
+
+            setOptions(prevData => ({
+                ...prevData,
+                orderStatusOptions: orderStatusArr,
+            }));
+        };
+
+        awaitJsonList();
         searchSelectOption();
         searchOrder(pageSearch);
     }, [pageSearch.search, pageSearch.page, pageSearch.num_per_page]);
@@ -409,6 +423,7 @@ export default function Order() {
                     key={item.o_id}>
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>{item.o_id}</TableCell>
+                    <TableCell>{item.order_status}</TableCell>
                     <TableCell>{item.type}</TableCell>
                     <TableCell>{item.city}</TableCell>
                     <TableCell>{item.area}</TableCell>
@@ -554,6 +569,7 @@ export default function Order() {
         }
         // 定義需要檢查的欄位
         const requiredFields = {
+            order_status: !data.order_status,
             type: !data.type,
             city: !data.city,
             area: !data.area,
@@ -729,23 +745,23 @@ export default function Order() {
                     <CusCard content={
                         <React.Fragment>
                             <Grid item xs={12} sm={3} lg={3}>
-                                <CusOutlinedSelect
-                                    id={"search--visible"}
-                                    name={"visible"}
-                                    label={"訂單狀態"}
-                                    options={options.visible}
-                                    optionKey={"value"}
-                                    value={options.visible.some(item => item.value === pageSearch.visible) ? options.visible.find(item => item.value === pageSearch.visible) : null}
-                                    onChangeEvent={(e) => search_handleSelect(e)}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={3} lg={3}>
                                 <CusInput
                                     id={"search--o_id"}
                                     name={"o_id"}
                                     label={"訂單編號"}
                                     value={pageSearch.o_id}
                                     onChangeEvent={(e) => search_handleInput(e)}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={3} lg={3}>
+                                <CusOutlinedSelect
+                                    id={"search--order_status"}
+                                    name={"order_status"}
+                                    label={"訂單狀態"}
+                                    options={options.orderStatusOptions}
+                                    optionKey={"name"}
+                                    value={options.orderStatusOptions.some(item => item.name === pageSearch.order_status) ? options.orderStatusOptions.find(item => item.name === pageSearch.order_status) : null}
+                                    onChangeEvent={(e) => search_handleSelect(e)}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3} lg={3}>
@@ -887,6 +903,7 @@ export default function Order() {
                                                 onRowsPerPageChange={onRowsPerPageChange}
                                                 tableHead={[
                                                     { name: "排序" },
+                                                    { name: "訂單狀態" },
                                                     { name: "訂單編號" },
                                                     { name: "訂單類型" },
                                                     { name: "城市" },
@@ -945,6 +962,7 @@ const DialogsInner = forwardRef((props, ref) => {
         sameDetail: type === "edit" ? sameDetail : false,
     });
 
+    const orderStatusOptions = options.orderStatusOptions; // 訂單狀態
     const orderTypeOptions = options.orderTypeOptions; // 訂單類型 (送機/接機)
     const cityOptions = options.cityAreaOptions.cityOptions; // 城市
     const areaOptions = options.cityAreaOptions.areaOptions; // 區域
@@ -1050,6 +1068,7 @@ const DialogsInner = forwardRef((props, ref) => {
     // }, [getEditData]);
 
     const editInitCheckState = {
+        order_status: false,
         type: false,
         city: false,
         area: false,
@@ -2064,6 +2083,18 @@ const DialogsInner = forwardRef((props, ref) => {
                 <Grid container>
                     <Grid item xs={12}>
                         <Typography variant="subtitle1" gutterBottom>訂單類型</Typography>
+                    </Grid>
+                    <Grid item xs={12} md={4} lg={4}>
+                        <CusOutlinedSelect
+                            id={"edit--order_status"}
+                            name={"order_status"}
+                            label={"訂單狀態"}
+                            options={orderStatusOptions}
+                            optionKey={"name"}
+                            error={editFieldCheck.order_status}
+                            value={orderStatusOptions.some(item => item.name === data.order_status) ? orderStatusOptions.find(item => item.name === data.order_status) : null}
+                            onChangeEvent={(e) => edit_HandleSelect(e)}
+                        />
                     </Grid>
                     <Grid item xs={12} md={4} lg={4}>
                         <CusOutlinedSelect

@@ -808,10 +808,40 @@
     }
 
     /// <summary>
+    /// 訂單狀態
+    /// </summary>
+    public enum OrderStatus
+    {
+        /// <summary>
+        /// 處理中
+        /// </summary>
+        處理中,
+
+        /// <summary>
+        /// 已確認
+        /// </summary>
+        已確認,
+
+        /// <summary>
+        /// 已完成
+        /// </summary>
+        已完成,
+
+        /// <summary>
+        /// 已取消
+        /// </summary>
+        已取消,
+
+        /// <summary>
+        /// 退款中
+        /// </summary>
+        退款中
+    }
+
+    /// <summary>
     /// 類別(接機/送機)
     /// </summary>
-    public enum
-        OrderType
+    public enum OrderType
     {
         /// <summary>
         /// 接機
@@ -833,7 +863,7 @@
         /// 額外服務
         /// </summary>
         舉牌,
-                  
+
         /// <summary>
         /// 額外費用
         /// </summary>

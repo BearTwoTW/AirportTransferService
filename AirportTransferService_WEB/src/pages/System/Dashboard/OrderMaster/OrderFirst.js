@@ -903,8 +903,8 @@ export default function Order() {
                                                 onRowsPerPageChange={onRowsPerPageChange}
                                                 tableHead={[
                                                     { name: "排序" },
-                                                    { name: "訂單狀態" },
                                                     { name: "訂單編號" },
+                                                    { name: "訂單狀態" },
                                                     { name: "訂單類型" },
                                                     { name: "城市" },
                                                     { name: "區域" },

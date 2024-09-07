@@ -43,8 +43,8 @@ namespace AirportTransferService.Controllers
         public ResultObject<object> ATS_OrderMasterCreate(ATS_OrderMasterCreate data)
         {
             // 檢查 路 & 段
-            data.road = CheckRoadFormat(data.road!);
-            data.section = CheckSectionFormat(data.section!);
+            if (data.road != null && !data.road.Equals(Appsettings.api_string_param_no_pass)) data.road = Tool.ConvertAddress(Tool.CheckRoadFormat(data.road!));
+            if (data.section != null && !data.section.Equals(Appsettings.api_string_param_no_pass)) data.section = Tool.ConvertAddress(Tool.CheckSectionFormat(data.section!));
             // 驗證訂單資料
             ResultObject<ValidateOrderResult> validateResult = ValidateOrder(data);
             if (!validateResult.success) return new ResultObject<object> { success = validateResult.success, message = validateResult.message, data = validateResult.data };

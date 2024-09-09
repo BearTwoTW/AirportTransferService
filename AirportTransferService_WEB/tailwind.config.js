@@ -23,7 +23,7 @@ module.exports = {
     extend: {
       // 顏色
       colors: {
-        'primary': '#F0BF1B',
+        'primary': '#FFFFFF',
         'secondary': '#595758',
         'success': '',
         'info': '#000000',

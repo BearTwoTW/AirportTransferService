@@ -72,9 +72,9 @@ export const WebNavigation3 = (props) => {
                             </Typography>
                         </Box>
                         <Box className="flex space-x-10 text-info font-bold max-md:hidden">
-                            <a href="/index#target" className="cursor-pointer hover:opacity-80">預約流程</a>
-                            <a className="cursor-pointer hover:opacity-80" onClick={() => navigate("/Price")}>加價服務</a>
-                            <a className="cursor-pointer hover:opacity-80" onClick={() => reserve_Click({ type: "go" })}>預約及車資計算</a>
+                            <a href="/index#target" className="cursor-pointer hover:opacity-80 font-normal">預約流程</a>
+                            <a className="cursor-pointer hover:opacity-80 font-normal" onClick={() => navigate("/Price")}>加價服務</a>
+                            <a className="cursor-pointer hover:opacity-80 font-normal" onClick={() => reserve_Click({ type: "go" })}>預約及車資計算</a>
                         </Box>
                         <WebIconButton3
                             className={"md:hidden"}

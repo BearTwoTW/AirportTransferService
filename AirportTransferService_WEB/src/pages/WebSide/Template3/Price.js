@@ -296,9 +296,9 @@ export default function Login() {
             </Box>
           </Box>
         </Box> */}
-                    <Box className="border rounded-lg">
+                    <Box className="rounded-lg">
                         <Box className="flex max-md:flex-col">
-                            <Box className="w-3/6 max-md:w-full border-r pb-5 space-y-5">
+                            <Box className="w-3/6 max-md:w-full border-r pb-5 space-y-5 bg-white">
                                 <Box className="bg-[#192F64] h-[60px] rounded-tl-lg max-md:rounded-t-lg flex justify-center items-center">
                                     <h2 className="text-[#FFF] self-center">夜間加成(23:00~05:59)</h2>
                                 </Box>
@@ -308,7 +308,7 @@ export default function Login() {
                                     </Box>
                                 </Box>
                             </Box>
-                            <Box className="w-3/6 max-md:w-full pb-5 space-y-5">
+                            <Box className="w-3/6 max-md:w-full pb-5 space-y-5 bg-white">
                                 <Box className="bg-[#192F64] h-[60px] rounded-tr-lg max-md:rounded-t-lg flex justify-center items-center">
                                     <h2 className="text-[#FFF] self-center">加價服務</h2>
                                 </Box>
@@ -320,12 +320,11 @@ export default function Login() {
                             </Box>
                         </Box>
                     </Box>
-                    <Box className="container mx-auto p-5">
+                    <Box className="container mx-auto p-5 flex justify-center">
                         <WebTextIconButton3
-                            className={"h-20 rounded-full"}
-                            fullWidth={true}
+                            className={"text-white text-2xl font-normal rounded-xl py-2.5 lg:px-40 max-lg:px-20"}
                             size={"medium"}
-                            color={"primary"}
+                            color={"info"}
                             text={"立即預約"}
                             onClick={() => reserve_Click({ type: "go" })} />
                     </Box>

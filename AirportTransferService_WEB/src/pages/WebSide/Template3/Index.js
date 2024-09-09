@@ -99,7 +99,7 @@ export default function Index() {
                     <Button color="secondary" variant='outlined' onClick={dialogClose}>
                         取消
                     </Button>
-                    <Button color="secondary" variant='contained' onClick={() => confirm_Click({ type: type })}>
+                    <Button sx={{ color: "#FFFFFF" }} color="secondary" variant='contained' onClick={() => confirm_Click({ type: type })}>
                         前往預約
                     </Button>
                 </React.Fragment>)
@@ -127,12 +127,12 @@ export default function Index() {
                     </Box>
                 </Box>
                 <Box className="p-5 w-[400px] max-lg:w-full flex lg:flex-col lg:space-y-5 max-lg:space-x-5">
-                    <Box className="bg-[#3F7C38] hover:opacity-80 flex flex-col justify-center items-center w-full h-full rounded-lg space-y-2.5 max-lg:h-[200px] p-2.5 cursor-pointer" onClick={() => reserve_Click({ type: "go" })}>
+                    <Box className="bg-[#32A5AA] hover:opacity-80 flex flex-col justify-center items-center w-full h-full rounded-lg space-y-2.5 max-lg:h-[110px] p-2.5 cursor-pointer" onClick={() => reserve_Click({ type: "go" })}>
                         <FlightTakeoffIcon className="text-[#FFF]" fontSize='large' />
                         <h1 className="text-[#FFF] font-bold max-md:hidden">預約送機/前往機場</h1>
                         <h3 className="text-[#FFF] font-bold md:hidden">預約送機/前往機場</h3>
                     </Box>
-                    <Box className="bg-[#EE732A] hover:opacity-80 flex flex-col justify-center items-center w-full h-full rounded-lg space-y-2.5 max-lg:h-[200px] p-2.5 cursor-pointer" onClick={() => reserve_Click({ type: "leave" })}>
+                    <Box className="bg-[#78B450] hover:opacity-80 flex flex-col justify-center items-center w-full h-full rounded-lg space-y-2.5 max-lg:h-[110px] p-2.5 cursor-pointer" onClick={() => reserve_Click({ type: "leave" })}>
                         <FlightLandIcon className="text-[#FFF]" fontSize='large' />
                         <h1 className="text-[#FFF] font-bold max-md:hidden">預約接機/離開機場</h1>
                         <h3 className="text-[#FFF] font-bold md:hidden">預約接機/離開機場</h3>
@@ -146,12 +146,11 @@ export default function Index() {
                 <Box className="object-cover">
                     <img className="w-full object-contain" src={imageE ? `${imageURL}${imageE}` : "https://fakeimg.pl/250x100/?text=img"}></img>
                 </Box>
-                <Box className="container mx-auto p-5">
+                <Box className="container mx-auto p-5 flex justify-center">
                     <WebTextIconButton3
-                        className={"h-20 rounded-full"}
-                        fullWidth={true}
+                        className={"text-white text-2xl font-normal rounded-xl py-2.5 lg:px-40 max-lg:px-20"}
                         size={"medium"}
-                        color={"primary"}
+                        color={"info"}
                         text={"立即預約"}
                         onClick={() => reserve_Click({ type: "go" })} />
                 </Box>

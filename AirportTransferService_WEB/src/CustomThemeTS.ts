@@ -64,10 +64,10 @@ declare module "@mui/material/styles" {
 export const CusThemeTS = (() => {
     const labelFontSize = "1.3rem";
     // 前台顏色(需跟 tailwind.config.js 內的顏色相同)
-    const primary = "#F0BF1B"
+    const primary = "#FFFFFF"
     const secondary = "#192F64"
-    const success = ""
-    const info = "#000000"
+    const success = "#78B450"
+    const info = "#32A5AA"
     const secInfo = "#AAAAAA"
     const headerInfo = "#000000"
     const footerInfo = "#000000"
@@ -155,6 +155,10 @@ export const CusThemeTS = (() => {
                             backgroundColor: secondary,
                             // color: info,
                         },
+                        [`&.MuiButton-containedInfo`]: {
+                            backgroundColor: info,
+                            // color: info,
+                        },
                         [`&.MuiButton-outlinedPrimary`]: {
                             // borderColor: "#ede2cf",
                             // color: "#ede2cf",
@@ -217,7 +221,7 @@ export const CusThemeTS = (() => {
                     root: {
                         [`&.MuiCheckbox-colorPrimary`]: {
                             [`&.Mui-checked`]: {
-                                color: primary,
+                                color: info,
                             },
                         },
                         [`&.MuiCheckbox-colorSecondary`]: {

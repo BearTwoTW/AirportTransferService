@@ -68,7 +68,7 @@ export const WebDialog3 = forwardRef((props, ref) => {
               <Box>
                 <WebIconButton3
                   className="no-drag"
-                  color={"info"}
+                  color={"secondary"}
                   aria-label="close"
                   onClick={() => setOpen(false)}
                   icon={<Close />} />

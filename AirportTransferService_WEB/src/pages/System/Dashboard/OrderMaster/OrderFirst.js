@@ -1881,7 +1881,7 @@ const DialogsInner = forwardRef((props, ref) => {
                             onChangeEvent={(e) => add_HandleSelect(e)}
                         />
                     </Grid>
-                    <Grid item xs={12}>
+                    {/* <Grid item xs={12}>
                         <Typography variant="subtitle1" gutterBottom>加價服務</Typography>
                     </Grid>
                     <Grid container>
@@ -1977,7 +1977,7 @@ const DialogsInner = forwardRef((props, ref) => {
                                 )
                             })
                             : null}
-                    </Grid>
+                    </Grid> */}
                     <Grid item xs={12}>
                         <Typography variant="subtitle1" gutterBottom>基本資料</Typography>
                     </Grid>
@@ -2346,7 +2346,7 @@ const DialogsInner = forwardRef((props, ref) => {
                             onChangeEvent={(e) => edit_HandleSelect(e)}
                         />
                     </Grid>
-                    <Grid item xs={12}>
+                    {/* <Grid item xs={12}>
                         <Typography variant="subtitle1" gutterBottom>加價服務</Typography>
                     </Grid>
                     <Grid container>
@@ -2442,7 +2442,7 @@ const DialogsInner = forwardRef((props, ref) => {
                                 )
                             })
                             : null}
-                    </Grid>
+                    </Grid> */}
                     <Grid item xs={12}>
                         <Typography variant="subtitle1" gutterBottom>基本資料</Typography>
                     </Grid>

@@ -312,7 +312,7 @@ export default function Reserve() {
           <Button color="secondary" variant='outlined' onClick={dialogClose}>
             上一步
           </Button>
-          <Button color="primary" variant='contained' onClick={(e) => { reserve_confirm({ e: e, orderAdd: orderAdd, price: price }) }}>
+          <Button sx={{ color: "#FFFFFF" }} color="info" variant='contained' onClick={(e) => { reserve_confirm({ e: e, orderAdd: orderAdd, price: price }) }}>
             確定預約/結帳
           </Button>
         </React.Fragment>)
@@ -386,8 +386,8 @@ export default function Reserve() {
 
   return (
     <React.Fragment>
-      <Box className="container mx-auto">
-        <Box className="mt-40 mb-40 border rounded-lg">
+      <Box className="container mx-auto pt-20 pb-20 ">
+        <Box className="rounded-lg bg-white">
           <Box>
             <Tabs
               sx={{
@@ -1107,6 +1107,7 @@ const GoTabPanel = forwardRef((props, ref) => {
             </Grid>
             <Box className="flex justify-end">
               <WebTextIconButton3
+                sx={{ color: "#FFFFFF" }}
                 size={"medium"}
                 color={"secondary"}
                 text={"下一步"}
@@ -1821,6 +1822,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
             </Grid>
             <Box className="flex justify-end">
               <WebTextIconButton3
+                sx={{ color: "#FFFFFF" }}
                 size={"medium"}
                 color={"secondary"}
                 text={"下一步"}
@@ -1847,71 +1849,72 @@ const DialogsInner = forwardRef((props, ref) => {
       <React.Fragment>
         <Grid container spacing={2} className="p-2.5">
           <Grid item xs={12} md={6} lg={6}>
-            <Box className="flex items-center border-b pb-2.5 gap-2">
+            <Box className="flex items-center pb-2.5 gap-2">
               <LocationOnOutlined color={"secondary"} />
               <Typography color="secondary" fontWeight="bold">上車地點</Typography>
             </Box>
-            <Box className="mt-2.5">
+            <Box className="mt-2.5 pl-8">
               <Typography color="info" fontWeight="bold">{orderAdd.city + orderAdd.area + (orderAdd.road && orderAdd.road.includes("路") ? orderAdd.road : orderAdd.road + "路") + (orderAdd.section ? (orderAdd.section.includes("段") ? orderAdd.section : orderAdd.section + "段") : "") + orderAdd.address}</Typography>
             </Box>
           </Grid>
           <Grid item xs={12} md={6} lg={6}>
-            <Box className="flex items-center border-b pb-2.5 gap-2">
+            <Box className="flex items-center pb-2.5 gap-2">
               <LocationOn color={"secondary"} />
               <Typography color="secondary" fontWeight="bold">下車地點</Typography>
             </Box>
-            <Box className="mt-2.5">
+            <Box className="mt-2.5 pl-8">
               <Typography color="info" fontWeight="bold">{orderAdd.airport + orderAdd.terminal}</Typography>
             </Box>
           </Grid>
+          <Grid item xs={12} className="border-b ml-4" />
           <Grid item xs={12} md={6} lg={6}>
-            <Box className="flex items-center border-b pb-2.5 gap-2">
+            <Box className="flex items-center pb-2.5 gap-2">
               <CalendarMonth color={"secondary"} />
               <Typography color="secondary" fontWeight="bold">預約乘車日期及時間</Typography>
             </Box>
             <Grid container className="mt-2.5 space-y-2.5">
               <Grid item xs={12}>
                 <Box className="flex gap-2">
-                  <FlightTakeoffIcon color={"info"} />
-                  <Typography color="info" fontWeight="bold">{orderAdd.flght_number}</Typography>
+                  <FlightTakeoffIcon color={"black"} />
+                  <Typography color="info" fontWeight="bold">{orderAdd.flght_number} 航班</Typography>
                 </Box>
               </Grid>
               <Grid item xs={6}>
                 <Box className="flex gap-2">
-                  <CalendarMonth color={"info"} />
+                  <CalendarMonth color={"black"} />
                   <Typography color="info" fontWeight="bold">{date_travel}</Typography>
                 </Box>
               </Grid>
               <Grid item xs={6}>
                 <Box className="flex gap-2">
-                  <AccessTime color={"info"} />
+                  <AccessTime color={"black"} />
                   <Typography color="info" fontWeight="bold">{orderAdd.time_travel}</Typography>
                 </Box>
               </Grid>
             </Grid>
           </Grid>
           <Grid item xs={12} md={6} lg={6}>
-            <Box className="flex items-center border-b pb-2.5 gap-2">
+            <Box className="flex items-center pb-2.5 gap-2">
               <DirectionsCar color={"secondary"} />
               <Typography color="secondary" fontWeight="bold">車型/人數及行李</Typography>
             </Box>
             <Grid container className="mt-2.5 gap-2">
               <Grid item xs={12}>
                 <Box className="flex gap-2">
-                  <DirectionsCar color={"info"} />
+                  <DirectionsCar color={"black"} />
                   <Typography color="info" fontWeight="bold">{car_model}</Typography>
                 </Box>
               </Grid>
               <Grid item xs={12}>
                 <Box className="flex gap-2">
-                  <PeopleAltOutlined color={"info"} />
-                  <Typography color="info" fontWeight="bold">{orderAdd.number_passenger + "位"}</Typography>
+                  <PeopleAltOutlined color={"black"} />
+                  <Typography color="info" fontWeight="bold">{orderAdd.number_passenger + "位乘客"}</Typography>
                 </Box>
               </Grid>
               <Grid item xs={12}>
                 <Box className="flex gap-2">
-                  <Backpack color={"info"} />
-                  <Typography color="info" fontWeight="bold">{orderAdd.number_bags + "件"}</Typography>
+                  <Backpack color={"black"} />
+                  <Typography color="info" fontWeight="bold">{orderAdd.number_bags + "件行李"}</Typography>
                 </Box>
               </Grid>
             </Grid>
@@ -1919,15 +1922,18 @@ const DialogsInner = forwardRef((props, ref) => {
           <Grid item xs={12} md={6} lg={6}>
             <Box className="flex items-center border-b pb-2.5 gap-2">
               <Add color={"secondary"} />
-              <Typography color="secondary" fontWeight="bold">加價服務</Typography>
+              <Typography color="secondary" fontWeight="bold">加價服務請於【結帳】時加購</Typography>
             </Box>
             <Box>
-              <FormGroup>
+              {/* <FormGroup>
                 <FormControlLabel
                   control={<Checkbox name="signboard" checked={extra} disabled />}
                   label="兒童座椅及增高墊 (+$200)"
                 />
-              </FormGroup>
+              </FormGroup> */}
+              <Box className="mt-2.5 pl-8 gap-2">
+                <Typography color="info" fontWeight="bold">兒童座椅及增高墊 (+$200)</Typography>
+              </Box>
               <Grid container>
                 {extra ?
                   options.extraOptions.filter(filterEle => filterEle.type === "合併").map((mapEle, index) => {
@@ -1947,12 +1953,15 @@ const DialogsInner = forwardRef((props, ref) => {
                   })
                   : null}
               </Grid>
-              <FormGroup>
+              {/* <FormGroup>
                 <FormControlLabel
                   control={<Checkbox name="other" checked={other} disabled />}
                   label="其它服務"
                 />
-              </FormGroup>
+              </FormGroup> */}
+              <Box className="mt-2.5 pl-8 gap-2">
+                <Typography color="info" fontWeight="bold">其它服務</Typography>
+              </Box>
               <Grid container>
                 {other ?
                   options.extraOptions.filter(filterEle => filterEle.type === "其它").map((mapEle, index) => {
@@ -1979,7 +1988,7 @@ const DialogsInner = forwardRef((props, ref) => {
               <EditNote color={"secondary"} />
               <Typography color="secondary" fontWeight="bold">基本資料</Typography>
             </Box>
-            <Grid container className="mt-2.5 gap-2">
+            <Grid container className="mt-2.5 pl-8 gap-2">
               <Grid item xs={12}>
                 <Typography color="info" fontWeight="bold">{`訂購人姓名: ${orderAdd.name_purchaser}`}</Typography>
               </Grid>
@@ -2018,7 +2027,7 @@ const DialogsInner = forwardRef((props, ref) => {
       <React.Fragment>
         <Grid container spacing={2} className="p-2.5">
           <Grid item xs={12} md={6} lg={6}>
-            <Box className="flex items-center border-b pb-2.5 gap-2">
+            <Box className="flex items-center pb-2.5 gap-2">
               <LocationOnOutlined color={"secondary"} />
               <Typography color="secondary" fontWeight="bold">上車地點</Typography>
             </Box>
@@ -2027,7 +2036,7 @@ const DialogsInner = forwardRef((props, ref) => {
             </Box>
           </Grid>
           <Grid item xs={12} md={6} lg={6}>
-            <Box className="flex items-center border-b pb-2.5 gap-2">
+            <Box className="flex items-center pb-2.5 gap-2">
               <LocationOn color={"secondary"} />
               <Typography color="secondary" fontWeight="bold">下車地點</Typography>
             </Box>
@@ -2035,54 +2044,55 @@ const DialogsInner = forwardRef((props, ref) => {
               <Typography color="info" fontWeight="bold">{orderAdd.city + orderAdd.area + (orderAdd.road && orderAdd.road.includes("路") ? orderAdd.road : orderAdd.road + "路") + (orderAdd.section ? (orderAdd.section.includes("段") ? orderAdd.section : orderAdd.section + "段") : "") + orderAdd.address}</Typography>
             </Box>
           </Grid>
+          <Grid item xs={12} className="border-b ml-4" />
           <Grid item xs={12} md={6} lg={6}>
-            <Box className="flex items-center border-b pb-2.5 gap-2">
+            <Box className="flex items-center pb-2.5 gap-2">
               <CalendarMonth color={"secondary"} />
               <Typography color="secondary" fontWeight="bold">預約乘車日期及時間</Typography>
             </Box>
             <Grid container className="mt-2.5 space-y-2.5">
               <Grid item xs={12}>
                 <Box className="flex gap-2">
-                  <FlightLandIcon color={"info"} />
-                  <Typography color="info" fontWeight="bold">{orderAdd.flght_number}</Typography>
+                  <FlightLandIcon color={"black"} />
+                  <Typography color="info" fontWeight="bold">{orderAdd.flght_number} 航班</Typography>
                 </Box>
               </Grid>
               <Grid item xs={6}>
                 <Box className="flex gap-2">
-                  <CalendarMonth color={"info"} />
+                  <CalendarMonth color={"black"} />
                   <Typography color="info" fontWeight="bold">{date_travel}</Typography>
                 </Box>
               </Grid>
               <Grid item xs={6}>
                 <Box className="flex gap-2">
-                  <AccessTime color={"info"} />
+                  <AccessTime color={"black"} />
                   <Typography color="info" fontWeight="bold">{orderAdd.time_travel}</Typography>
                 </Box>
               </Grid>
             </Grid>
           </Grid>
           <Grid item xs={12} md={6} lg={6}>
-            <Box className="flex items-center border-b pb-2.5 gap-2">
+            <Box className="flex items-center pb-2.5 gap-2">
               <DirectionsCar color={"secondary"} />
               <Typography color="secondary" fontWeight="bold">車型/人數及行李</Typography>
             </Box>
             <Grid container className="mt-2.5 gap-2">
               <Grid item xs={12}>
                 <Box className="flex gap-2">
-                  <DirectionsCar color={"info"} />
+                  <DirectionsCar color={"black"} />
                   <Typography color="info" fontWeight="bold">{car_model}</Typography>
                 </Box>
               </Grid>
               <Grid item xs={12}>
                 <Box className="flex gap-2">
-                  <PeopleAltOutlined color={"info"} />
-                  <Typography color="info" fontWeight="bold">{orderAdd.number_passenger + "位"}</Typography>
+                  <PeopleAltOutlined color={"black"} />
+                  <Typography color="info" fontWeight="bold">{orderAdd.number_passenger + "位乘客"}</Typography>
                 </Box>
               </Grid>
               <Grid item xs={12}>
                 <Box className="flex gap-2">
-                  <Backpack color={"info"} />
-                  <Typography color="info" fontWeight="bold">{orderAdd.number_bags + "件"}</Typography>
+                  <Backpack color={"black"} />
+                  <Typography color="info" fontWeight="bold">{orderAdd.number_bags + "件行李"}</Typography>
                 </Box>
               </Grid>
             </Grid>
@@ -2090,15 +2100,18 @@ const DialogsInner = forwardRef((props, ref) => {
           <Grid item xs={12} md={6} lg={6}>
             <Box className="flex items-center border-b pb-2.5 gap-2">
               <Add color={"secondary"} />
-              <Typography color="secondary" fontWeight="bold">加價服務</Typography>
+              <Typography color="secondary" fontWeight="bold">加價服務請於【結帳】時加購</Typography>
             </Box>
             <Box>
-              <FormGroup>
+              {/* <FormGroup>
                 <FormControlLabel
                   control={<Checkbox name="signboard" checked={signboard} disabled />}
                   label="接機舉牌 (+$200)"
                 />
-              </FormGroup>
+              </FormGroup> */}
+              <Box className="mt-2.5 pl-8 gap-2">
+                <Typography color="info" fontWeight="bold">接機舉牌 (+$200)</Typography>
+              </Box>
               {signboard ?
                 <Grid container>
                   <Grid item xs={12} >
@@ -2123,12 +2136,15 @@ const DialogsInner = forwardRef((props, ref) => {
                   </Grid>
                 </Grid>
                 : null}
-              <FormGroup>
+              {/* <FormGroup>
                 <FormControlLabel
                   control={<Checkbox name="signboard" checked={extra} disabled />}
                   label="兒童座椅及增高墊 (+$200)"
                 />
-              </FormGroup>
+              </FormGroup> */}
+              <Box className="mt-2.5 pl-8 gap-2">
+                <Typography color="info" fontWeight="bold">兒童座椅及增高墊 (+$200)</Typography>
+              </Box>
               <Grid container>
                 {extra ?
                   options.extraOptions.filter(filterEle => filterEle.type === "合併").map((mapEle, index) => {
@@ -2148,12 +2164,15 @@ const DialogsInner = forwardRef((props, ref) => {
                   })
                   : null}
               </Grid>
-              <FormGroup>
+              {/* <FormGroup>
                 <FormControlLabel
                   control={<Checkbox name="other" checked={other} disabled />}
                   label="其它服務"
                 />
-              </FormGroup>
+              </FormGroup> */}
+              <Box className="mt-2.5 pl-8 gap-2">
+                <Typography color="info" fontWeight="bold">其它服務</Typography>
+              </Box>
               <Grid container>
                 {other ?
                   options.extraOptions.filter(filterEle => filterEle.type === "其它").map((mapEle, index) => {
@@ -2180,7 +2199,7 @@ const DialogsInner = forwardRef((props, ref) => {
               <EditNote color={"secondary"} />
               <Typography color="secondary" fontWeight="bold">基本資料</Typography>
             </Box>
-            <Grid container className="mt-2.5 gap-2">
+            <Grid container className="mt-2.5 pl-8 gap-2">
               <Grid item xs={12}>
                 <Typography color="info" fontWeight="bold">{`訂購人姓名: ${orderAdd.name_purchaser}`}</Typography>
               </Grid>

@@ -5,6 +5,7 @@
     [upd_time]          DATETIME       NULL,
     [o_id]              VARCHAR (20)   NOT NULL,
     [visible]           VARCHAR (2)    CONSTRAINT [DF_ATS_OrderMaster_visible] DEFAULT ('Y') NULL,
+    [order_status]      VARCHAR (6)    NULL,
     [type]              VARCHAR (4)    NULL,
     [city]              NVARCHAR (255) NULL,
     [area]              NVARCHAR (255) NULL,
@@ -170,3 +171,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'ATS_OrderMaster',
     @level2type = NULL,
     @level2name = NULL
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'訂單狀態',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'ATS_OrderMaster',
+    @level2type = N'COLUMN',
+    @level2name = N'order_status'

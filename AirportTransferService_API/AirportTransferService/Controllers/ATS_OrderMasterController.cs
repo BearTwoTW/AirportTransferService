@@ -43,8 +43,8 @@ namespace AirportTransferService.Controllers
         public ResultObject<object> ATS_OrderMasterCreate(ATS_OrderMasterCreate data)
         {
             // 檢查 路 & 段
-            data.road = CheckRoadFormat(data.road!);
-            data.section = CheckSectionFormat(data.section!);
+            if (data.road != null && !data.road.Equals(Appsettings.api_string_param_no_pass)) data.road = Tool.ConvertAddress(Tool.CheckRoadFormat(data.road!));
+            if (data.section != null && !data.section.Equals(Appsettings.api_string_param_no_pass)) data.section = Tool.ConvertAddress(Tool.CheckSectionFormat(data.section!));
             // 驗證訂單資料
             ResultObject<ValidateOrderResult> validateResult = ValidateOrder(data);
             if (!validateResult.success) return new ResultObject<object> { success = validateResult.success, message = validateResult.message, data = validateResult.data };
@@ -76,6 +76,7 @@ namespace AirportTransferService.Controllers
                         cre_userid: jwtObject.user_id,
                         cre_time: cre_time,
                         visible: data.visible,
+                        order_status: OrderStatus.處理中.ToString(),
                         type: data.type,
                         city: data.city,
                         area: data.area,
@@ -156,9 +157,17 @@ namespace AirportTransferService.Controllers
         [HttpPost]
         public ResultObject<object> ATS_OrderMasterUpdate(ATS_OrderMasterUpdate data)
         {
+            #region 檢查狀態
+            if (!data.order_status.Equals(Appsettings.api_string_param_no_pass))
+            {
+                if (!Enum.TryParse(data.order_status, out OrderStatus _)) return new ResultObject<object> { success = false, message = "訂單狀態錯誤" };
+            }
+            #endregion
+            if (data.visible != null && data.visible.Equals("N")) data.order_status = OrderStatus.已取消.ToString();
+            if (data.visible != null && data.visible.Equals("Y")) data.order_status = OrderStatus.處理中.ToString();
             // 檢查 路 & 段
-            data.road = CheckRoadFormat(data.road!);
-            data.section = CheckSectionFormat(data.section!);
+            if (data.road != null && !data.road.Equals(Appsettings.api_string_param_no_pass)) data.road = Tool.ConvertAddress(Tool.CheckRoadFormat(data.road!));
+            if (data.section != null && !data.section.Equals(Appsettings.api_string_param_no_pass)) data.section = Tool.ConvertAddress(Tool.CheckSectionFormat(data.section!));
             // 查自己
             SearchATS_OrderMasterResult? search_own_result = _ATS_OrderMaster.SearchATS_OrderMaster(
                 new SearchATS_OrderMasterParam(o_id: data.o_id),
@@ -309,6 +318,7 @@ namespace AirportTransferService.Controllers
                     upd_time: now_time,
                     o_id: data.o_id,
                     visible: data.visible,
+                    order_status: data.order_status,
                     type: data.type,
                     city: data.city,
                     area: data.area,
@@ -354,6 +364,7 @@ namespace AirportTransferService.Controllers
                     cre_time_end: data.cre_date_end.HasValue ? data.cre_date_end.Value.ToDateTime(new TimeOnly(23, 59, 59)) : null,
                     o_id: data.o_id,
                     visible: data.visible,
+                    order_status: data.order_status,
                     type: data.type,
                     city: data.city,
                     area: data.area,
@@ -376,7 +387,7 @@ namespace AirportTransferService.Controllers
                     email_passenger: data.email_passenger,
                     page: data.page,
                     num_per_page: data.num_per_page),
-                ["o_id", "visible", "type", "city", "area", "road", "section", "address", "airport", "terminal", "flght_number", "date_travel", "time_travel", "number_passenger", "number_bags", "cms_id", "signboard_title", "signboard_content", "name_purchaser", "phone_purchaser", "email_purchaser", "name_passenger", "phone_passenger", "email_passenger", "price", "link"], [],
+                ["o_id", "visible", "order_status", "type", "city", "area", "road", "section", "address", "airport", "terminal", "flght_number", "date_travel", "time_travel", "number_passenger", "number_bags", "cms_id", "signboard_title", "signboard_content", "name_purchaser", "phone_purchaser", "email_purchaser", "name_passenger", "phone_passenger", "email_passenger", "price", "link"], [],
                 out int page_count);
             List<SearchATS_CarModelSettingsResult> resultSearchATS_CarModelSettings = _ATS_CarModelSettings.SearchATS_CarModelSettings(
                 new SearchATS_CarModelSettingsParam(cms_id: data.cms_id),
@@ -407,6 +418,7 @@ namespace AirportTransferService.Controllers
                 {
                     o_id = result.o_id,
                     visible = result.visible,
+                    order_status = result.order_status,
                     type = result.type,
                     city = result.city,
                     area = result.area,
@@ -440,6 +452,7 @@ namespace AirportTransferService.Controllers
             {
                 DataTable dt_excel = new();
                 dt_excel.Columns.Add("訂單編號", typeof(string));
+                dt_excel.Columns.Add("訂單狀態", typeof(string));
                 dt_excel.Columns.Add("類別(接機/送機)", typeof(string));
                 dt_excel.Columns.Add("城市", typeof(string));
                 dt_excel.Columns.Add("區域", typeof(string));
@@ -469,6 +482,7 @@ namespace AirportTransferService.Controllers
                 {
                     DataRow dr_excel = dt_excel.NewRow();
                     dr_excel["訂單編號"] = obj.o_id;
+                    dr_excel["訂單狀態"] = obj.order_status;
                     dr_excel["類別(接機/送機)"] = obj.type;
                     dr_excel["城市"] = obj.city;
                     dr_excel["區域"] = obj.area;
@@ -696,34 +710,6 @@ namespace AirportTransferService.Controllers
             #endregion
 
             return new ResultObject<ValidateOrderResult> { success = true, data = new ValidateOrderResult { exists_es_ids = exists_es_ids, price = price } };
-        }
-
-        /// <summary>
-        /// 檢查路名格式
-        /// </summary>
-        /// <param name="road"></param>
-        /// <returns></returns>
-        [NonAction]
-        private static string CheckRoadFormat(string road)
-        {
-            if (string.IsNullOrEmpty(road)
-                || road == Appsettings.api_string_param_no_pass
-                || road.Contains('路', StringComparison.CurrentCulture)) return road;
-            return $"{road}路";
-        }
-
-        /// <summary>
-        /// 檢查段名格式
-        /// </summary>
-        /// <param name="section"></param>
-        /// <returns></returns>
-        [NonAction]
-        private static string CheckSectionFormat(string section)
-        {
-            if (string.IsNullOrEmpty(section)
-                || section == Appsettings.api_string_param_no_pass
-                || section.Contains('段', StringComparison.CurrentCulture)) return section;
-            return $"{section}段";
         }
 
         /// <summary>

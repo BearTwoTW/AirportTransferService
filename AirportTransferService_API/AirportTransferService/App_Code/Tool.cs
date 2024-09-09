@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 
 using ClosedXML.Excel;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AirportTransferService.App_Code
 {
@@ -818,6 +819,100 @@ namespace AirportTransferService.App_Code
             for (int i = 0; i < fileArray.Length; i++) if (i >= 10) File.Delete(filePath + fileArray[i].Name);
 
             return newFilePath.Replace(Tool.GetParentDirectoryPath(AppDomain.CurrentDomain.SetupInformation.ApplicationBase!, 2) + @"\", "");
+        }
+
+        /// <summary>
+        /// 檢查路名格式
+        /// </summary>
+        /// <param name="road"></param>
+        /// <returns></returns>
+        [NonAction]
+        public static string CheckRoadFormat(string road)
+        {
+            if (string.IsNullOrEmpty(road)
+                || road == Appsettings.api_string_param_no_pass
+                || road.Contains('路', StringComparison.CurrentCulture)) return road;
+            return $"{road}路";
+        }
+
+        /// <summary>
+        /// 檢查段名格式
+        /// </summary>
+        /// <param name="section"></param>
+        /// <returns></returns>
+        [NonAction]
+        public static string CheckSectionFormat(string section)
+        {
+            if (string.IsNullOrEmpty(section)
+                || section == Appsettings.api_string_param_no_pass
+                || section.Contains('段', StringComparison.CurrentCulture)) return section;
+            return $"{section}段";
+        }
+
+        /// <summary>
+        /// 數字轉中文
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        public static string ConvertNumberToChinese(int number)
+        {
+            string[] ChineseDigits = { "零", "一", "二", "三", "四", "五", "六", "七", "八", "九" };
+            string[] ChineseUnits = { "", "十", "百", "千", "萬", "十萬", "百萬", "千萬", "億", "十億" };
+
+            if (number == 0) return "零";
+
+            string result = "";
+            int unitPos = 0; // 單位位置
+            bool needZero = false; // 用來判斷是否需要“零”
+
+            while (number > 0)
+            {
+                int digit = number % 10;
+                if (digit != 0)
+                {
+                    result = ChineseDigits[digit] + ChineseUnits[unitPos] + result;
+                    needZero = true;
+                }
+                else
+                {
+                    if (needZero)
+                    {
+                        result = ChineseDigits[digit] + result;
+                        needZero = false;
+                    }
+                }
+                number /= 10;
+                unitPos++;
+            }
+
+            // 處理 "一十" 這種情況
+            if (result.StartsWith("一十"))
+            {
+                result = result.Substring(1);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 轉換地址中的數字為中文
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
+        public static string ConvertAddress(string address)
+        {
+            // 使用正則表達式找到連續的數字
+            string pattern = @"\d+";
+            MatchCollection matches = Regex.Matches(address, pattern);
+
+            foreach (Match match in matches)
+            {
+                int number = int.Parse(match.Value);
+                string chineseNumber = ConvertNumberToChinese(number);
+                address = address.Replace(match.Value, chineseNumber);
+            }
+
+            return address;
         }
     }
 }

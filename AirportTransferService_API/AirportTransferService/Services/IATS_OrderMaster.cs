@@ -133,6 +133,7 @@
                     upd_time = dt.Columns.Contains("upd_time") ? dr.Field<DateTime?>("upd_time") : null,
                     o_id = dt.Columns.Contains("o_id") ? dr["o_id"].ToString() : null,
                     visible = dt.Columns.Contains("visible") ? dr["visible"].ToString() : null,
+                    order_status = dt.Columns.Contains("order_status") ? dr["order_status"].ToString() : null,
                     type = dt.Columns.Contains("type") ? dr["type"].ToString() : null,
                     city = dt.Columns.Contains("city") ? dr["city"].ToString() : null,
                     area = dt.Columns.Contains("area") ? dr["area"].ToString() : null,

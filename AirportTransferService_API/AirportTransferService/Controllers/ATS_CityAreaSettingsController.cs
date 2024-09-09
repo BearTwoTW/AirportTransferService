@@ -31,6 +31,8 @@ namespace AirportTransferService.Controllers
         public ResultObject<string> ATS_CityAreaSettingsCreate(ATS_CityAreaSettingsCreate data)
         {
             DateTime cre_time = DateTime.Now;
+            if (data.road != null && !data.road.Equals(Appsettings.api_string_param_no_pass)) data.road = Tool.ConvertAddress(Tool.CheckRoadFormat(data.road!));
+            if (data.section != null && !data.section.Equals(Appsettings.api_string_param_no_pass)) data.section = Tool.ConvertAddress(Tool.CheckSectionFormat(data.section!));
 
             List<SearchATS_CityAreaSettingsResult> resultCityAreaSettings = _ATS_CityAreaSettings.SearchATS_CityAreaSettings(
                 new SearchATS_CityAreaSettingsParam(),
@@ -68,6 +70,8 @@ namespace AirportTransferService.Controllers
         public ResultObject<string> ATS_CityAreaSettingsUpdate(ATS_CityAreaSettingsUpdate data)
         {
             DateTime upd_time = DateTime.Now;
+            if (data.road != null && !data.road.Equals(Appsettings.api_string_param_no_pass)) data.road = Tool.ConvertAddress(Tool.CheckRoadFormat(data.road!));
+            if (data.section != null && !data.section.Equals(Appsettings.api_string_param_no_pass)) data.section = Tool.ConvertAddress(Tool.CheckSectionFormat(data.section!));
 
             //查自己
             SearchATS_CityAreaSettingsResult? search_own_result = _ATS_CityAreaSettings.SearchATS_CityAreaSettings(

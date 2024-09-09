@@ -444,18 +444,21 @@ export default function Fare() {
         if (name === "city") {
             setPageSearch(prev => ({
                 ...prev,
+                page: 1,
                 area: null,
                 [name]: val,
             }));
         } else if (name === "airport") {
             setPageSearch(prev => ({
                 ...prev,
+                page: 1,
                 terminal: null,
                 [name]: val,
             }));
         } else {
             setPageSearch(prev => ({
                 ...prev,
+                page: 1,
                 [name]: val,
             }));
         }

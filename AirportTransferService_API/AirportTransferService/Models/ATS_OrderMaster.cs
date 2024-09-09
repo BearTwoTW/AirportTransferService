@@ -10,6 +10,7 @@ namespace AirportTransferService.Models
     /// <param name="upd_userid"></param>
     /// <param name="upd_time"></param>
     /// <param name="o_id"></param>
+    /// <param name="order_status"></param>
     /// <param name="visible"></param>
     /// <param name="type"></param>
     /// <param name="city"></param>
@@ -41,6 +42,7 @@ namespace AirportTransferService.Models
         string? upd_userid = null,
         DateTime? upd_time = null,
         string? o_id = null,
+        string? order_status = null,
         string? visible = null,
         string? type = null,
         string? city = null,
@@ -97,6 +99,11 @@ namespace AirportTransferService.Models
         /// visible
         /// </summary>
         public string? visible { get; } = visible;
+
+        /// <summary>
+        /// order_status
+        /// </summary>
+        public string? order_status { get; } = order_status;
 
         /// <summary>
         /// type
@@ -225,6 +232,7 @@ namespace AirportTransferService.Models
     /// <param name="cre_userid"></param>
     /// <param name="cre_time"></param>
     /// <param name="visible"></param>
+    /// <param name="order_status"></param>
     /// <param name="type"></param>
     /// <param name="city"></param>
     /// <param name="area"></param>
@@ -253,6 +261,7 @@ namespace AirportTransferService.Models
         string? cre_userid,
         DateTime? cre_time,
         string? visible,
+        string? order_status,
         string? type,
         string? city,
         string? area,
@@ -280,6 +289,7 @@ namespace AirportTransferService.Models
             cre_userid: cre_userid,
             cre_time: cre_time,
             visible: visible,
+            order_status: order_status,
             type: type,
             city: city,
             area: area,
@@ -318,6 +328,7 @@ namespace AirportTransferService.Models
     /// <param name="time_travel"></param>
     /// <param name="cre_userid"></param>
     /// <param name="visible"></param>
+    /// <param name="order_status"></param>
     /// <param name="type"></param>
     /// <param name="city"></param>
     /// <param name="area"></param>
@@ -349,6 +360,7 @@ namespace AirportTransferService.Models
         TimeOnly? time_travel,
         string? cre_userid = api_string_param_no_pass,
         string? visible = api_string_param_no_pass,
+        string? order_status = api_string_param_no_pass,
         string? type = api_string_param_no_pass,
         string? city = api_string_param_no_pass,
         string? area = api_string_param_no_pass,
@@ -379,6 +391,7 @@ namespace AirportTransferService.Models
             date_travel: date_travel,
             time_travel: time_travel,
             visible: visible,
+            order_status: order_status,
             type: type,
             city: city,
             area: area,
@@ -411,6 +424,7 @@ namespace AirportTransferService.Models
     /// <param name="cre_time_end"></param>
     /// <param name="o_id"></param>
     /// <param name="visible"></param>
+    /// <param name="order_status"></param>
     /// <param name="type"></param>
     /// <param name="city"></param>
     /// <param name="area"></param>
@@ -438,6 +452,7 @@ namespace AirportTransferService.Models
         DateTime? cre_time_end = null,
         string? o_id = null,
         string? visible = null,
+        string? order_status = null,
         string? type = null,
         string? city = null,
         string? area = null,
@@ -484,6 +499,13 @@ namespace AirportTransferService.Models
         /// </summary>
         [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_OrderMaster.visible")]
         public string? visible { get; } = visible;
+
+        /// <summary>
+        /// order_status
+        /// </summary>
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_OrderMaster.order_status")]
+        public string? order_status { get; } = order_status;
+
 
         /// <summary>
         /// type
@@ -658,6 +680,12 @@ namespace AirportTransferService.Models
         public string? visible { get; set; }
 
         /// <summary>
+        /// order_status
+        /// </summary>
+        [SQLSource("ATS_OrderMaster.order_status")]
+        public string? order_status { get; set; }
+
+        /// <summary>
         /// type
         /// </summary>
         [SQLSource("ATS_OrderMaster.type")]
@@ -819,6 +847,7 @@ namespace AirportTransferService.Models
                 upd_time == searchATS_OrderMasterResult.upd_time &&
                 o_id == searchATS_OrderMasterResult.o_id &&
                 visible == searchATS_OrderMasterResult.visible &&
+                order_status == searchATS_OrderMasterResult.order_status &&
                 type == searchATS_OrderMasterResult.type &&
                 city == searchATS_OrderMasterResult.city &&
                 area == searchATS_OrderMasterResult.area &&
@@ -1073,6 +1102,12 @@ namespace AirportTransferService.Models
         public string? visible { get; set; } = api_string_param_no_pass;
 
         /// <summary>
+        /// 訂單狀態
+        /// </summary>
+        [Display(Name = "訂單狀態")]
+        public string? order_status { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
         /// 類別(接機/送機)
         /// </summary>
         [Display(Name = "類別(接機/送機)")]
@@ -1259,6 +1294,12 @@ namespace AirportTransferService.Models
         public string? visible { get; set; } = "N";
 
         /// <summary>
+        /// 訂單狀態
+        /// </summary>
+        [Display(Name = "訂單狀態")]
+        public string? order_status { get; set; } = "";
+
+        /// <summary>
         /// 類別(接機/送機)
         /// </summary>
         [Display(Name = "類別(接機/送機)")]
@@ -1395,6 +1436,12 @@ namespace AirportTransferService.Models
         /// </summary>
         [Display(Name = "是否可見")]
         public string? visible { get; set; }
+
+        /// <summary>
+        /// 訂單狀態
+        /// </summary>
+        [Display(Name = "訂單狀態")]
+        public string? order_status { get; set; }
 
         /// <summary>
         /// 類別(接機/送機)

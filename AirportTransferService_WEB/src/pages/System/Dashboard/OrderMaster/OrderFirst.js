@@ -577,20 +577,21 @@ export default function Order() {
         };
 
         // 檢查下拉選單的錯誤狀態
-        const mergeError =
+        const extraError =
             checkboxState.extra && data.es_ids?.some((item) => item.extraType === "合併" && !item.count);
+        console.log(extraError)
 
         // 檢查下拉選單的錯誤狀態 - 其它
         const otherError =
             checkboxState.other && data.es_ids?.some((item) => item.extraType === "其它" && !item.count);
 
         // 檢查是否有任何必填欄位未填
-        const hasError = Object.values(requiredFields).some(Boolean) || mergeError || otherError;
+        const hasError = Object.values(requiredFields).some(Boolean) || extraError || otherError;
 
         if (hasError) {
             setEditFieldCheck({
                 ...requiredFields,
-                es_ids_merge: mergeError,
+                es_ids_merge: extraError,
                 es_ids_other: otherError,
             });
         } else {
@@ -1018,37 +1019,6 @@ const DialogsInner = forwardRef((props, ref) => {
         otherData: type === "edit" ? (getEditData.es_ids ? getEditData.es_ids.filter(item => item.es_type === "其它") : []) : [],
     });
 
-    // useEffect(() => {
-    //     if (type === "edit") {
-    //         let arr = [];
-    //         if (filteredData) {
-    //             arr.push(
-    //                 {
-    //                     es_id: "00001",
-    //                     count: "1",
-    //                 }
-    //             );
-    //         }
-    //         if (isNotEmpty) {
-    //             getEditData.es_ids.forEach(item => {
-    //                 arr.push(
-    //                     {
-    //                         es_id: item.es_id,
-    //                         count: item.count,
-    //                     }
-    //                 );
-    //             });
-    //         }
-    //         setEditData(prevData => ({
-    //             ...prevData,
-    //             updData: {
-    //                 ...prevData.updData,
-    //                 es_ids: arr,
-    //             }
-    //         }));
-    //     }
-    // }, [getEditData]);
-
     const editInitCheckState = {
         type: false,
         city: false,
@@ -1138,7 +1108,6 @@ const DialogsInner = forwardRef((props, ref) => {
     // 編輯加價勾選
     const handleCheckboxChangeEdit = (event) => {
         const { name, checked } = event.target;
-        console.log('1138,editData', editData);
         // let data = {
         //     ...editData.dtlData,
         //     ...editData.updData
@@ -1147,12 +1116,11 @@ const DialogsInner = forwardRef((props, ref) => {
         let updData = editData.updData;
         let arr = updData ? updData.es_ids ? updData.es_ids : [] : [];
         let signboardData = editData.signboardData;
-        let extraData = editData.extraData;
-        let otherData = editData.otherData;
+        let extraData = editData.extraData.es_ids ? editData.extraData.es_ids : [];
+        let otherData = editData.otherData.es_ids ? editData.otherData.es_ids : [];
 
         if (name === "signboard") { // 舉牌
             // 如果勾選, 就把舉牌加入es_ids欄位
-            console.log("1148,arr: ", arr);
             if (checked) {
                 // 如果本來就有這個加價項目，還能把checkbox打勾，就是已經經過一次取消勾選了
                 if (signboardData.some(item => item.es_id === options.extraOptions.find(item => item.type === "舉牌").es_id)) {
@@ -1203,7 +1171,7 @@ const DialogsInner = forwardRef((props, ref) => {
                     }));
                 }
                 else arr = arr.filter(item => item.es_id !== options.extraOptions.find(item => item.type === "舉牌").es_id);
-                console.log("1205,arr: ", arr);
+
                 setEditData(prev => ({
                     ...prev,
                     updData: {
@@ -1564,11 +1532,25 @@ const DialogsInner = forwardRef((props, ref) => {
                     ...prev,
                     es_ids_merge: false,
                 }));
+                setEditData(prev => ({
+                    ...prev,
+                    extraData: {
+                        ...prev.extraData,
+                        [name]: arr.length > 0 ? arr : null,
+                    },
+                }))
             } else {
                 setEditFieldCheck(prev => ({
                     ...prev,
                     es_ids_other: false,
                 }));
+                setEditData(prev => ({
+                    ...prev,
+                    otherData: {
+                        ...prev.otherData,
+                        [name]: arr.length > 0 ? arr : null,
+                    },
+                }))
             }
 
             setEditData(prev => ({
@@ -1576,7 +1558,7 @@ const DialogsInner = forwardRef((props, ref) => {
                 updData: {
                     ...prev.updData,
                     [name]: arr.length > 0 ? arr : null,
-                }
+                },
             }))
         } else {
             setEditData(prev => ({
@@ -1880,7 +1862,7 @@ const DialogsInner = forwardRef((props, ref) => {
                             onChangeEvent={(e) => add_HandleSelect(e)}
                         />
                     </Grid>
-                    {/* <Grid item xs={12}>
+                    <Grid item xs={12}>
                         <Typography variant="subtitle1" gutterBottom>加價服務</Typography>
                     </Grid>
                     <Grid container>
@@ -1976,7 +1958,7 @@ const DialogsInner = forwardRef((props, ref) => {
                                 )
                             })
                             : null}
-                    </Grid> */}
+                    </Grid>
                     <Grid item xs={12}>
                         <Typography variant="subtitle1" gutterBottom>基本資料</Typography>
                     </Grid>
@@ -2333,7 +2315,7 @@ const DialogsInner = forwardRef((props, ref) => {
                             onChangeEvent={(e) => edit_HandleSelect(e)}
                         />
                     </Grid>
-                    {/* <Grid item xs={12}>
+                    <Grid item xs={12}>
                         <Typography variant="subtitle1" gutterBottom>加價服務</Typography>
                     </Grid>
                     <Grid container>
@@ -2394,7 +2376,7 @@ const DialogsInner = forwardRef((props, ref) => {
                                             error={editFieldCheck.es_ids_merge}
                                             options={options.extraCount}
                                             optionKey={"name"}
-                                            value={data.extraData ? (data.extraData.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === String(data.extraData.find(item => item.es_id === mapEle.es_id).count)) : null) : null}
+                                            value={data.extraData.es_ids ? (data.extraData.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === String(data.extraData.es_ids.find(item => item.es_id === mapEle.es_id).count)) : null) : null}
                                             onChangeEvent={(e) => edit_HandleSelect(e, mapEle.type)}
                                         />
                                     </Grid>
@@ -2422,14 +2404,14 @@ const DialogsInner = forwardRef((props, ref) => {
                                             error={editFieldCheck.es_ids_other}
                                             options={options.extraCount}
                                             optionKey={"name"}
-                                            value={data.otherData ? (data.otherData.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === String(data.otherData.find(item => item.es_id === mapEle.es_id).count)) : null) : null}
+                                            value={data.otherData.es_ids ? (data.otherData.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === String(data.otherData.es_ids.find(item => item.es_id === mapEle.es_id).count)) : null) : null}
                                             onChangeEvent={(e) => edit_HandleSelect(e, mapEle.type)}
                                         />
                                     </Grid>
                                 )
                             })
                             : null}
-                    </Grid> */}
+                    </Grid>
                     <Grid item xs={12}>
                         <Typography variant="subtitle1" gutterBottom>基本資料</Typography>
                     </Grid>

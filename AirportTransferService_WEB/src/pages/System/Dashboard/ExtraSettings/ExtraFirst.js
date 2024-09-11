@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect, useCallback, forwardRef, useImperat
 import MD5 from 'crypto-js/md5';
 import { useLocation, useNavigate } from "react-router-dom";
 import { CircularLoading } from '../../../../components/CusProgress';
-import { Grid, TableCell, TableRow, Chip, Box, Typography } from '@mui/material';
+import { Grid, TableCell, TableRow, Chip, Box, Typography, FormControlLabel, Switch } from '@mui/material';
 import { HighlightOff, Add, Search, Delete, Edit } from '@mui/icons-material';
 import { CusCard } from '../../../../components/CusCard';
 import { CusInfoTitle } from '../../../../components/CusInfo';
@@ -161,6 +161,21 @@ export default function Extra() {
         }
     };
 
+    /** 編輯是否開放 */
+    const edit_Visible = async ({ id, visible }) => {
+        const { success, message } = await ATS_ExtraSettings.ATS_ExtraSettingsUpdate({
+            es_id: id,
+            visible: visible === "Y" ? "N" : "Y"
+        });
+
+        if (success) searchExtra(pageSearch);
+
+        enqueueSnackbar(message, {
+            variant: success ? "success" : "warning",
+            persist: !success
+        });
+    };
+
     /** [清除]查查查查 */
     const cleanSearch_Click = () => {
         setPageSearch(prevData => ({
@@ -189,6 +204,18 @@ export default function Extra() {
                     key={item.es_id}>
                     <TableCell>{index + 1}</TableCell>
                     {/* <TableCell>{item.type}</TableCell> */}
+                    <TableCell>
+                        <FormControlLabel
+                            onClick={(e) => e.stopPropagation()}
+                            control={
+                                <Switch
+                                    checked={item.visible === "Y" ? true : false}
+                                    color={"success"}
+                                    onChange={() => edit_Visible({ id: item.es_id, visible: item.visible })}
+                                />
+                            }
+                        />
+                    </TableCell>
                     <TableCell>{item.name}</TableCell>
                     <TableCell>{item.price}</TableCell>
                     <TableCell>
@@ -466,6 +493,7 @@ export default function Extra() {
                                                 tableHead={[
                                                     { name: "排序" },
                                                     // { name: "加價類型" },
+                                                    { name: "開放狀態" },
                                                     { name: "加價名稱" },
                                                     { name: "加價金額" },
                                                     { name: "操作" },

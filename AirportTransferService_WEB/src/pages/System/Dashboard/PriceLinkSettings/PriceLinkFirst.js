@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect, useCallback, forwardRef, useImperat
 import MD5 from 'crypto-js/md5';
 import { useLocation, useNavigate } from "react-router-dom";
 import { CircularLoading } from '../../../../components/CusProgress';
-import { Grid, TableCell, TableRow, Chip, Box, Typography } from '@mui/material';
+import { Grid, TableCell, TableRow, Chip, Box, Typography, FormControlLabel, Switch } from '@mui/material';
 import { HighlightOff, Add, Search, Delete, Edit, CloudUpload, CloudDownload } from '@mui/icons-material';
 import { CusCard } from '../../../../components/CusCard';
 import { CusInfoTitle } from '../../../../components/CusInfo';
@@ -158,6 +158,18 @@ export default function PriceLink() {
                     hover
                     key={item.pls_id}>
                     <TableCell>{index + 1}</TableCell>
+                    <TableCell>
+                        <FormControlLabel
+                            onClick={(e) => e.stopPropagation()}
+                            control={
+                                <Switch
+                                    checked={item.visible === "Y" ? true : false}
+                                    color={"success"}
+                                    onChange={() => edit_Visible({ id: item.pls_id, visible: item.visible })}
+                                />
+                            }
+                        />
+                    </TableCell>
                     <TableCell>{item.price}</TableCell>
                     <TableCell>{item.type}</TableCell>
                     <TableCell>{item.link}</TableCell>
@@ -276,6 +288,21 @@ export default function PriceLink() {
                 persist: !success
             });
         }
+    };
+
+    /** 編輯是否開放 */
+    const edit_Visible = async ({ id, visible }) => {
+        const { success, message } = await ATS_PriceLinkSettings.ATS_PriceLinkSettingsUpdate({
+            pls_id: id,
+            visible: visible === "Y" ? "N" : "Y"
+        });
+
+        if (success) searchPriceLink(pageSearch);
+
+        enqueueSnackbar(message, {
+            variant: success ? "success" : "warning",
+            persist: !success
+        });
     };
 
     /**[刪除]價錢連結 */
@@ -507,6 +534,7 @@ export default function PriceLink() {
                                                 onRowsPerPageChange={onRowsPerPageChange}
                                                 tableHead={[
                                                     { name: "排序" },
+                                                    { name: "開放狀態" },
                                                     { name: "價錢" },
                                                     { name: "接/送機" },
                                                     { name: "連結" },

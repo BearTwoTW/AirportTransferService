@@ -56,7 +56,7 @@ export const WebFooter3 = (props) => {
 
   return (
     <React.Fragment>
-      <Box className={"w-full flex bg-primary animate-fadeIn"}>
+      <Box className={"w-full flex bg-[#f1f2f6] animate-fadeIn"}>
         <Box className={"container m-auto py-10"}>
           <Box className="flex justify-between items-center max-md:px-2.5 max-md:flex-col max-md:space-y-5">
             <Box>

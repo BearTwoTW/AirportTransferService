@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect, useCallback, forwardRef, useImperat
 import MD5 from 'crypto-js/md5';
 import { useLocation, useNavigate } from "react-router-dom";
 import { CircularLoading } from '../../../../components/CusProgress';
-import { Grid, TableCell, TableRow, Chip, Box, Typography } from '@mui/material';
+import { Grid, TableCell, TableRow, Chip, Box, Typography, FormControlLabel, Switch } from '@mui/material';
 import { HighlightOff, Add, Search, Delete, Edit } from '@mui/icons-material';
 import { CusCard } from '../../../../components/CusCard';
 import { CusInfoTitle } from '../../../../components/CusInfo';
@@ -157,6 +157,21 @@ export default function CityArea() {
         })
     }
 
+    /** 編輯是否開放 */
+    const edit_Visible = async ({ id, visible }) => {
+        const { success, message } = await ATS_CityAreaSettings.ATS_CityAreaSettingsUpdate({
+            cas_id: id,
+            visible: visible === "Y" ? "N" : "Y"
+        });
+
+        if (success) searchCityArea(pageSearch);
+
+        enqueueSnackbar(message, {
+            variant: success ? "success" : "warning",
+            persist: !success
+        });
+    };
+
     /**
      * 查詢城市區域列表
      */
@@ -224,6 +239,18 @@ export default function CityArea() {
                     hover
                     key={item.cas_id}>
                     <TableCell>{index + 1}</TableCell>
+                    <TableCell>
+                        <FormControlLabel
+                            onClick={(e) => e.stopPropagation()}
+                            control={
+                                <Switch
+                                    checked={item.visible === "Y" ? true : false}
+                                    color={"success"}
+                                    onChange={() => edit_Visible({ id: item.cas_id, visible: item.visible })}
+                                />
+                            }
+                        />
+                    </TableCell>
                     <TableCell>{item.zip}</TableCell>
                     <TableCell>{item.city}</TableCell>
                     <TableCell>{item.area}</TableCell>
@@ -531,6 +558,7 @@ export default function CityArea() {
                                                 onRowsPerPageChange={onRowsPerPageChange}
                                                 tableHead={[
                                                     { name: "排序" },
+                                                    { name: "開放狀態" },
                                                     { name: "區號" },
                                                     { name: "城市" },
                                                     { name: "區域" },

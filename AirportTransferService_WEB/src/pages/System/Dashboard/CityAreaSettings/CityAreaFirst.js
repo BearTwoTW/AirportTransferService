@@ -101,6 +101,7 @@ export default function CityArea() {
                 ...search_set
             }));
 
+            seacrhOptions();
             // 存在search_set就用indexedDB的搜尋條件，不然就用預設的搜尋條件
             searchCityArea(search_set ?? pageSearch);
         });
@@ -233,7 +234,6 @@ export default function CityArea() {
     };
 
     useEffect(() => {
-        seacrhOptions();
         searchCityArea(pageSearch);
     }, [pageSearch.search, pageSearch.page, pageSearch.num_per_page]);
 

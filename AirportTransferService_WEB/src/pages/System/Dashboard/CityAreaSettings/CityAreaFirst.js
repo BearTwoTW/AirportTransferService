@@ -113,7 +113,7 @@ export default function CityArea() {
      */
     const seacrhOptions = async () => {
         ATS_CityAreaSettings.ATS_CityAreaSettingsSearch({
-            visible: "Y",
+            visible: null,
             cas_id: null,
             zip: null,
             city: null,
@@ -175,8 +175,14 @@ export default function CityArea() {
     /**
      * 查詢城市區域列表
      */
-    const searchCityArea = async (searchPrams) => {
+    const searchCityArea = async (searchPrams, searchbutton = false) => {
         setIsLoading(true);
+        if (searchbutton) {
+            setPageSearch(prevParams => ({
+                ...prevParams,
+                page: 1
+            }));
+        }
         if (initDBRef.current) {
             try {
                 ATS_CityAreaSettings.ATS_CityAreaSettingsSearch(searchPrams).then(async res => {
@@ -526,7 +532,7 @@ export default function CityArea() {
                                     color={"info"}
                                     text={"查詢"}
                                     startIcon={<Search />}
-                                    onClick={() => searchCityArea(pageSearch)}
+                                    onClick={() => searchCityArea(pageSearch, true)}
                                 />
                             </Grid>
                         </React.Fragment>

@@ -92,7 +92,7 @@ export default function AirportTerminal() {
      */
     const seacrhOptions = async () => {
         ATS_AirportTerminalSettings.ATS_AirportTerminalSettingsSearch({
-            visible: "Y",
+            visible: null,
             ats_id: null,
             airport: null,
             terminal: null,
@@ -151,8 +151,14 @@ export default function AirportTerminal() {
     /**
      * 查詢機場航廈
      */
-    const searchAirportTerminal = async (searchPrams) => {
+    const searchAirportTerminal = async (searchPrams, searchbutton = false) => {
         setIsLoading(true);
+        if (searchbutton) {
+            setPageSearch(prevParams => ({
+                ...prevParams,
+                page: 1
+            }));
+        }
         if (initDBRef.current) {
             try {
                 ATS_AirportTerminalSettings.ATS_AirportTerminalSettingsSearch(searchPrams).then(async res => {
@@ -458,7 +464,7 @@ export default function AirportTerminal() {
                                     color={"info"}
                                     text={"查詢"}
                                     startIcon={<Search />}
-                                    onClick={() => searchAirportTerminal(pageSearch)}
+                                    onClick={() => searchAirportTerminal(pageSearch, true)}
                                 />
                             </Grid>
                         </React.Fragment>

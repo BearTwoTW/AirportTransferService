@@ -96,7 +96,7 @@ export default function Extra() {
      */
     const seacrhOptions = async () => {
         ATS_ExtraSettings.ATS_ExtraSettingsSearch({
-            visible: "Y",
+            visible: null,
             es_id: null,
             type: null,
             name: null,
@@ -127,8 +127,14 @@ export default function Extra() {
     /**
      * 查詢加價項目
      */
-    const searchExtra = async (searchPrams) => {
+    const searchExtra = async (searchPrams, searchbutton = false) => {
         setIsLoading(true);
+        if (searchbutton) {
+            setPageSearch(prevParams => ({
+                ...prevParams,
+                page: 1
+            }));
+        }
         if (initDBRef.current) {
             try {
                 ATS_ExtraSettings.ATS_ExtraSettingsSearch(searchPrams).then(async res => {
@@ -460,7 +466,7 @@ export default function Extra() {
                                     color={"info"}
                                     text={"查詢"}
                                     startIcon={<Search />}
-                                    onClick={() => searchExtra(pageSearch)}
+                                    onClick={() => searchExtra(pageSearch, true)}
                                 />
                             </Grid>
                         </React.Fragment>

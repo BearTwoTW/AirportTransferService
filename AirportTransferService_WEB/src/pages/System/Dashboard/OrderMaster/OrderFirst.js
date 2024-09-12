@@ -292,8 +292,14 @@ export default function Order() {
     /**
      * 查詢訂單
      */
-    const searchOrder = async (searchPrams) => {
+    const searchOrder = async (searchPrams, searchbutton = false) => {
         setIsLoading(true);
+        if (searchbutton) {
+            setPageSearch(prevParams => ({
+                ...prevParams,
+                page: 1
+            }));
+        }
         if (initDBRef.current) {
             try {
                 ATS_OrderMaster.ATS_OrderMasterSearch(searchPrams).then(async res => {
@@ -866,7 +872,7 @@ export default function Order() {
                                     color={"info"}
                                     text={"查詢"}
                                     startIcon={<Search />}
-                                    onClick={() => searchOrder(pageSearch)}
+                                    onClick={() => searchOrder(pageSearch, true)}
                                 />
                             </Grid>
                         </React.Fragment>

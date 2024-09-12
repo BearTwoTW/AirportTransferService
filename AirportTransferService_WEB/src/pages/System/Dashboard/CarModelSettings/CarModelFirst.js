@@ -94,7 +94,7 @@ export default function CarModel() {
      */
     const seacrhOptions = async () => {
         ATS_CarModelSettings.ATS_CarModelSettingsSearch({
-            visible: "Y",
+            visible: null,
             cms_id: null,
             name: null,
             max_passengers: null,
@@ -132,8 +132,14 @@ export default function CarModel() {
     /**
      * 查詢車型列表
      */
-    const searchCarModel = async (searchPrams) => {
+    const searchCarModel = async (searchPrams, searchbutton = false) => {
         setIsLoading(true);
+        if (searchbutton) {
+            setPageSearch(prevParams => ({
+                ...prevParams,
+                page: 1
+            }));
+        }
         if (initDBRef.current) {
             try {
                 ATS_CarModelSettings.ATS_CarModelSettingsSearch(searchPrams).then(async res => {
@@ -478,7 +484,7 @@ export default function CarModel() {
                                     color={"info"}
                                     text={"查詢"}
                                     startIcon={<Search />}
-                                    onClick={() => searchCarModel(pageSearch)} ㄋ
+                                    onClick={() => searchCarModel(pageSearch, true)}
                                 />
                             </Grid>
                         </React.Fragment>

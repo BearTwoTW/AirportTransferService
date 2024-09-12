@@ -34,7 +34,7 @@ export default function Fare() {
 
     // 頁面資訊
     const [pageSearch, setPageSearch] = useState({
-        visible: null,
+        visible: "Y",
         road: null,
         section: null,
         fs_id: null,
@@ -217,8 +217,14 @@ export default function Fare() {
     /**
      * 查詢車資
      */
-    const searchFare = async (searchPrams) => {
+    const searchFare = async (searchPrams, searchbutton = false) => {
         setIsLoading(true);
+        if (searchbutton) {
+            setPageSearch(prevParams => ({
+                ...prevParams,
+                page: 1
+            }));
+        }
         if (initDBRef.current) {
             try {
                 ATS_FareSettings.ATS_FareSettingsSearch(searchPrams).then(async res => {
@@ -255,7 +261,7 @@ export default function Fare() {
     const cleanSearch_Click = () => {
         setPageSearch(prevData => ({
             ...prevData,
-            visible: null,
+            visible: "Y",
             road: null,
             section: null,
             fs_id: null,
@@ -578,7 +584,7 @@ export default function Fare() {
                                     color={"info"}
                                     text={"查詢"}
                                     startIcon={<Search />}
-                                    onClick={() => searchFare(pageSearch)}
+                                    onClick={() => searchFare(pageSearch, true)}
                                 />
                             </Grid>
                         </React.Fragment>

@@ -97,8 +97,14 @@ export default function PriceLink() {
     /**
      * 查詢車資
      */
-    const searchPriceLink = async (searchPrams) => {
+    const searchPriceLink = async (searchPrams, searchbutton = false) => {
         setIsLoading(true);
+        if (searchbutton) {
+            setPageSearch(prevParams => ({
+                ...prevParams,
+                page: 1
+            }));
+        }
         if (initDBRef.current) {
             try {
                 ATS_PriceLinkSettings.ATS_PriceLinkSettingsSearch(searchPrams).then(async res => {
@@ -495,7 +501,7 @@ export default function PriceLink() {
                                     color={"info"}
                                     text={"查詢"}
                                     startIcon={<Search />}
-                                    onClick={() => searchPriceLink(pageSearch)}
+                                    onClick={() => searchPriceLink(pageSearch, true)}
                                 />
                             </Grid>
                         </React.Fragment>

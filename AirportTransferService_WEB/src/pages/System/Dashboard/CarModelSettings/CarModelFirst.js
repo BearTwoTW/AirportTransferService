@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect, useCallback, forwardRef, useImperat
 import MD5 from 'crypto-js/md5';
 import { useLocation, useNavigate } from "react-router-dom";
 import { CircularLoading } from '../../../../components/CusProgress';
-import { Grid, TableCell, TableRow, Chip, Box, Typography } from '@mui/material';
+import { Grid, TableCell, TableRow, Chip, Box, Typography, FormControlLabel, Switch } from '@mui/material';
 import { HighlightOff, Add, Search, Edit, Delete } from '@mui/icons-material';
 import { CusCard } from '../../../../components/CusCard';
 import { CusInfoTitle } from '../../../../components/CusInfo';
@@ -114,6 +114,21 @@ export default function CarModel() {
         })
     }
 
+    /** 編輯是否開放 */
+    const edit_Visible = async ({ id, visible }) => {
+        const { success, message } = await ATS_CarModelSettings.ATS_CarModelSettingsUpdate({
+            cms_id: id,
+            visible: visible === "Y" ? "N" : "Y"
+        });
+
+        if (success) searchCarModel(pageSearch);
+
+        enqueueSnackbar(message, {
+            variant: success ? "success" : "warning",
+            persist: !success
+        });
+    };
+
     /**
      * 查詢車型列表
      */
@@ -181,6 +196,18 @@ export default function CarModel() {
                     hover
                     key={item.cms_id}>
                     <TableCell>{index + 1}</TableCell>
+                    <TableCell>
+                        <FormControlLabel
+                            onClick={(e) => e.stopPropagation()}
+                            control={
+                                <Switch
+                                    checked={item.visible === "Y" ? true : false}
+                                    color={"success"}
+                                    onChange={() => edit_Visible({ id: item.cms_id, visible: item.visible })}
+                                />
+                            }
+                        />
+                    </TableCell>
                     <TableCell>{item.name}</TableCell>
                     <TableCell>{item.max_passengers}</TableCell>
                     <TableCell>{item.max_luggage}</TableCell>
@@ -483,6 +510,7 @@ export default function CarModel() {
                                                 onRowsPerPageChange={onRowsPerPageChange}
                                                 tableHead={[
                                                     { name: "排序" },
+                                                    { name: "開放狀態" },
                                                     { name: "車型名稱" },
                                                     { name: "乘車人數上限" },
                                                     { name: "行李數上限" },

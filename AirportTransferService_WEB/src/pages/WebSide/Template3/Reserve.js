@@ -149,10 +149,6 @@ export default function Reserve() {
         extraOptions: [], // 加價服務
         passengerOptions: [], // 人數
         bagsOptions: [], // 行李數
-        extraCount: [
-            { key: 0, name: '1' },
-            { key: 0, name: '2' },
-        ], // 加價服務
     });
 
     const [extraVisible, setExtraVisible] = useState(false);
@@ -178,7 +174,7 @@ export default function Reserve() {
             }
         });
     };
-    console.log(extraVisible);
+
     const searchSelectOption = async () => {
         // 查城市區域 (下拉選單用)
         ATS_CityAreaSettings.ATS_CityAreaSettingsSearch(cityAreaSearch).then(async res => {
@@ -441,6 +437,9 @@ export default function Reserve() {
 const GoTabPanel = forwardRef((props, ref) => {
     const { value, index, options, reserve_next, reserve_error, extraVisible, extraText } = props
     const otherExtra = options.extraOptions.filter(option => option.type === "其它");
+    const [extraOptions, setExtraOptions] = useState([]);
+    const [selectedCounts, setSelectedCounts] = useState({});
+
     // 新增訂單
     const [orderAdd, setOrderAdd] = useState({
         visible: "Y",
@@ -556,7 +555,6 @@ const GoTabPanel = forwardRef((props, ref) => {
     const add_HandleSelect = (e, type) => {
         const { id, name, value, key } = e.target;
         const val = value === null ? null : value[key];
-        // const num = e.target.value ? e.target.value.max_service_extras : null;
 
         if (name === "city") {
             setOrderAdd(prev => ({
@@ -576,8 +574,8 @@ const GoTabPanel = forwardRef((props, ref) => {
                 [name]: val,
             }));
 
-            const passengerCount = parseInt(val) || 0; // 選擇人數
-            const luggageCount = parseInt(orderAdd.number_bags ? orderAdd.number_bags : 0) || 0; // 選擇行李數
+            const passengerCount = parseInt(val) || 0;
+            const luggageCount = parseInt(orderAdd.number_bags ? orderAdd.number_bags : 0) || 0;
 
             const filteredVehicles = options.carModelOptions.filter(item => item.max_passengers >= passengerCount && item.max_luggage >= luggageCount);
 
@@ -588,31 +586,57 @@ const GoTabPanel = forwardRef((props, ref) => {
                 [name]: val,
             }));
 
-            const passengerCount = parseInt(orderAdd.number_passenger ? orderAdd.number_passenger : 0) || 0; // 選擇人數
-            const luggageCount = parseInt(val) || 0; // 選擇行李數
+            const passengerCount = parseInt(orderAdd.number_passenger ? orderAdd.number_passenger : 0) || 0;
+            const luggageCount = parseInt(val) || 0;
 
             const filteredVehicles = options.carModelOptions.filter(item => item.max_passengers >= passengerCount && item.max_luggage >= luggageCount);
 
             setCarModelOptions(filteredVehicles);
+        } else if (name === "cms_id") {
+            setOrderAdd(prev => ({
+                ...prev,
+                [name]: val,
+            }));
+
+            const selectedCarModel = carModelOptions.find(model => model.cms_id === val);
+
+            if (selectedCarModel) {
+                const maxServiceExtras = selectedCarModel.max_service_extras;
+
+                const newExtraOptions = Array.from({ length: maxServiceExtras + 1 }, (_, index) => ({
+                    name: `${index}`,
+                    value: index
+                }));
+
+                setExtraOptions(newExtraOptions);
+            }
         } else if (name === "es_ids") {
-            let arr = orderAdd.es_ids ? [...orderAdd.es_ids] : []; // 使用展開運算符號來複製陣列
-            const index = arr.findIndex(item => item.es_id === id); // 找到相同 es_id 的物件索引
+            let arr = orderAdd.es_ids ? [...orderAdd.es_ids] : [];
+            const index = arr.findIndex(item => item.es_id === id);
 
             if (index !== -1) {
-                // 如果已經存在相同 es_id，更新 count
                 if (val === null) {
-                    // 如果 count 為 0，移除該物件
                     arr = arr.filter(item => item.es_id !== id);
                 } else {
                     arr[index].count = val;
                 }
             } else {
-                // 如果不存在相同 es_id，新增一個新物件
                 arr.push({
                     es_id: id,
                     count: val,
                     extraType: type,
                 });
+            }
+
+            // 計算當前總數
+            const totalCount = arr.reduce((acc, item) => acc + (parseInt(item.count) || 0), 0);
+            const selectedCarModel = carModelOptions.find(model => model.cms_id === orderAdd.cms_id);
+            const maxServiceExtras = selectedCarModel ? selectedCarModel.max_service_extras : 0;
+
+            if (totalCount > maxServiceExtras) {
+                // 提示用戶並不更新狀態
+                alert(`選擇的數量不能超過 ${maxServiceExtras}`);
+                return;
             }
 
             if (type === "合併") {
@@ -630,13 +654,14 @@ const GoTabPanel = forwardRef((props, ref) => {
             setOrderAdd(prev => ({
                 ...prev,
                 [name]: arr.length > 0 ? arr : null,
-            }))
+            }));
         } else {
             setOrderAdd(prev => ({
                 ...prev,
                 [name]: val,
             }));
         }
+
         setOrderAddCheck(prev => ({
             ...prev,
             [name]: !val ? true : false,
@@ -986,9 +1011,9 @@ const GoTabPanel = forwardRef((props, ref) => {
                                                     name={"es_ids"}
                                                     label={mapEle.name}
                                                     error={orderAddCheck.es_ids_merge}
-                                                    options={options.extraCount}
+                                                    options={extraOptions}
                                                     optionKey={"name"}
-                                                    value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
+                                                    value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? extraOptions.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
                                                     onChangeEvent={(e) => add_HandleSelect(e, mapEle.type)}
                                                 />
                                             </Grid>
@@ -1125,6 +1150,9 @@ const GoTabPanel = forwardRef((props, ref) => {
 const LeaveTabPanel = forwardRef((props, ref) => {
     const { value, index, options, reserve_next, reserve_error, extraVisible, extraText } = props
     const otherExtra = options.extraOptions.filter(option => option.type === "其它");
+    const [extraOptions, setExtraOptions] = useState([]);
+    const [selectedCounts, setSelectedCounts] = useState({});
+
     // 新增訂單
     const [orderAdd, setOrderAdd] = useState({
         visible: "Y",
@@ -1253,8 +1281,8 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                 [name]: val,
             }));
 
-            const passengerCount = parseInt(val) || 0; // 選擇人數
-            const luggageCount = parseInt(orderAdd.number_bags ? orderAdd.number_bags : 0) || 0; // 選擇行李數
+            const passengerCount = parseInt(val) || 0;
+            const luggageCount = parseInt(orderAdd.number_bags ? orderAdd.number_bags : 0) || 0;
 
             const filteredVehicles = options.carModelOptions.filter(item => item.max_passengers >= passengerCount && item.max_luggage >= luggageCount);
 
@@ -1265,31 +1293,57 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                 [name]: val,
             }));
 
-            const passengerCount = parseInt(orderAdd.number_passenger ? orderAdd.number_passenger : 0) || 0; // 選擇人數
-            const luggageCount = parseInt(val) || 0; // 選擇行李數
+            const passengerCount = parseInt(orderAdd.number_passenger ? orderAdd.number_passenger : 0) || 0;
+            const luggageCount = parseInt(val) || 0;
 
             const filteredVehicles = options.carModelOptions.filter(item => item.max_passengers >= passengerCount && item.max_luggage >= luggageCount);
 
             setCarModelOptions(filteredVehicles);
+        } else if (name === "cms_id") {
+            setOrderAdd(prev => ({
+                ...prev,
+                [name]: val,
+            }));
+
+            const selectedCarModel = carModelOptions.find(model => model.cms_id === val);
+
+            if (selectedCarModel) {
+                const maxServiceExtras = selectedCarModel.max_service_extras;
+
+                const newExtraOptions = Array.from({ length: maxServiceExtras + 1 }, (_, index) => ({
+                    name: `${index}`,
+                    value: index
+                }));
+
+                setExtraOptions(newExtraOptions);
+            }
         } else if (name === "es_ids") {
-            let arr = orderAdd.es_ids ? [...orderAdd.es_ids] : []; // 使用展開運算符號來複製陣列
-            const index = arr.findIndex(item => item.es_id === id); // 找到相同 es_id 的物件索引
+            let arr = orderAdd.es_ids ? [...orderAdd.es_ids] : [];
+            const index = arr.findIndex(item => item.es_id === id);
 
             if (index !== -1) {
-                // 如果已經存在相同 es_id，更新 count
                 if (val === null) {
-                    // 如果 count 為 0，移除該物件
                     arr = arr.filter(item => item.es_id !== id);
                 } else {
                     arr[index].count = val;
                 }
             } else {
-                // 如果不存在相同 es_id，新增一個新物件
                 arr.push({
                     es_id: id,
                     count: val,
                     extraType: type,
                 });
+            }
+
+            // 計算當前總數
+            const totalCount = arr.reduce((acc, item) => acc + (parseInt(item.count) || 0), 0);
+            const selectedCarModel = carModelOptions.find(model => model.cms_id === orderAdd.cms_id);
+            const maxServiceExtras = selectedCarModel ? selectedCarModel.max_service_extras : 0;
+
+            if (totalCount > maxServiceExtras) {
+                // 提示用戶並不更新狀態
+                alert(`選擇的數量不能超過 ${maxServiceExtras}`);
+                return;
             }
 
             if (type === "合併") {
@@ -1307,13 +1361,14 @@ const LeaveTabPanel = forwardRef((props, ref) => {
             setOrderAdd(prev => ({
                 ...prev,
                 [name]: arr.length > 0 ? arr : null,
-            }))
+            }));
         } else {
             setOrderAdd(prev => ({
                 ...prev,
                 [name]: val,
             }));
         }
+
         setOrderAddCheck(prev => ({
             ...prev,
             [name]: !val ? true : false,
@@ -1701,9 +1756,9 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                                                     name={"es_ids"}
                                                     label={mapEle.name}
                                                     error={orderAddCheck.es_ids_merge}
-                                                    options={options.extraCount}
+                                                    options={extraOptions}
                                                     optionKey={"name"}
-                                                    value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
+                                                    value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? extraOptions.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
                                                     onChangeEvent={(e) => add_HandleSelect(e, mapEle.type)}
                                                 />
                                             </Grid>

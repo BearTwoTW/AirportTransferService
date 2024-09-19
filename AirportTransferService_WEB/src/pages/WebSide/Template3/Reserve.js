@@ -439,6 +439,9 @@ const GoTabPanel = forwardRef((props, ref) => {
     const otherExtra = options.extraOptions.filter(option => option.type === "其它");
     const [extraOptions, setExtraOptions] = useState([]);
     const [selectedCounts, setSelectedCounts] = useState({});
+    const [maxServiceExtrasMessage, setMaxServiceExtrasMessage] = useState({
+        message: "",
+    });
 
     // 新增訂單
     const [orderAdd, setOrderAdd] = useState({
@@ -608,6 +611,9 @@ const GoTabPanel = forwardRef((props, ref) => {
                     value: index
                 }));
 
+                setMaxServiceExtrasMessage(() => ({
+                    message: `安全座椅及增高墊，加總上限為 ${maxServiceExtras} 個`
+                }));
                 setExtraOptions(newExtraOptions);
             }
         } else if (name === "es_ids") {
@@ -635,7 +641,7 @@ const GoTabPanel = forwardRef((props, ref) => {
 
             if (totalCount > maxServiceExtras) {
                 // 提示用戶並不更新狀態
-                alert(`選擇的數量不能超過 ${maxServiceExtras}`);
+                alert(`加總上限不能超過 ${maxServiceExtras} 個`);
                 return;
             }
 
@@ -780,7 +786,7 @@ const GoTabPanel = forwardRef((props, ref) => {
             })
         }
     };
-
+    console.log(maxServiceExtrasMessage);
     return (
         <TabPanel value={value} index={index}>
             <Grid container className="space-y-2.5">
@@ -995,12 +1001,15 @@ const GoTabPanel = forwardRef((props, ref) => {
                             </Box>
                             <Grid container>
                                 <Grid item lg={12} sm={12} xs={12}>
-                                    <FormGroup>
-                                        <FormControlLabel
-                                            control={<Checkbox name="extra" checked={checkboxState.extra} onChange={handleCheckboxChange} />}
-                                            label="加購兒童安全座椅及增高墊 (+$200)"
-                                        />
-                                    </FormGroup>
+                                    <Box className="flex items-center">
+                                        <FormGroup>
+                                            <FormControlLabel
+                                                control={<Checkbox name="extra" checked={checkboxState.extra} onChange={handleCheckboxChange} />}
+                                                label="加購兒童安全座椅及增高墊 (+$200)"
+                                            />
+                                        </FormGroup>
+                                        {maxServiceExtrasMessage.message != "" ? <Typography color="error" fontWeight="bold">{`(${maxServiceExtrasMessage.message})`}</Typography> : null}
+                                    </Box>
                                 </Grid>
                                 {checkboxState.extra ?
                                     options.extraOptions.filter(filterEle => filterEle.type === "合併").map((mapEle, index) => {

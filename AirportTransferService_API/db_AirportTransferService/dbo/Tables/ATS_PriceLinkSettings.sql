@@ -5,7 +5,9 @@
     [upd_time]   DATETIME       NULL,
     [pls_id]     VARCHAR (10)   NULL,
     [visible]    VARCHAR (2)    DEFAULT ('Y') NULL,
-    [type] VARCHAR(4) NULL,
+    [type]       VARCHAR(4)     NULL,
+    [city]       NVARCHAR (255) NULL,
+    [area]       NVARCHAR (255) NULL,
     [price]      DECIMAL (10)   NULL,
     [link]       NVARCHAR (MAX) NULL
 );
@@ -61,3 +63,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'ATS_PriceLinkSettings',
     @level2type = N'COLUMN',
     @level2name = N'type'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'城市',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'ATS_PriceLinkSettings',
+    @level2type = N'COLUMN',
+    @level2name = N'city'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'區域',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'ATS_PriceLinkSettings',
+    @level2type = N'COLUMN',
+    @level2name = N'area'

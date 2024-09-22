@@ -306,7 +306,7 @@ export default function Reserve() {
             id: type,
             maxWidth: "md",
             DialogTitle: "車資金額確認及前往付款",
-            DialogContent: <DialogsInner type={type} ref={useDialogInner} orderAdd={orderAdd} price={price} options={options} signboard={signboard} extra={extra} other={other} sameDetail={sameDetail} />,
+            DialogContent: <DialogsInner type={type} ref={useDialogInner} orderAdd={orderAdd} price={price} options={options} signboard={signboard} extra={extra} other={other} sameDetail={sameDetail} extraVisible={extraVisible} />,
             DialogActions: (
                 <React.Fragment>
                     <Button color="secondary" variant='outlined' onClick={dialogClose}>
@@ -1915,7 +1915,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
 
 /** [內容]Dialog*/
 const DialogsInner = forwardRef((props, ref) => {
-    const { type, orderAdd, options, signboard, extra, sameDetail, other, price, message } = props;
+    const { type, orderAdd, options, signboard, extra, sameDetail, other, price, message, extraVisible } = props;
     console.log(other)
     if (type === "go") {
         // 日期格式yyyy-mm-dd
@@ -1996,70 +1996,72 @@ const DialogsInner = forwardRef((props, ref) => {
                             </Grid>
                         </Grid>
                     </Grid>
-                    <Grid item xs={12} md={6} lg={6}>
-                        <Box className="flex items-center border-b pb-2.5 gap-2">
-                            <Add color={"secondary"} />
-                            <Typography color="secondary" fontWeight="bold">加價服務請於【結帳】時加購</Typography>
-                        </Box>
-                        <Box>
-                            {/* <FormGroup>
-                <FormControlLabel
-                  control={<Checkbox name="signboard" checked={extra} disabled />}
-                  label="兒童座椅及增高墊 (+$200)"
-                />
-              </FormGroup> */}
-                            <Box className="mt-2.5 pl-8 gap-2">
-                                <Typography color="info" fontWeight="bold">兒童座椅及增高墊 (+$200)</Typography>
+                    {extraVisible ?
+                        <Grid item xs={12} md={6} lg={6}>
+                            <Box className="flex items-center border-b pb-2.5 gap-2">
+                                <Add color={"secondary"} />
+                                <Typography color="secondary" fontWeight="bold">加價服務請於【結帳】時加購</Typography>
                             </Box>
-                            <Grid container>
-                                {extra ?
-                                    options.extraOptions.filter(filterEle => filterEle.type === "合併").map((mapEle, index) => {
-                                        return (
-                                            <Grid key={mapEle.es_id} item lg={6} sm={6} xs={12}>
-                                                <CusOutlinedSelect
-                                                    id={mapEle.es_id}
-                                                    name={"es_ids"}
-                                                    label={mapEle.name}
-                                                    options={options.extraCount}
-                                                    optionKey={"name"}
-                                                    value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
-                                                    disabled
-                                                />
-                                            </Grid>
-                                        )
-                                    })
-                                    : null}
-                            </Grid>
-                            {/* <FormGroup>
-                <FormControlLabel
-                  control={<Checkbox name="other" checked={other} disabled />}
-                  label="其它服務"
-                />
-              </FormGroup> */}
-                            <Box className="mt-2.5 pl-8 gap-2">
-                                <Typography color="info" fontWeight="bold">其它服務</Typography>
+                            <Box>
+                                {/* <FormGroup>
+            <FormControlLabel
+              control={<Checkbox name="signboard" checked={extra} disabled />}
+              label="兒童座椅及增高墊 (+$200)"
+            />
+          </FormGroup> */}
+                                <Box className="mt-2.5 pl-8 gap-2">
+                                    <Typography color="info" fontWeight="bold">兒童座椅及增高墊 (+$200)</Typography>
+                                </Box>
+                                <Grid container>
+                                    {extra ?
+                                        options.extraOptions.filter(filterEle => filterEle.type === "合併").map((mapEle, index) => {
+                                            return (
+                                                <Grid key={mapEle.es_id} item lg={6} sm={6} xs={12}>
+                                                    <CusOutlinedSelect
+                                                        id={mapEle.es_id}
+                                                        name={"es_ids"}
+                                                        label={mapEle.name}
+                                                        options={options.extraCount}
+                                                        optionKey={"name"}
+                                                        value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
+                                                        disabled
+                                                    />
+                                                </Grid>
+                                            )
+                                        })
+                                        : null}
+                                </Grid>
+                                {/* <FormGroup>
+            <FormControlLabel
+              control={<Checkbox name="other" checked={other} disabled />}
+              label="其它服務"
+            />
+          </FormGroup> */}
+                                <Box className="mt-2.5 pl-8 gap-2">
+                                    <Typography color="info" fontWeight="bold">其它服務</Typography>
+                                </Box>
+                                <Grid container>
+                                    {other ?
+                                        options.extraOptions.filter(filterEle => filterEle.type === "其它").map((mapEle, index) => {
+                                            return (
+                                                <Grid key={mapEle.es_id} item lg={6} sm={6} xs={12}>
+                                                    <CusOutlinedSelect
+                                                        id={mapEle.es_id}
+                                                        name={"es_ids"}
+                                                        label={mapEle.name}
+                                                        options={options.extraCount}
+                                                        optionKey={"name"}
+                                                        value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
+                                                        disabled
+                                                    />
+                                                </Grid>
+                                            )
+                                        })
+                                        : null}
+                                </Grid>
                             </Box>
-                            <Grid container>
-                                {other ?
-                                    options.extraOptions.filter(filterEle => filterEle.type === "其它").map((mapEle, index) => {
-                                        return (
-                                            <Grid key={mapEle.es_id} item lg={6} sm={6} xs={12}>
-                                                <CusOutlinedSelect
-                                                    id={mapEle.es_id}
-                                                    name={"es_ids"}
-                                                    label={mapEle.name}
-                                                    options={options.extraCount}
-                                                    optionKey={"name"}
-                                                    value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
-                                                    disabled
-                                                />
-                                            </Grid>
-                                        )
-                                    })
-                                    : null}
-                            </Grid>
-                        </Box>
-                    </Grid>
+                        </Grid>
+                        : null}
                     <Grid item xs={12} md={6} lg={6}>
                         <Box className="flex items-center border-b pb-2.5 gap-2">
                             <EditNote color={"secondary"} />

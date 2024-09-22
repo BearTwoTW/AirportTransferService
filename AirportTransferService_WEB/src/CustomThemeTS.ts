@@ -64,7 +64,7 @@ declare module "@mui/material/styles" {
 export const CusThemeTS = (() => {
     const labelFontSize = "1.3rem";
     // 前台顏色(需跟 tailwind.config.js 內的顏色相同)
-    const primary = "#FFFFFF"
+    const primary = "#000000"
     const secondary = "#192F64"
     const success = "#78B450"
     const info = "#32A5AA"
@@ -327,13 +327,13 @@ export const CusThemeTS = (() => {
                         },
                         [`&.Mui-selected`]: {
                             [`&:focus`]: {
-                                background: primary,
+                                background: secInfo,
                             },
                             [`&:hover`]: {
-                                background: primary,
+                                background: secInfo,
                             },
                             color: headerInfo,
-                            backgroundColor: primary,
+                            backgroundColor: secInfo,
                             fontWeight: "bold",
                         },
                     },
@@ -356,13 +356,13 @@ export const CusThemeTS = (() => {
                         },
                         [`&.Mui-selected`]: {
                             [`&:focus`]: {
-                                background: primary,
+                                background: secInfo,
                             },
                             [`&:hover`]: {
-                                background: primary,
+                                background: secInfo,
                             },
                             color: headerInfo,
-                            backgroundColor: primary,
+                            backgroundColor: secInfo,
                             fontWeight: "bold",
                         },
                     },
@@ -388,13 +388,13 @@ export const CusThemeTS = (() => {
                         },
                         [`&.Mui-selected`]: {
                             [`&:focus`]: {
-                                background: primary,
+                                background: secInfo,
                             },
                             [`&:hover`]: {
-                                background: primary,
+                                background: secInfo,
                             },
                             color: headerInfo,
-                            backgroundColor: primary,
+                            backgroundColor: secInfo,
                             fontWeight: "bold",
                         },
                     },

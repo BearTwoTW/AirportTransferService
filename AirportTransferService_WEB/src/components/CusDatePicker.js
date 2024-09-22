@@ -65,7 +65,13 @@ const CusDatePicker = (props) => {
   }
 
   return (
-    <LocalizationProvider dateAdapter={AdapterMoment}>
+    <LocalizationProvider
+      dateAdapter={AdapterMoment}
+      localeText={{
+        clearButtonLabel: '清除',
+        cancelButtonLabel: '取消',
+        okButtonLabel: '確定',
+      }}>
       <DatePicker
         className={props.className}
         sx={{
@@ -125,8 +131,8 @@ const CusDatePicker = (props) => {
               color: "secondary",
             },
             actionBar: {
-              actions: ["clear"]
-            }
+              actions: ["clear", "accept", "cancel"],
+            },
           }
         }
       />

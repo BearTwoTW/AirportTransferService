@@ -11,8 +11,8 @@ import moment from "moment";
 import "moment/locale/zh-tw";
 
 moment.updateLocale("zh-tw", {
-  weekdaysShort: ["日", "一", "二", "三", "四", "五", "六"],
-  week: { dow: 0 }
+    weekdaysShort: ["日", "一", "二", "三", "四", "五", "六"],
+    week: { dow: 0 }
 });
 
 // UI樣式
@@ -42,120 +42,126 @@ const status = sessionStorage.getItem("themeStatus") === null ? "LightON" : sess
  * @param {bool}   displayWeekNumber 是否顯示week
  */
 const CusTimePicker = (props) => {
-  const [value, setValue] = React.useState(null);
+    const [value, setValue] = React.useState(null);
 
-  useEffect(() => {
-    // 確保傳遞給 moment 的格式是正確的
-    setValue(props.value ? moment(props.value, props.format.replace(/\//g, "").replace(/:/g, "").replace(/\s/g, "")) : null);
-  }, [props.value, props.format]);
+    useEffect(() => {
+        // 確保傳遞給 moment 的格式是正確的
+        setValue(props.value ? moment(props.value, props.format.replace(/\//g, "").replace(/:/g, "").replace(/\s/g, "")) : null);
+    }, [props.value, props.format]);
 
-  const checkInputData = (e) => {
-    const momentValue = e.moment; // Moment.js 物件
-    setValue(momentValue); // 確保 value 是 Moment.js 物件
-    e.target.name = props.name;
-    e.target.label = props.label;
-    e.target.value = momentValue ? moment(momentValue).format("HH:mm") : null; // 確保正確格式
-    props.onChangeEvent(e);
-  };
+    const checkInputData = (e) => {
+        const momentValue = e.moment; // Moment.js 物件
+        setValue(momentValue); // 確保 value 是 Moment.js 物件
+        e.target.name = props.name;
+        e.target.label = props.label;
+        e.target.value = momentValue ? moment(momentValue).format("HH:mm") : null; // 確保正確格式
+        props.onChangeEvent(e);
+    };
 
-  return (
-    <LocalizationProvider dateAdapter={AdapterMoment}>
-      <TimePicker
-        className={props.className}
-        sx={{
-          paddingRight: { sm: "0.5rem", xs: "0rem" },
-          margin: "0.5rem 0",
-          label: {
-            color: props.labelColor || 'inherit', // 確保使用正確的顏色屬性
-          },
-          input: {
-            color: props.inputColor || 'inherit', // 確保使用正確的顏色屬性
-          },
-        }}
-        maxTime={props.maxTime ? moment(props.maxTime) : undefined} // 確保 maxTime 是 Moment.js 物件或 undefined
-        minTime={props.minTime ? moment(props.minTime) : undefined} // 確保 minTime 是 Moment.js 物件或 undefined
-        views={props.views}
-        openTo={props.openTo}
-        fullWidth={true}
-        label={props.label}
-        value={value} // 確保 value 是 Moment.js 物件或 null
-        format={props.format}
-        disabled={props.disabled}
-        color={props.color}
-        disablePast={props.disablePast}
-        disableFuture={props.disableFuture}
-        displayWeekNumber={props.displayWeekNumber}
-        onChange={(e) => checkInputData({
-          moment: e,
-          target: {
-            "id": props.id,
-            "name": props.name,
-            "value": value,
-            "label": props.label,
-            "key": (props.optionKey === undefined ? "" : props.optionKey),
-          }
-        })}
-        slotProps={{
-          openPickerButton: {
-            sx: {
-              color: props.buttonColor || 'inherit', // 確保使用正確的顏色屬性
-            }
-          },
-          textField: {
-            id: props.id,
-            size: props.size,
-            fullWidth: true,
-            required: props.required,
-            helperText: props.helperText,
-            error: props.error,
-            color: "secondary",
-          },
-          actionBar: {
-            actions: ["clear"]
-          }
-        }}
-      />
-    </LocalizationProvider>
-  );
+    return (
+        <LocalizationProvider
+            dateAdapter={AdapterMoment}
+            localeText={{
+                clearButtonLabel: '清除',
+                cancelButtonLabel: '取消',
+                okButtonLabel: '確定',
+            }}>
+            <TimePicker
+                className={props.className}
+                sx={{
+                    paddingRight: { sm: "0.5rem", xs: "0rem" },
+                    margin: "0.5rem 0",
+                    label: {
+                        color: props.labelColor || 'inherit', // 確保使用正確的顏色屬性
+                    },
+                    input: {
+                        color: props.inputColor || 'inherit', // 確保使用正確的顏色屬性
+                    },
+                }}
+                maxTime={props.maxTime ? moment(props.maxTime) : undefined} // 確保 maxTime 是 Moment.js 物件或 undefined
+                minTime={props.minTime ? moment(props.minTime) : undefined} // 確保 minTime 是 Moment.js 物件或 undefined
+                views={props.views}
+                openTo={props.openTo}
+                fullWidth={true}
+                label={props.label}
+                value={value} // 確保 value 是 Moment.js 物件或 null
+                format={props.format}
+                disabled={props.disabled}
+                color={props.color}
+                disablePast={props.disablePast}
+                disableFuture={props.disableFuture}
+                displayWeekNumber={props.displayWeekNumber}
+                onChange={(e) => checkInputData({
+                    moment: e,
+                    target: {
+                        "id": props.id,
+                        "name": props.name,
+                        "value": value,
+                        "label": props.label,
+                        "key": (props.optionKey === undefined ? "" : props.optionKey),
+                    }
+                })}
+                slotProps={{
+                    openPickerButton: {
+                        sx: {
+                            color: props.buttonColor || 'inherit', // 確保使用正確的顏色屬性
+                        }
+                    },
+                    textField: {
+                        id: props.id,
+                        size: props.size,
+                        fullWidth: true,
+                        required: props.required,
+                        helperText: props.helperText,
+                        error: props.error,
+                        color: "secondary",
+                    },
+                    actionBar: {
+                        actions: ["clear", "cancel", "accept"]
+                    }
+                }}
+            />
+        </LocalizationProvider>
+    );
 };
 
 CusTimePicker.defaultProps = {
-  className: 'CusTimePicker',
-  label: '',
-  format: "HH:mm",
-  maxTime: '',
-  minTime: '',
-  views: ["hours", "minutes"],
-  openTo: "hours",
-  disabled: false,
-  disablePast: false,
-  disableFuture: false,
-  displayWeekNumber: false,
-  color: "primary",
-  required: false,
-  size: 'small',
-  helperText: '',
-  error: false
+    className: 'CusTimePicker',
+    label: '',
+    format: "HH:mm",
+    maxTime: '',
+    minTime: '',
+    views: ["hours", "minutes"],
+    openTo: "hours",
+    disabled: false,
+    disablePast: false,
+    disableFuture: false,
+    displayWeekNumber: false,
+    color: "primary",
+    required: false,
+    size: 'small',
+    helperText: '',
+    error: false
 };
 
 CusTimePicker.prototype = {
-  className: PropTypes.string,
-  label: PropTypes.string,
-  value: PropTypes.string,
-  error: PropTypes.bool,
-  format: PropTypes.string,
-  maxTime: PropTypes.string,
-  minTime: PropTypes.string,
-  views: PropTypes.object,
-  openTo: PropTypes.string,
-  disabled: PropTypes.bool,
-  disablePast: PropTypes.bool,
-  disableFuture: PropTypes.bool,
-  displayWeekNumber: PropTypes.bool,
-  helperText: PropTypes.string,
-  color: PropTypes.string,
-  required: PropTypes.bool,
-  size: PropTypes.string,
+    className: PropTypes.string,
+    label: PropTypes.string,
+    value: PropTypes.string,
+    error: PropTypes.bool,
+    format: PropTypes.string,
+    maxTime: PropTypes.string,
+    minTime: PropTypes.string,
+    views: PropTypes.object,
+    openTo: PropTypes.string,
+    disabled: PropTypes.bool,
+    disablePast: PropTypes.bool,
+    disableFuture: PropTypes.bool,
+    displayWeekNumber: PropTypes.bool,
+    helperText: PropTypes.string,
+    color: PropTypes.string,
+    required: PropTypes.bool,
+    size: PropTypes.string,
 };
 
 export { CusTimePicker };

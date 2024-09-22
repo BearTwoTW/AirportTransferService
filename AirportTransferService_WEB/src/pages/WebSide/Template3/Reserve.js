@@ -2192,103 +2192,105 @@ const DialogsInner = forwardRef((props, ref) => {
                             </Grid>
                         </Grid>
                     </Grid>
-                    <Grid item xs={12} md={6} lg={6}>
-                        <Box className="flex items-center border-b pb-2.5 gap-2">
-                            <Add color={"secondary"} />
-                            <Typography color="secondary" fontWeight="bold">加價服務請於【結帳】時加購</Typography>
-                        </Box>
-                        <Box>
-                            {/* <FormGroup>
-                <FormControlLabel
-                  control={<Checkbox name="signboard" checked={signboard} disabled />}
-                  label="接機舉牌 (+$200)"
-                />
-              </FormGroup> */}
-                            <Box className="mt-2.5 pl-8 gap-2">
-                                <Typography color="info" fontWeight="bold">接機舉牌 (+$200)</Typography>
+                    {extraVisible ?
+                        <Grid item xs={12} md={6} lg={6}>
+                            <Box className="flex items-center border-b pb-2.5 gap-2">
+                                <Add color={"secondary"} />
+                                <Typography color="secondary" fontWeight="bold">加價服務請於【結帳】時加購</Typography>
                             </Box>
-                            {signboard ?
+                            <Box>
+                                {/* <FormGroup>
+            <FormControlLabel
+              control={<Checkbox name="signboard" checked={signboard} disabled />}
+              label="接機舉牌 (+$200)"
+            />
+          </FormGroup> */}
+                                <Box className="mt-2.5 pl-8 gap-2">
+                                    <Typography color="info" fontWeight="bold">接機舉牌 (+$200)</Typography>
+                                </Box>
+                                {signboard ?
+                                    <Grid container>
+                                        <Grid item xs={12} >
+                                            <CusInput
+                                                disabled
+                                                id={"add--signboard_title"}
+                                                name={"signboard_title"}
+                                                label={"舉牌標題"}
+                                                value={orderAdd.signboard_title}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <CusInput
+                                                disabled
+                                                multiline
+                                                rows={4}
+                                                id={"add--signboard_content"}
+                                                name={"signboard_content"}
+                                                label={"舉牌內容"}
+                                                value={orderAdd.signboard_content}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                    : null}
+                                {/* <FormGroup>
+            <FormControlLabel
+              control={<Checkbox name="signboard" checked={extra} disabled />}
+              label="兒童座椅及增高墊 (+$200)"
+            />
+          </FormGroup> */}
+                                <Box className="mt-2.5 pl-8 gap-2">
+                                    <Typography color="info" fontWeight="bold">兒童座椅及增高墊 (+$200)</Typography>
+                                </Box>
                                 <Grid container>
-                                    <Grid item xs={12} >
-                                        <CusInput
-                                            disabled
-                                            id={"add--signboard_title"}
-                                            name={"signboard_title"}
-                                            label={"舉牌標題"}
-                                            value={orderAdd.signboard_title}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <CusInput
-                                            disabled
-                                            multiline
-                                            rows={4}
-                                            id={"add--signboard_content"}
-                                            name={"signboard_content"}
-                                            label={"舉牌內容"}
-                                            value={orderAdd.signboard_content}
-                                        />
-                                    </Grid>
+                                    {extra ?
+                                        options.extraOptions.filter(filterEle => filterEle.type === "合併").map((mapEle, index) => {
+                                            return (
+                                                <Grid key={mapEle.es_id} item lg={6} sm={6} xs={12}>
+                                                    <CusOutlinedSelect
+                                                        id={mapEle.es_id}
+                                                        name={"es_ids"}
+                                                        label={mapEle.name}
+                                                        options={options.extraCount}
+                                                        optionKey={"name"}
+                                                        value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
+                                                        disabled
+                                                    />
+                                                </Grid>
+                                            )
+                                        })
+                                        : null}
                                 </Grid>
-                                : null}
-                            {/* <FormGroup>
-                <FormControlLabel
-                  control={<Checkbox name="signboard" checked={extra} disabled />}
-                  label="兒童座椅及增高墊 (+$200)"
-                />
-              </FormGroup> */}
-                            <Box className="mt-2.5 pl-8 gap-2">
-                                <Typography color="info" fontWeight="bold">兒童座椅及增高墊 (+$200)</Typography>
+                                {/* <FormGroup>
+            <FormControlLabel
+              control={<Checkbox name="other" checked={other} disabled />}
+              label="其它服務"
+            />
+          </FormGroup> */}
+                                <Box className="mt-2.5 pl-8 gap-2">
+                                    <Typography color="info" fontWeight="bold">其它服務</Typography>
+                                </Box>
+                                <Grid container>
+                                    {other ?
+                                        options.extraOptions.filter(filterEle => filterEle.type === "其它").map((mapEle, index) => {
+                                            return (
+                                                <Grid key={mapEle.es_id} item lg={6} sm={6} xs={12}>
+                                                    <CusOutlinedSelect
+                                                        id={mapEle.es_id}
+                                                        name={"es_ids"}
+                                                        label={mapEle.name}
+                                                        options={options.extraCount}
+                                                        optionKey={"name"}
+                                                        value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
+                                                        disabled
+                                                    />
+                                                </Grid>
+                                            )
+                                        })
+                                        : null}
+                                </Grid>
                             </Box>
-                            <Grid container>
-                                {extra ?
-                                    options.extraOptions.filter(filterEle => filterEle.type === "合併").map((mapEle, index) => {
-                                        return (
-                                            <Grid key={mapEle.es_id} item lg={6} sm={6} xs={12}>
-                                                <CusOutlinedSelect
-                                                    id={mapEle.es_id}
-                                                    name={"es_ids"}
-                                                    label={mapEle.name}
-                                                    options={options.extraCount}
-                                                    optionKey={"name"}
-                                                    value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
-                                                    disabled
-                                                />
-                                            </Grid>
-                                        )
-                                    })
-                                    : null}
-                            </Grid>
-                            {/* <FormGroup>
-                <FormControlLabel
-                  control={<Checkbox name="other" checked={other} disabled />}
-                  label="其它服務"
-                />
-              </FormGroup> */}
-                            <Box className="mt-2.5 pl-8 gap-2">
-                                <Typography color="info" fontWeight="bold">其它服務</Typography>
-                            </Box>
-                            <Grid container>
-                                {other ?
-                                    options.extraOptions.filter(filterEle => filterEle.type === "其它").map((mapEle, index) => {
-                                        return (
-                                            <Grid key={mapEle.es_id} item lg={6} sm={6} xs={12}>
-                                                <CusOutlinedSelect
-                                                    id={mapEle.es_id}
-                                                    name={"es_ids"}
-                                                    label={mapEle.name}
-                                                    options={options.extraCount}
-                                                    optionKey={"name"}
-                                                    value={orderAdd.es_ids ? (orderAdd.es_ids.some(item => item.es_id === mapEle.es_id) ? options.extraCount.find(item => item.name === orderAdd.es_ids.find(item => item.es_id === mapEle.es_id).count) : null) : null}
-                                                    disabled
-                                                />
-                                            </Grid>
-                                        )
-                                    })
-                                    : null}
-                            </Grid>
-                        </Box>
-                    </Grid>
+                        </Grid>
+                        : null}
                     <Grid item xs={12} md={6} lg={6}>
                         <Box className="flex items-center border-b pb-2.5 gap-2">
                             <EditNote color={"secondary"} />

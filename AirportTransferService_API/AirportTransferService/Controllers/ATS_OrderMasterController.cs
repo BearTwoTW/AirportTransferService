@@ -125,12 +125,9 @@ namespace AirportTransferService.Controllers
                 }
 
                 // 拿價錢查連結
-                List<SearchATS_PriceLinkSettingsResult> resultSearchATS_PriceLinkSettings = _ATS_PriceLinkSettings.SearchATS_PriceLinkSettings(
-                    new SearchATS_PriceLinkSettingsParam(type: data.type, price: price),
-                    ["link"], [],
-                    out int _);
-                if (resultSearchATS_PriceLinkSettings.Count == 0) return new ResultObject<object> { success = false, message = "價錢連結不存在" };
-                link = resultSearchATS_PriceLinkSettings[0].link!;
+                ResultObject<string> resultGetPriceLink = GetPriceLink(data.type, data.city, data.area, price);
+                if (!resultGetPriceLink.success) return new ResultObject<object> { success = false, message = resultGetPriceLink.message };
+                link = resultGetPriceLink.data!;
 
                 // 更新訂單價錢和連結
                 _ATS_OrderMaster.UpdateATS_OrderMaster(new UpdateATS_OrderMasterParam(
@@ -235,6 +232,9 @@ namespace AirportTransferService.Controllers
                     break;
             }
 
+            string type = string.IsNullOrEmpty(data.type) || data.type == Appsettings.api_string_param_no_pass ? search_own_result.type : data.type;
+            string city = string.IsNullOrEmpty(data.city) || data.city == Appsettings.api_string_param_no_pass ? search_own_result.city : data.city;
+            string area = string.IsNullOrEmpty(data.area) || data.area == Appsettings.api_string_param_no_pass ? search_own_result.area : data.area;
             // 驗證訂單資料
             ResultObject<ValidateOrderResult> validateResult = ValidateOrder(new ATS_OrderMasterCreate
             {
@@ -251,9 +251,9 @@ namespace AirportTransferService.Controllers
                 //number_passenger = data.number_passenger == Appsettings.api_numeric_param_no_pass ? search_own_result.number_passenger : data.number_passenger,
                 //number_bags = data.number_bags == Appsettings.api_numeric_param_no_pass ? search_own_result.number_bags : data.number_bags,
                 //cms_id = data.cms_id == Appsettings.api_string_param_no_pass ? search_own_result.cms_id : data.cms_id,
-                type = string.IsNullOrEmpty(data.type) || data.type == Appsettings.api_string_param_no_pass ? search_own_result.type : data.type,
-                city = string.IsNullOrEmpty(data.city) || data.city == Appsettings.api_string_param_no_pass ? search_own_result.city : data.city,
-                area = string.IsNullOrEmpty(data.area) || data.area == Appsettings.api_string_param_no_pass ? search_own_result.area : data.area,
+                type = type,
+                city = city,
+                area = area,
                 road = string.IsNullOrEmpty(data.road) || data.road == Appsettings.api_string_param_no_pass ? search_own_result.road : data.road,
                 section = string.IsNullOrEmpty(data.section) || data.section == Appsettings.api_string_param_no_pass ? search_own_result.section : data.section,
                 airport = string.IsNullOrEmpty(data.airport) || data.airport == Appsettings.api_string_param_no_pass ? search_own_result.airport : data.airport,
@@ -301,15 +301,14 @@ namespace AirportTransferService.Controllers
                 }
 
                 if (price == 0) price = Appsettings.api_numeric_param_no_pass;
-                List<SearchATS_PriceLinkSettingsResult> resultSearchATS_PriceLinkSettings = [];
+                string? link = "";
                 // 拿價錢查連結
                 if (price != Appsettings.api_numeric_param_no_pass)
                 {
-                    resultSearchATS_PriceLinkSettings = _ATS_PriceLinkSettings.SearchATS_PriceLinkSettings(
-                        new SearchATS_PriceLinkSettingsParam(price: price),
-                        ["link"], [],
-                        out int _);
-                    if (resultSearchATS_PriceLinkSettings.Count == 0) return new ResultObject<object> { success = false, message = $"價錢連結不存在，價錢:{price}" };
+                    // 拿價錢查連結
+                    ResultObject<string> resultGetPriceLink = GetPriceLink(data.type, data.city, data.area, price);
+                    if (!resultGetPriceLink.success) return new ResultObject<object> { success = false, message = resultGetPriceLink.message };
+                    link = resultGetPriceLink.data;
                 }
 
                 _ATS_OrderMaster.UpdateATS_OrderMaster(new UpdateATS_OrderMasterParam(
@@ -342,7 +341,7 @@ namespace AirportTransferService.Controllers
                     phone_passenger: data.phone_passenger,
                     email_passenger: data.email_passenger,
                     price: price,
-                    link: resultSearchATS_PriceLinkSettings.Count > 0 ? resultSearchATS_PriceLinkSettings[0].link : Appsettings.api_string_param_no_pass));
+                    link: !string.IsNullOrEmpty(link) ? link : Appsettings.api_string_param_no_pass));
 
                 tx.Complete();
             }
@@ -710,6 +709,33 @@ namespace AirportTransferService.Controllers
             #endregion
 
             return new ResultObject<ValidateOrderResult> { success = true, data = new ValidateOrderResult { exists_es_ids = exists_es_ids, price = price } };
+        }
+
+        private ResultObject<string> GetPriceLink(string type, string city, string area, decimal? price)
+        {
+            List<SearchATS_PriceLinkSettingsResult> resultSearchATS_PriceLinkSettings = _ATS_PriceLinkSettings.SearchATS_PriceLinkSettings(
+                new SearchATS_PriceLinkSettingsParam(type: type, city: city, area: area, price: price),
+                ["link"], [],
+                out int _);
+
+            if (resultSearchATS_PriceLinkSettings.Count != 0)
+            {
+                return new ResultObject<string> { success = true, data = resultSearchATS_PriceLinkSettings[0].link };
+            }
+
+            // 如果 area 不為空，嘗試將 area 設為空並再次查詢
+            if (!string.IsNullOrEmpty(area))
+            {
+                return GetPriceLink(type, city, "", price);
+            }
+
+            // 如果 city 不為空，嘗試將 city 設為空並再次查詢
+            if (!string.IsNullOrEmpty(city))
+            {
+                return GetPriceLink(type, "", "", price);
+            }
+
+            return new ResultObject<string> { success = false, message = "價錢連結不存在" };
         }
 
         /// <summary>

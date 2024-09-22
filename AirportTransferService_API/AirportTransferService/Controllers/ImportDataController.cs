@@ -202,7 +202,7 @@ namespace AirportTransferService.Controllers
                     else if (dsexcelRecords != null && dsexcelRecords.Tables.Count > 0)
                     {
                         DataTable dtPriceLink = dsexcelRecords.Tables[0];
-                        List<string> column = ["價錢", "接/送機", "連結"];
+                        List<string> column = ["價錢", "接/送機", "城市", "區域", "連結"];
 
                         // 欄位檢查
                         foreach (string item in column)
@@ -216,17 +216,22 @@ namespace AirportTransferService.Controllers
                         if (dtPriceLink.AsEnumerable().ToList().Exists(x => string.IsNullOrWhiteSpace(x["連結"].ToString()))) return new ResultObject { success = false, message = String.Format("{0}不得為空白", "連結") };
 
                         // 塞資料
+                        ATS_PriceLinkSettingsController aTS_CityAreaSettingsController = new(_baseService, _ATS_PriceLinkSettings, _ATS_CityAreaSettings) { ControllerContext = ControllerContext };
                         foreach (DataRow row in dtPriceLink.Rows)
                         {
                             using (TransactionScope tx = new())
                             {
                                 decimal price = (dtPriceLink.Columns.Contains("價錢") && !DBNull.Value.Equals(dtPriceLink.Columns.Contains("價錢"))) ? Convert.ToDecimal(row["價錢"]) : 0;
                                 string type = (dtPriceLink.Columns.Contains("接/送機") && !DBNull.Value.Equals(dtPriceLink.Columns.Contains("接/送機"))) ? row["接/送機"].ToString() ?? "" : "";
+                                string city = (dtPriceLink.Columns.Contains("城市") && !DBNull.Value.Equals(dtPriceLink.Columns.Contains("城市"))) ? row["城市"].ToString() ?? "" : "";
+                                string area = (dtPriceLink.Columns.Contains("區域") && !DBNull.Value.Equals(dtPriceLink.Columns.Contains("區域"))) ? row["區域"].ToString() ?? "" : "";
                                 string link = (dtPriceLink.Columns.Contains("連結") && !DBNull.Value.Equals(dtPriceLink.Columns.Contains("連結"))) ? row["連結"].ToString() ?? "" : "";
                                 // 先查出價錢連結設定
                                 List<SearchATS_PriceLinkSettingsResult> resultSearchATS_PriceLinkSettings = _ATS_PriceLinkSettings.SearchATS_PriceLinkSettings(
                                     new SearchATS_PriceLinkSettingsParam(
                                         type: type,
+                                        city: city,
+                                        area: area,
                                         price: price,
                                         page: 0,
                                         num_per_page: 0),
@@ -243,19 +248,24 @@ namespace AirportTransferService.Controllers
                                             pls_id: resultSearchATS_PriceLinkSettings[0].pls_id,
                                             visible: Appsettings.api_string_param_no_pass,
                                             type: Appsettings.api_string_param_no_pass,
+                                            city: Appsettings.api_string_param_no_pass,
+                                            area: Appsettings.api_string_param_no_pass,
                                             price: Appsettings.api_numeric_param_no_pass,
                                             link: link));
                                 }
                                 else
                                 {
-                                    _ATS_PriceLinkSettings.CreateATS_PriceLinkSettings(
-                                        new CreateATS_PriceLinkSettingsParam(
-                                            cre_time: DateTime.Now,
-                                            cre_userid: jwtObject.user_id,
-                                            visible: "Y",
-                                            type: type,
-                                            price: price,
-                                            link: link));
+                                    ResultObject<string> resultATS_CityAreaSettingsController = aTS_CityAreaSettingsController.ATS_PriceLinkSettingsCreate(
+                                        new ATS_PriceLinkSettingsCreate
+                                        {
+                                            visible = "Y",
+                                            type = type,
+                                            city = city,
+                                            area = area,
+                                            price = price,
+                                            link = link
+                                        });
+                                    if (!resultATS_CityAreaSettingsController.success) return new ResultObject() { success = false, message = resultATS_CityAreaSettingsController.message };
                                 }
 
                                 tx.Complete();

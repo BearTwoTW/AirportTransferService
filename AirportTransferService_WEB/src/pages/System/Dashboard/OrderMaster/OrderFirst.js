@@ -1713,7 +1713,7 @@ const DialogsInner = forwardRef((props, ref) => {
                                 <CusInput
                                     id={"add--address"}
                                     name={"address"}
-                                    label={"地址"}
+                                    label={"巷/弄/號"}
                                     error={orderAddCheck.address}
                                     value={orderAdd.address}
                                     onChangeEvent={(e) => add_handelInput(e)}
@@ -1828,7 +1828,7 @@ const DialogsInner = forwardRef((props, ref) => {
                                     <CusInput
                                         id={"add--address"}
                                         name={"address"}
-                                        label={"地址"}
+                                        label={"巷/弄/號"}
                                         error={orderAddCheck.address}
                                         value={orderAdd.address}
                                         onChangeEvent={(e) => add_handelInput(e)}
@@ -2178,7 +2178,7 @@ const DialogsInner = forwardRef((props, ref) => {
                                 <CusInput
                                     id={"edit--address"}
                                     name={"address"}
-                                    label={"地址"}
+                                    label={"巷/弄/號"}
                                     error={editFieldCheck.address}
                                     value={data.address}
                                     onChangeEvent={(e) => edit_HandleInput(e)}
@@ -2293,7 +2293,7 @@ const DialogsInner = forwardRef((props, ref) => {
                                     <CusInput
                                         id={"edit--address"}
                                         name={"address"}
-                                        label={"地址"}
+                                        label={"巷/弄/號"}
                                         error={editFieldCheck.address}
                                         value={data.address}
                                         onChangeEvent={(e) => edit_HandleInput(e)}

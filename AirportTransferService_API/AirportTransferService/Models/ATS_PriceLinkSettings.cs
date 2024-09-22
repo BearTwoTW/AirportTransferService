@@ -12,6 +12,8 @@ namespace AirportTransferService.Models
     /// <param name="pls_id"></param>
     /// <param name="visible"></param>
     /// <param name="type"></param>
+    /// <param name="city"></param>
+    /// <param name="area"></param>
     /// <param name="price"></param>
     /// <param name="link"></param>
     public class ATS_PriceLinkSettings(
@@ -22,6 +24,8 @@ namespace AirportTransferService.Models
         string? pls_id = null,
         string? visible = null,
         string? type = null,
+        string? city = null,
+        string? area = null,
         decimal? price = null,
         string? link = null)
     {
@@ -62,6 +66,16 @@ namespace AirportTransferService.Models
         public string? type { get; } = type;
 
         /// <summary>
+        /// city
+        /// </summary>
+        public string? city { get; } = city;
+
+        /// <summary>
+        /// area
+        /// </summary>
+        public string? area { get; } = area;
+
+        /// <summary>
         /// price
         /// </summary>
         public decimal? price { get; } = price;
@@ -79,6 +93,8 @@ namespace AirportTransferService.Models
     /// <param name="cre_time"></param>
     /// <param name="visible"></param>
     /// <param name="type"></param>
+    /// <param name="city"></param>
+    /// <param name="area"></param>
     /// <param name="price"></param>
     /// <param name="link"></param>
     public class CreateATS_PriceLinkSettingsParam(
@@ -86,12 +102,16 @@ namespace AirportTransferService.Models
         DateTime? cre_time,
         string? visible,
         string? type,
+        string? city,
+        string? area,
         decimal? price,
         string? link) : ATS_PriceLinkSettings(
             cre_userid: cre_userid,
             cre_time: cre_time,
             visible: visible,
             type: type,
+            city: city,
+            area: area,
             price: price,
             link: link)
     {
@@ -107,6 +127,8 @@ namespace AirportTransferService.Models
     /// <param name="cre_userid"></param>
     /// <param name="visible"></param>
     /// <param name="type"></param>
+    /// <param name="city"></param>
+    /// <param name="area"></param>
     /// <param name="price"></param>
     /// <param name="link"></param>
     public class UpdateATS_PriceLinkSettingsParam(
@@ -117,6 +139,8 @@ namespace AirportTransferService.Models
         string? cre_userid = api_string_param_no_pass,
         string? visible = api_string_param_no_pass,
         string? type = api_string_param_no_pass,
+        string? city = api_string_param_no_pass,
+        string? area = api_string_param_no_pass,
         decimal? price = api_numeric_param_no_pass,
         string? link = api_string_param_no_pass) : ATS_PriceLinkSettings(
             cre_userid: cre_userid,
@@ -126,6 +150,8 @@ namespace AirportTransferService.Models
             pls_id: pls_id,
             visible: visible,
             type: type,
+            city: city,
+            area: area,
             price: price,
             link: link)
     {
@@ -137,6 +163,8 @@ namespace AirportTransferService.Models
     /// <param name="pls_id"></param>
     /// <param name="visible"></param>
     /// <param name="type"></param>
+    /// <param name="city"></param>
+    /// <param name="area"></param>
     /// <param name="price"></param>
     /// <param name="link"></param>
     /// <param name="page"></param>
@@ -145,6 +173,8 @@ namespace AirportTransferService.Models
         string? pls_id = null,
         string? visible = null,
         string? type = null,
+        string? city = null,
+        string? area = null,
         decimal? price = null,
         string? link = null,
         int page = 0,
@@ -167,6 +197,18 @@ namespace AirportTransferService.Models
         /// </summary>
         [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_PriceLinkSettings.type")]
         public string? type { get; } = type;
+
+        /// <summary>
+        /// city
+        /// </summary>
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_PriceLinkSettings.city")]
+        public string? city { get; } = city;
+
+        /// <summary>
+        /// area
+        /// </summary>
+        [SQLSearchCondition(SQLSearchConditionType.Equal, "ATS_PriceLinkSettings.area")]
+        public string? area { get; } = area;
 
         /// <summary>
         /// price
@@ -239,6 +281,18 @@ namespace AirportTransferService.Models
         public string? type { get; set; }
 
         /// <summary>
+        /// city
+        /// </summary>
+        [SQLSource("ATS_PriceLinkSettings.city")]
+        public string? city { get; set; }
+
+        /// <summary>
+        /// area
+        /// </summary>
+        [SQLSource("ATS_PriceLinkSettings.area")]
+        public string? area { get; set; }
+
+        /// <summary>
         /// price
         /// </summary>
         [SQLSource("ATS_PriceLinkSettings.price")]
@@ -268,6 +322,9 @@ namespace AirportTransferService.Models
                 upd_time == searchATS_PriceLinkSettingsResult.upd_time &&
                 pls_id == searchATS_PriceLinkSettingsResult.pls_id &&
                 visible == searchATS_PriceLinkSettingsResult.visible &&
+                type == searchATS_PriceLinkSettingsResult.type &&
+                city == searchATS_PriceLinkSettingsResult.city &&
+                area == searchATS_PriceLinkSettingsResult.area &&
                 price == searchATS_PriceLinkSettingsResult.price &&
                 link == searchATS_PriceLinkSettingsResult.link;
         }
@@ -290,6 +347,18 @@ namespace AirportTransferService.Models
         /// </summary>
         [Display(Name = "類別(接機/送機)"), Required(ErrorMessage = "請輸入{0}")]
         public string? type { get; set; }
+
+        /// <summary>
+        /// 城市
+        /// </summary>
+        [Display(Name = "城市")]
+        public string? city { get; set; } = "";
+
+        /// <summary>
+        /// 區域
+        /// </summary>
+        [Display(Name = "區域")]
+        public string? area { get; set; } = "";
 
         /// <summary>
         /// 價錢
@@ -326,6 +395,18 @@ namespace AirportTransferService.Models
         /// </summary>
         [Display(Name = "類別(接機/送機)")]
         public string? type { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 城市
+        /// </summary>
+        [Display(Name = "城市")]
+        public string? city { get; set; } = api_string_param_no_pass;
+
+        /// <summary>
+        /// 區域
+        /// </summary>
+        [Display(Name = "區域")]
+        public string? area { get; set; } = api_string_param_no_pass;
 
         /// <summary>
         /// 價錢
@@ -380,6 +461,18 @@ namespace AirportTransferService.Models
         /// </summary>
         [Display(Name = "類別(接機/送機)")]
         public string? type { get; set; } = "";
+
+        /// <summary>
+        /// 城市
+        /// </summary>
+        [Display(Name = "城市")]
+        public string? city { get; set; } = "";
+
+        /// <summary>
+        /// 區域
+        /// </summary>
+        [Display(Name = "區域")]
+        public string? area { get; set; } = "";
 
         /// <summary>
         /// 價錢

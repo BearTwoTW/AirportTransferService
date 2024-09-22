@@ -17,7 +17,7 @@ import { NoResults } from '../../../../components/CusError';
 import { CusOutlinedSelect } from '../../../../components/CusSelect';
 import { CusTextIconButton, CusIconButton, CusTextButton } from '../../../../components/CusButton';
 import { CusDatePicker } from '../../../../components/CusDatePicker';
-import { UserAPI, OptionList, DDMenu, ATS_PriceLinkSettings, ImportData } from '../../../../js/APITS';
+import { UserAPI, OptionList, DDMenu, ATS_PriceLinkSettings, ATS_CityAreaSettings, ImportData } from '../../../../js/APITS';
 import { useCheckLogInXPermission, get_ECC_indexedDB_factory } from '../../../../js/Function';
 import { isNullOrEmpty } from '../../../../js/FunctionTS';
 import { exportURL, ImportSampleURL } from '../../../../js/DomainTS';
@@ -35,6 +35,8 @@ export default function PriceLink() {
         visible: null,
         pls_id: null,
         type: null,
+        city: null,
+        area: null,
         price: null,
         link: null,
         page: 1,
@@ -59,7 +61,9 @@ export default function PriceLink() {
         typeOptions: [
             { name: "接機" },
             { name: "送機" }
-        ]
+        ],
+        cityOptions: [],
+        areaOptions: [],
     });
 
     // Dialog
@@ -93,6 +97,56 @@ export default function PriceLink() {
         });
         setInitDB(true);
     }, []);
+
+    /**
+ * 查詢城市區域選單
+ */
+    const seacrhOptions = async () => {
+        // 城市區域選單
+        ATS_CityAreaSettings.ATS_CityAreaSettingsSearch({
+            visible: "Y",
+            cas_id: null,
+            zip: null,
+            city: null,
+            area: null,
+            road: null,
+            section: null,
+            page: 0,
+            num_per_page: 0,
+            excel: "",
+        }).then(async res => {
+            if (res.success) {
+                setOptions(prev => {
+                    const cityOptions = res.data
+                        .map(item => item.city)
+                        .filter((city, index, self) => self.indexOf(city) === index)
+                        .map((name, index) => ({ key: index, name }));
+
+                    const uniqueAreaMap = new Map();
+                    res.data.forEach((item, index) => {
+                        if (!uniqueAreaMap.has(item.city)) {
+                            uniqueAreaMap.set(item.city, new Set());
+                        }
+                        uniqueAreaMap.get(item.city).add(item.area);
+                    });
+
+                    const areaOptions = [];
+                    let keyIndex = 0;
+                    uniqueAreaMap.forEach((areas, city) => {
+                        areas.forEach(area => {
+                            areaOptions.push({ key: keyIndex++, city, name: area });
+                        });
+                    });
+
+                    return {
+                        ...prev,
+                        cityOptions,
+                        areaOptions,
+                    };
+                });
+            }
+        })
+    }
 
     /**
      * 查詢車資
@@ -144,6 +198,8 @@ export default function PriceLink() {
             visible: null,
             pls_id: null,
             type: null,
+            city: null,
+            area: null,
             price: null,
             link: null,
             page: 1,
@@ -153,6 +209,7 @@ export default function PriceLink() {
     };
 
     useEffect(() => {
+        seacrhOptions();
         searchPriceLink(pageSearch);
     }, [pageSearch.search, pageSearch.page, pageSearch.num_per_page]);
 
@@ -178,6 +235,8 @@ export default function PriceLink() {
                     </TableCell>
                     <TableCell>{item.price}</TableCell>
                     <TableCell>{item.type}</TableCell>
+                    <TableCell>{item.city}</TableCell>
+                    <TableCell>{item.area}</TableCell>
                     <TableCell>{item.link}</TableCell>
                     <TableCell>
                         {permission.Edit ?
@@ -426,10 +485,20 @@ export default function PriceLink() {
         const { id, name, value, key } = e.target;
         const val = value === null ? null : value[key];
 
-        setPageSearch(prev => ({
-            ...prev,
-            [name]: val,
-        }));
+        if (name === "city") {
+            setPageSearch(prev => ({
+                ...prev,
+                page: 1,
+                area: null,
+                [name]: val,
+            }));
+        } else {
+            setPageSearch(prev => ({
+                ...prev,
+                page: 1,
+                [name]: val,
+            }));
+        }
     };
 
     /**選擇分頁顯示行數 */
@@ -479,6 +548,29 @@ export default function PriceLink() {
                                     optionKey={"name"}
                                     value={options.typeOptions.some(item => item.name === pageSearch.type) ? options.typeOptions.find(item => item.name === pageSearch.type) : null}
                                     onChangeEvent={(e) => search_handleSelect(e)}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={3} lg={3}>
+                                <CusOutlinedSelect
+                                    id={"search--city"}
+                                    name={"city"}
+                                    label={"城市"}
+                                    options={options.cityOptions}
+                                    optionKey={"name"}
+                                    value={options.cityOptions.some(item => item.name === pageSearch.city) ? options.cityOptions.find(item => item.name === pageSearch.city) : null}
+                                    onChangeEvent={(e) => search_handleSelect(e)}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={3} lg={3}>
+                                <CusOutlinedSelect
+                                    id={"search--area"}
+                                    name={"area"}
+                                    label={"區域"}
+                                    options={options.areaOptions.filter(item => item.city === pageSearch.city)}
+                                    optionKey={"name"}
+                                    value={options.areaOptions.some(item => item.name === pageSearch.area) ? options.areaOptions.find(item => item.name === pageSearch.area) : null}
+                                    onChangeEvent={(e) => search_handleSelect(e)}
+                                    disabled={pageSearch.city ? false : true}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3} lg={3}>
@@ -543,6 +635,8 @@ export default function PriceLink() {
                                                     { name: "開放狀態" },
                                                     { name: "價錢" },
                                                     { name: "接/送機" },
+                                                    { name: "城市" },
+                                                    { name: "區域" },
                                                     { name: "連結" },
                                                     { name: "操作" },
                                                 ]}
@@ -573,11 +667,15 @@ const DialogsInner = forwardRef((props, ref) => {
     const [file, setFile] = useState(null);
 
     const typeOptions = options.typeOptions; // 接/送機
+    const cityOptions = options.cityOptions; // 城市
+    const areaOptions = options.areaOptions; // 區域
 
     // 新增價錢連結
     const [priceLinkAdd, setPriceLinkAdd] = useState({
         visible: "Y",
         type: null,
+        city: null,
+        area: null,
         price: null,
         link: null,
     });
@@ -644,13 +742,24 @@ const DialogsInner = forwardRef((props, ref) => {
         const { id, name, value, key } = e.target;
         const val = value === null ? null : value[key];
 
-        setEditData(prevData => ({
-            ...prevData,
-            updData: {
-                ...prevData.updData,
-                [name]: val
-            }
-        }));
+        if (name === "city") {
+            setEditData(prevData => ({
+                ...prevData,
+                updData: {
+                    ...prevData.updData,
+                    area: null,
+                    [name]: val
+                }
+            }));
+        } else {
+            setEditData(prevData => ({
+                ...prevData,
+                updData: {
+                    ...prevData.updData,
+                    [name]: val
+                }
+            }));
+        }
     };
 
     /**
@@ -707,6 +816,28 @@ const DialogsInner = forwardRef((props, ref) => {
                         />
                     </Grid>
                     <Grid item xs={12}>
+                        <CusOutlinedSelect
+                            id={"add--city"}
+                            name={"city"}
+                            label={"城市"}
+                            options={cityOptions}
+                            optionKey={"name"}
+                            value={cityOptions.some(item => item.name === priceLinkAdd.city) ? cityOptions.find(item => item.name === priceLinkAdd.city) : null}
+                            onChangeEvent={(e) => add_HandleSelect(e)}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <CusOutlinedSelect
+                            id={"add--area"}
+                            name={"area"}
+                            label={"區域"}
+                            options={areaOptions}
+                            optionKey={"name"}
+                            value={areaOptions.some(item => item.name === priceLinkAdd.area) ? areaOptions.find(item => item.name === priceLinkAdd.area) : null}
+                            onChangeEvent={(e) => add_HandleSelect(e)}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
                         <CusInput
                             id={"add--link"}
                             name={"link"}
@@ -746,6 +877,24 @@ const DialogsInner = forwardRef((props, ref) => {
                         optionKey={"name"}
                         error={editFieldCheck.type}
                         value={typeOptions.some(item => item.name === data.type) ? typeOptions.find(item => item.name === data.type) : null}
+                        onChangeEvent={(e) => edit_HandleSelect(e)}
+                    />
+                    <CusOutlinedSelect
+                        id={'edit--city'}
+                        name={'city'}
+                        label={'城市'}
+                        options={cityOptions}
+                        optionKey={"name"}
+                        value={cityOptions.some(item => item.name === data.city) ? cityOptions.find(item => item.name === data.city) : null}
+                        onChangeEvent={(e) => edit_HandleSelect(e)}
+                    />
+                    <CusOutlinedSelect
+                        id={'edit--area'}
+                        name={'area'}
+                        label={'區域'}
+                        options={areaOptions}
+                        optionKey={"name"}
+                        value={areaOptions.some(item => item.name === data.area) ? areaOptions.find(item => item.name === data.area) : null}
                         onChangeEvent={(e) => edit_HandleSelect(e)}
                     />
                     <CusInput

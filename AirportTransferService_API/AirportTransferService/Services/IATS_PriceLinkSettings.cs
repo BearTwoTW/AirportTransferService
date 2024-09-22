@@ -116,7 +116,7 @@
                 from ATS_PriceLinkSettings
                 where 1=1
                 {SQL.GenerateSQLWhereQuery(param)}
-                {SQL.GenerateSQLOrderQuery<SearchATS_PriceLinkSettingsResult>(sort_columns, "order by ATS_PriceLinkSettings.price,ATS_PriceLinkSettings.type desc")}
+                {SQL.GenerateSQLOrderQuery<SearchATS_PriceLinkSettingsResult>(sort_columns, "order by ATS_PriceLinkSettings.price,ATS_PriceLinkSettings.city,ATS_PriceLinkSettings.area,ATS_PriceLinkSettings.type desc")}
                 {(param.page > 0 ? "offset((@page-1)) * @num_per_page ROWS fetch next @num_per_page ROWS only;" : "")}";
 
                 dt = SQL.GenerateSQLSelectResult(param, strSql, myConn, out page_count);
@@ -134,6 +134,8 @@
                     pls_id = dt.Columns.Contains("pls_id") ? dr["pls_id"].ToString() : null,
                     visible = dt.Columns.Contains("visible") ? dr["visible"].ToString() : null,
                     type = dt.Columns.Contains("type") ? dr["type"].ToString() : null,
+                    city = dt.Columns.Contains("city") ? dr["city"].ToString() : null,
+                    area = dt.Columns.Contains("area") ? dr["area"].ToString() : null,
                     price = dt.Columns.Contains("price") ? dr.Field<decimal>("price") : null,
                     link = dt.Columns.Contains("link") ? dr["link"].ToString() : null
                 });

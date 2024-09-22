@@ -147,6 +147,10 @@ export default function Reserve() {
         },
         carModelOptions: [], // 車型
         extraOptions: [], // 加價服務
+        extraCount: [
+            { key: 0, name: "1" },
+            { key: 1, name: "2" },
+        ], // 加價服務
         passengerOptions: [], // 人數
         bagsOptions: [], // 行李數
     });
@@ -786,7 +790,7 @@ const GoTabPanel = forwardRef((props, ref) => {
             })
         }
     };
-    console.log(maxServiceExtrasMessage);
+
     return (
         <TabPanel value={value} index={index}>
             <Grid container className="space-y-2.5">
@@ -1001,7 +1005,7 @@ const GoTabPanel = forwardRef((props, ref) => {
                             </Box>
                             <Grid container>
                                 <Grid item lg={12} sm={12} xs={12}>
-                                    <Box className="flex items-center">
+                                    <Box className="flex flex-wrap items-center">
                                         <FormGroup>
                                             <FormControlLabel
                                                 control={<Checkbox name="extra" checked={checkboxState.extra} onChange={handleCheckboxChange} />}
@@ -1155,12 +1159,15 @@ const GoTabPanel = forwardRef((props, ref) => {
     )
 })
 
-/** [內容]送機 */
+/** [內容]接機 */
 const LeaveTabPanel = forwardRef((props, ref) => {
     const { value, index, options, reserve_next, reserve_error, extraVisible, extraText } = props
     const otherExtra = options.extraOptions.filter(option => option.type === "其它");
     const [extraOptions, setExtraOptions] = useState([]);
     const [selectedCounts, setSelectedCounts] = useState({});
+    const [maxServiceExtrasMessage, setMaxServiceExtrasMessage] = useState({
+        message: "",
+    });
 
     // 新增訂單
     const [orderAdd, setOrderAdd] = useState({
@@ -1324,6 +1331,9 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                     value: index
                 }));
 
+                setMaxServiceExtrasMessage(() => ({
+                    message: `安全座椅及增高墊，加總上限為 ${maxServiceExtras} 個`
+                }));
                 setExtraOptions(newExtraOptions);
             }
         } else if (name === "es_ids") {
@@ -1351,7 +1361,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
 
             if (totalCount > maxServiceExtras) {
                 // 提示用戶並不更新狀態
-                alert(`選擇的數量不能超過 ${maxServiceExtras}`);
+                alert(`加總上限不能超過 ${maxServiceExtras} 個`);
                 return;
             }
 
@@ -1749,12 +1759,15 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                                     </React.Fragment>
                                     : null}
                                 <Grid item lg={12} sm={12} xs={12}>
-                                    <FormGroup>
-                                        <FormControlLabel
-                                            control={<Checkbox name="extra" checked={checkboxState.extra} onChange={handleCheckboxChange} />}
-                                            label="加購兒童安全座椅及增高墊 (+$200)"
-                                        />
-                                    </FormGroup>
+                                    <Box className="flex flex-wrap items-center">
+                                        <FormGroup>
+                                            <FormControlLabel
+                                                control={<Checkbox name="extra" checked={checkboxState.extra} onChange={handleCheckboxChange} />}
+                                                label="加購兒童安全座椅及增高墊 (+$200)"
+                                            />
+                                        </FormGroup>
+                                        {maxServiceExtrasMessage.message != "" ? <Typography color="error" fontWeight="bold">{`(${maxServiceExtrasMessage.message})`}</Typography> : null}
+                                    </Box>
                                 </Grid>
                                 {checkboxState.extra ?
                                     options.extraOptions.filter(filterEle => filterEle.type === "合併").map((mapEle, index) => {
@@ -1936,7 +1949,7 @@ const DialogsInner = forwardRef((props, ref) => {
                             <CalendarMonth color={"secondary"} />
                             <Typography color="secondary" fontWeight="bold">預約乘車日期及時間</Typography>
                         </Box>
-                        <Grid container className="mt-2.5 space-y-2.5">
+                        <Grid container className="mt-2.5 pl-8 space-y-2.5">
                             <Grid item xs={12}>
                                 <Box className="flex gap-2">
                                     <FlightTakeoffIcon color={"black"} />
@@ -1962,7 +1975,7 @@ const DialogsInner = forwardRef((props, ref) => {
                             <DirectionsCar color={"secondary"} />
                             <Typography color="secondary" fontWeight="bold">車型/人數及行李</Typography>
                         </Box>
-                        <Grid container className="mt-2.5 gap-2">
+                        <Grid container className="mt-2.5 pl-8 gap-2">
                             <Grid item xs={12}>
                                 <Box className="flex gap-2">
                                     <DirectionsCar color={"black"} />
@@ -2114,7 +2127,7 @@ const DialogsInner = forwardRef((props, ref) => {
                             <CalendarMonth color={"secondary"} />
                             <Typography color="secondary" fontWeight="bold">預約乘車日期及時間</Typography>
                         </Box>
-                        <Grid container className="mt-2.5 space-y-2.5">
+                        <Grid container className="mt-2.5 pl-8 space-y-2.5">
                             <Grid item xs={12}>
                                 <Box className="flex gap-2">
                                     <FlightLandIcon color={"black"} />
@@ -2140,7 +2153,7 @@ const DialogsInner = forwardRef((props, ref) => {
                             <DirectionsCar color={"secondary"} />
                             <Typography color="secondary" fontWeight="bold">車型/人數及行李</Typography>
                         </Box>
-                        <Grid container className="mt-2.5 gap-2">
+                        <Grid container className="mt-2.5 pl-8 gap-2">
                             <Grid item xs={12}>
                                 <Box className="flex gap-2">
                                     <DirectionsCar color={"black"} />

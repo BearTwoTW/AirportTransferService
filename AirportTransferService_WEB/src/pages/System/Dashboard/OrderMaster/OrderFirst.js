@@ -1303,7 +1303,15 @@ const DialogsInner = forwardRef((props, ref) => {
         const { name, value } = e.target;
         const val = value === "" ? null : value;
 
-        if (name === "date_travel") {
+        if (name === "section" || name === "road") {
+            // 使用正則表達式來移除所有阿拉伯數字
+            const filteredValue = val ? val.replace(/[0-9]/g, '') : null;
+
+            setOrderAdd(prev => ({
+                ...prev,
+                [name]: filteredValue
+            }));
+        } else if (name === "date_travel") {
             let formattedValue = val ? val.split('T')[0] : null; // 格式化日期為 YYYY-MM-DD
 
             setOrderAdd(prev => ({
@@ -1460,7 +1468,15 @@ const DialogsInner = forwardRef((props, ref) => {
         const { name, value } = e.target;
         const val = value === "" ? null : value;
 
-        if (name === "date_travel") {
+        if (name === "section" || name === "road") {
+            // 使用正則表達式來移除所有阿拉伯數字
+            const filteredValue = val ? val.replace(/[0-9]/g, '') : null;
+
+            setOrderAdd(prev => ({
+                ...prev,
+                [name]: filteredValue
+            }));
+        } else if (name === "date_travel") {
             let formattedValue = val ? val.split('T')[0] : null; // 格式化日期為 YYYY-MM-DD
 
             setEditData(prev => ({

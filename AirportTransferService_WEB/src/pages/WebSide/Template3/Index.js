@@ -142,7 +142,7 @@ export default function Index() {
             <Box id="target" className="object-cover">
                 <img className="w-full object-contain" src={imageD ? `${imageURL}${imageD}` : "https://fakeimg.pl/250x100/?text=img"}></img>
             </Box>
-            <Box className="flex flex-col space-y-5">
+            <Box className="flex flex-col">
                 <Box className="object-cover">
                     <img className="w-full object-contain" src={imageE ? `${imageURL}${imageE}` : "https://fakeimg.pl/250x100/?text=img"}></img>
                 </Box>

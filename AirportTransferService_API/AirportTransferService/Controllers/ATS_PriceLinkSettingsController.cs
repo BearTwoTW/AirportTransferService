@@ -58,23 +58,24 @@ namespace AirportTransferService.Controllers
             && ((string.IsNullOrEmpty(x.area) ? "" : x.area) == (string.IsNullOrEmpty(data.area) ? "" : data.area))
             && x.price == data.price))
                 return new ResultObject<string> { success = false, message = "價錢重複" };
-            // 同一個城市跟區域價錢只會有一種設定
-            if (!string.IsNullOrEmpty(data.city) && !string.IsNullOrEmpty(data.area))
-            {
-                if (search_results.Exists(x =>
-                x.type == data.type
-                && ((string.IsNullOrEmpty(x.city) ? "" : x.city) == (string.IsNullOrEmpty(data.city) ? "" : data.city))
-                && ((string.IsNullOrEmpty(x.area) ? "" : x.area) == (string.IsNullOrEmpty(data.area) ? "" : data.area))))
-                    return new ResultObject<string> { success = false, message = "城市、區域重複" };
-            }
-            else if (!string.IsNullOrEmpty(data.city))
-            {
-                if (search_results.Exists(x =>
-                x.type == data.type
-                && ((string.IsNullOrEmpty(x.city) ? "" : x.city) == (string.IsNullOrEmpty(data.city) ? "" : data.city))
-                && ((string.IsNullOrEmpty(x.area) ? "" : x.area) == "")))
-                    return new ResultObject<string> { success = false, message = "城市重複" };
-            }
+            // 同一個城市、區域會有不同的車型、路段、夜間加成..等，所以價錢可以重複
+            //// 同一個城市跟區域價錢只會有一種設定
+            //if (!string.IsNullOrEmpty(data.city) && !string.IsNullOrEmpty(data.area))
+            //{
+            //    if (search_results.Exists(x =>
+            //    x.type == data.type
+            //    && ((string.IsNullOrEmpty(x.city) ? "" : x.city) == (string.IsNullOrEmpty(data.city) ? "" : data.city))
+            //    && ((string.IsNullOrEmpty(x.area) ? "" : x.area) == (string.IsNullOrEmpty(data.area) ? "" : data.area))))
+            //        return new ResultObject<string> { success = false, message = "城市、區域重複" };
+            //}
+            //else if (!string.IsNullOrEmpty(data.city))
+            //{
+            //    if (search_results.Exists(x =>
+            //    x.type == data.type
+            //    && ((string.IsNullOrEmpty(x.city) ? "" : x.city) == (string.IsNullOrEmpty(data.city) ? "" : data.city))
+            //    && ((string.IsNullOrEmpty(x.area) ? "" : x.area) == "")))
+            //        return new ResultObject<string> { success = false, message = "城市重複" };
+            //}
 
             string id = _ATS_PriceLinkSettings.CreateATS_PriceLinkSettings(
                 new CreateATS_PriceLinkSettingsParam(
@@ -129,25 +130,26 @@ namespace AirportTransferService.Controllers
             && ((string.IsNullOrEmpty(x.area) ? "" : x.area) == (string.IsNullOrEmpty(area) ? "" : area))
             && x.price == price && x.pls_id != data.pls_id))
                 return new ResultObject<string> { success = false, message = "價錢重複" };
-            // 同一個城市跟區域價錢只會有一種設定
-            if (!string.IsNullOrEmpty(city) && !string.IsNullOrEmpty(area))
-            {
-                if (search_results.Exists(x =>
-                x.type == type
-                && ((string.IsNullOrEmpty(x.city) ? "" : x.city) == (string.IsNullOrEmpty(city) ? "" : city))
-                && ((string.IsNullOrEmpty(x.area) ? "" : x.area) == (string.IsNullOrEmpty(area) ? "" : area))
-                && x.pls_id != data.pls_id))
-                    return new ResultObject<string> { success = false, message = "城市、區域重複" };
-            }
-            else if (!string.IsNullOrEmpty(city))
-            {
-                if (search_results.Exists(x =>
-                x.type == type
-                && ((string.IsNullOrEmpty(x.city) ? "" : x.city) == (string.IsNullOrEmpty(city) ? "" : city))
-                && ((string.IsNullOrEmpty(x.area) ? "" : x.area) == "")
-                && x.pls_id != data.pls_id))
-                    return new ResultObject<string> { success = false, message = "城市重複" };
-            }
+            // 同一個城市、區域會有不同的車型、路段、夜間加成..等，所以價錢可以重複
+            //// 同一個城市跟區域價錢只會有一種設定
+            //if (!string.IsNullOrEmpty(city) && !string.IsNullOrEmpty(area))
+            //{
+            //    if (search_results.Exists(x =>
+            //    x.type == type
+            //    && ((string.IsNullOrEmpty(x.city) ? "" : x.city) == (string.IsNullOrEmpty(city) ? "" : city))
+            //    && ((string.IsNullOrEmpty(x.area) ? "" : x.area) == (string.IsNullOrEmpty(area) ? "" : area))
+            //    && x.pls_id != data.pls_id))
+            //        return new ResultObject<string> { success = false, message = "城市、區域重複" };
+            //}
+            //else if (!string.IsNullOrEmpty(city))
+            //{
+            //    if (search_results.Exists(x =>
+            //    x.type == type
+            //    && ((string.IsNullOrEmpty(x.city) ? "" : x.city) == (string.IsNullOrEmpty(city) ? "" : city))
+            //    && ((string.IsNullOrEmpty(x.area) ? "" : x.area) == "")
+            //    && x.pls_id != data.pls_id))
+            //        return new ResultObject<string> { success = false, message = "城市重複" };
+            //}
 
             //檢查城市區域是否已建立
             if (!string.IsNullOrEmpty(city) || !string.IsNullOrEmpty(area))

@@ -521,9 +521,18 @@ const GoTabPanel = forwardRef((props, ref) => {
         const { name, value } = e.target;
         const val = value === "" ? null : value;
 
-        if (name === "section" || name === "road") {
+        let checkAlert = false;
+        if (name === "road" || name === "section") {
             // 使用正則表達式來移除所有阿拉伯數字
             const filteredValue = val ? val.replace(/[0-9]/g, '') : null;
+
+            if (name === "road") {
+                checkAlert = val ? !val.includes("道") && !val.includes("路") && !val.includes("街") : false;
+            }
+
+            if (name === "section") {
+                checkAlert = val ? !val.includes("段") : false;
+            }
 
             setOrderAdd(prev => ({
                 ...prev,
@@ -560,9 +569,10 @@ const GoTabPanel = forwardRef((props, ref) => {
                 [name]: val
             }));
         }
+
         setOrderAddCheck(prev => ({
             ...prev,
-            [name]: !val ? true : false,
+            [name]: name === "section" || name === "address" ? checkAlert : !val ? true : checkAlert,
         }));
     };
 
@@ -778,6 +788,9 @@ const GoTabPanel = forwardRef((props, ref) => {
         const otherError =
             checkboxState.other && !orderAdd.es_ids?.some((item) => item.extraType === "其它");
 
+        if (orderAdd.section) requiredFields.section = !orderAdd.section.includes("段");
+        if (orderAdd.road) requiredFields.road = !orderAdd.road.includes("道") && !orderAdd.road.includes("路") && !orderAdd.road.includes("街");
+
         // 檢查是否有任何必填欄位未填
         const hasError = Object.values(requiredFields).some(Boolean) || mergeError || otherError;
 
@@ -786,6 +799,11 @@ const GoTabPanel = forwardRef((props, ref) => {
                 ...requiredFields,
                 es_ids_merge: mergeError,
                 es_ids_other: otherError,
+            });
+
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
             });
         } else {
             // 金額試算
@@ -840,7 +858,8 @@ const GoTabPanel = forwardRef((props, ref) => {
                                 <CusInput
                                     id={"add--road"}
                                     name={"road"}
-                                    label={"路"}
+                                    label={"道/路/街"}
+                                    helperText={!orderAdd.road ? "" : orderAddCheck.road ? `內容必須包含"道/路/街"` : ""}
                                     error={orderAddCheck.road}
                                     value={orderAdd.road}
                                     onChangeEvent={(e) => add_handelInput(e)}
@@ -851,6 +870,8 @@ const GoTabPanel = forwardRef((props, ref) => {
                                     id={"add--section"}
                                     name={"section"}
                                     label={"段"}
+                                    helperText={!orderAdd.section ? " " : orderAddCheck.section ? `內容必須包含"段"` : ""}
+                                    error={orderAddCheck.section}
                                     value={orderAdd.section}
                                     onChangeEvent={(e) => add_handelInput(e)}
                                 />
@@ -860,6 +881,7 @@ const GoTabPanel = forwardRef((props, ref) => {
                                     id={"add--address"}
                                     name={"address"}
                                     label={"巷/弄/號"}
+                                    helperText={" "}
                                     error={orderAddCheck.address}
                                     value={orderAdd.address}
                                     onChangeEvent={(e) => add_handelInput(e)}
@@ -1245,9 +1267,18 @@ const LeaveTabPanel = forwardRef((props, ref) => {
         const { name, value } = e.target;
         const val = value === "" ? null : value;
 
-        if (name === "section" || name === "road") {
+        let checkAlert = false;
+        if (name === "road" || name === "section") {
             // 使用正則表達式來移除所有阿拉伯數字
             const filteredValue = val ? val.replace(/[0-9]/g, '') : null;
+
+            if (name === "road") {
+                checkAlert = val ? !val.includes("道") && !val.includes("路") && !val.includes("街") : false;
+            }
+
+            if (name === "section") {
+                checkAlert = val ? !val.includes("段") : false;
+            }
 
             setOrderAdd(prev => ({
                 ...prev,
@@ -1284,9 +1315,10 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                 [name]: val
             }));
         }
+
         setOrderAddCheck(prev => ({
             ...prev,
-            [name]: !val ? true : false,
+            [name]: name === "section" || name === "address" ? checkAlert : !val ? true : checkAlert,
         }));
     };
 
@@ -1478,6 +1510,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
             city: !orderAdd.city,
             area: !orderAdd.area,
             road: !orderAdd.road,
+            section: true,
             address: !orderAdd.address,
             airport: !orderAdd.airport,
             terminal: !orderAdd.terminal,
@@ -1602,7 +1635,8 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                                 <CusInput
                                     id={"add--road"}
                                     name={"road"}
-                                    label={"路"}
+                                    label={"道/路/街"}
+                                    helperText={!orderAdd.road ? "" : orderAddCheck.road ? `內容必須包含"道/路/街"` : ""}
                                     error={orderAddCheck.road}
                                     value={orderAdd.road}
                                     onChangeEvent={(e) => add_handelInput(e)}
@@ -1613,6 +1647,8 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                                     id={"add--section"}
                                     name={"section"}
                                     label={"段"}
+                                    helperText={!orderAdd.section ? " " : orderAddCheck.section ? `內容必須包含"段"` : ""}
+                                    error={orderAddCheck.section}
                                     value={orderAdd.section}
                                     onChangeEvent={(e) => add_handelInput(e)}
                                 />
@@ -1622,6 +1658,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                                     id={"add--address"}
                                     name={"address"}
                                     label={"巷/弄/號"}
+                                    helperText={" "}
                                     error={orderAddCheck.address}
                                     value={orderAdd.address}
                                     onChangeEvent={(e) => add_handelInput(e)}
@@ -1947,7 +1984,7 @@ const DialogsInner = forwardRef((props, ref) => {
                             <Typography color="secondary" fontWeight="bold">上車地點</Typography>
                         </Box>
                         <Box className="mt-2.5 pl-8">
-                            <Typography color="info" fontWeight="bold">{orderAdd.city + orderAdd.area + (orderAdd.road && orderAdd.road.includes("路") ? orderAdd.road : orderAdd.road + "路") + (orderAdd.section ? (orderAdd.section.includes("段") ? orderAdd.section : orderAdd.section + "段") : "") + orderAdd.address}</Typography>
+                            <Typography color="info" fontWeight="bold">{orderAdd.city + orderAdd.area + orderAdd.road + orderAdd.section + orderAdd.address}</Typography>
                         </Box>
                     </Grid>
                     <Grid item xs={12} md={6} lg={6}>
@@ -2136,7 +2173,7 @@ const DialogsInner = forwardRef((props, ref) => {
                             <Typography color="secondary" fontWeight="bold">下車地點</Typography>
                         </Box>
                         <Box className="mt-2.5">
-                            <Typography color="info" fontWeight="bold">{orderAdd.city + orderAdd.area + (orderAdd.road && orderAdd.road.includes("路") ? orderAdd.road : orderAdd.road + "路") + (orderAdd.section ? (orderAdd.section.includes("段") ? orderAdd.section : orderAdd.section + "段") : "") + orderAdd.address}</Typography>
+                            <Typography color="info" fontWeight="bold">{orderAdd.city + orderAdd.area + orderAdd.road + orderAdd.section + orderAdd.address}</Typography>
                         </Box>
                     </Grid>
                     <Grid item xs={12} className="border-b ml-4" />

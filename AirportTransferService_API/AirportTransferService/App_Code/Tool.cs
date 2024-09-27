@@ -831,7 +831,9 @@ namespace AirportTransferService.App_Code
         {
             if (string.IsNullOrEmpty(road)
                 || road == Appsettings.api_string_param_no_pass
-                || road.Contains('路', StringComparison.CurrentCulture)) return road;
+                || road.Contains('路', StringComparison.CurrentCulture)
+                || road.Contains('道', StringComparison.CurrentCulture)
+                || road.Contains('街', StringComparison.CurrentCulture)) return road;
             return $"{road}路";
         }
 

@@ -235,7 +235,7 @@ namespace AirportTransferService.Controllers
                                         price: price,
                                         page: 0,
                                         num_per_page: 0),
-                                    ["pls_id", "type", "price"], [],
+                                    ["pls_id"], [],
                                     out int _);
                                 // 如果有符合的價錢，就更新連結
                                 if (resultSearchATS_PriceLinkSettings.Count > 0)

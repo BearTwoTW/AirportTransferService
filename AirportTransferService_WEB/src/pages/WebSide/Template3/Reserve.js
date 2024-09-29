@@ -572,7 +572,7 @@ const GoTabPanel = forwardRef((props, ref) => {
 
         setOrderAddCheck(prev => ({
             ...prev,
-            [name]: name === "section" || name === "address" ? checkAlert : !val ? true : checkAlert,
+            [name]: name === "section" ? checkAlert : !val ? true : checkAlert,
         }));
     };
 
@@ -881,7 +881,6 @@ const GoTabPanel = forwardRef((props, ref) => {
                                     id={"add--address"}
                                     name={"address"}
                                     label={"巷/弄/號"}
-                                    helperText={" "}
                                     error={orderAddCheck.address}
                                     value={orderAdd.address}
                                     onChangeEvent={(e) => add_handelInput(e)}
@@ -1318,7 +1317,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
 
         setOrderAddCheck(prev => ({
             ...prev,
-            [name]: name === "section" || name === "address" ? checkAlert : !val ? true : checkAlert,
+            [name]: name === "section" ? checkAlert : !val ? true : checkAlert,
         }));
     };
 
@@ -1510,7 +1509,6 @@ const LeaveTabPanel = forwardRef((props, ref) => {
             city: !orderAdd.city,
             area: !orderAdd.area,
             road: !orderAdd.road,
-            section: true,
             address: !orderAdd.address,
             airport: !orderAdd.airport,
             terminal: !orderAdd.terminal,
@@ -1539,6 +1537,9 @@ const LeaveTabPanel = forwardRef((props, ref) => {
             checkboxState.other &&
             !orderAdd.es_ids?.some((item) => item.extraType === "其它" && item.es_id !== "00001");
 
+        if (orderAdd.section) requiredFields.section = !orderAdd.section.includes("段");
+        if (orderAdd.road) requiredFields.road = !orderAdd.road.includes("道") && !orderAdd.road.includes("路") && !orderAdd.road.includes("街");
+
         // 檢查是否有任何必填欄位未填
         const hasError = Object.values(requiredFields).some(Boolean) || mergeError || otherError;
 
@@ -1547,6 +1548,11 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                 ...requiredFields,
                 es_ids_merge: mergeError,
                 es_ids_other: otherError,
+            });
+
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
             });
         } else {
             // 金額試算
@@ -1658,7 +1664,6 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                                     id={"add--address"}
                                     name={"address"}
                                     label={"巷/弄/號"}
-                                    helperText={" "}
                                     error={orderAddCheck.address}
                                     value={orderAdd.address}
                                     onChangeEvent={(e) => add_handelInput(e)}

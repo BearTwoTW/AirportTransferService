@@ -160,8 +160,48 @@ namespace AirportTransferService.Controllers
                 if (!Enum.TryParse(data.order_status, out OrderStatus _)) return new ResultObject<object> { success = false, message = "訂單狀態錯誤" };
             }
             #endregion
-            if (data.visible != null && data.visible.Equals("N")) data.order_status = OrderStatus.已取消.ToString();
-            if (data.visible != null && data.visible.Equals("Y")) data.order_status = OrderStatus.處理中.ToString();
+            if (data.visible != null && data.visible.Equals("N"))
+            {
+                using (TransactionScope tx = new())
+                {
+                    _ATS_OrderMaster.UpdateATS_OrderMaster(new UpdateATS_OrderMasterParam(
+                        cre_time: Appsettings.api_datetime_param_no_pass,
+                        upd_userid: jwtObject.user_id,
+                        upd_time: DateTime.Now,
+                        o_id: data.o_id,
+                        visible: data.visible,
+                        order_status: OrderStatus.已取消.ToString(),
+                        type: Appsettings.api_string_param_no_pass,
+                        city: Appsettings.api_string_param_no_pass,
+                        area: Appsettings.api_string_param_no_pass,
+                        road: Appsettings.api_string_param_no_pass,
+                        section: Appsettings.api_string_param_no_pass,
+                        address: Appsettings.api_string_param_no_pass,
+                        airport: Appsettings.api_string_param_no_pass,
+                        terminal: Appsettings.api_string_param_no_pass,
+                        flght_number: Appsettings.api_string_param_no_pass,
+                        date_travel: Appsettings.api_dateonly_param_no_pass,
+                        time_travel: Appsettings.api_timeonly_param_no_pass,
+                        number_passenger: Appsettings.api_numeric_param_no_pass,
+                        number_bags: Appsettings.api_numeric_param_no_pass,
+                        cms_id: Appsettings.api_string_param_no_pass,
+                        signboard_title: Appsettings.api_string_param_no_pass,
+                        signboard_content: Appsettings.api_string_param_no_pass,
+                        name_purchaser: Appsettings.api_string_param_no_pass,
+                        phone_purchaser: Appsettings.api_string_param_no_pass,
+                        email_purchaser: Appsettings.api_string_param_no_pass,
+                        name_passenger: Appsettings.api_string_param_no_pass,
+                        phone_passenger: Appsettings.api_string_param_no_pass,
+                        email_passenger: Appsettings.api_string_param_no_pass,
+                        price: Appsettings.api_numeric_param_no_pass,
+                        link: Appsettings.api_string_param_no_pass));
+
+                    tx.Complete();
+                }
+
+                return new ResultObject<object> { success = true, message = "修改成功" };
+            }
+            else if (data.visible != null && data.visible.Equals("Y")) data.order_status = OrderStatus.處理中.ToString();
             // 檢查 路 & 段
             if (data.road != null && !data.road.Equals(Appsettings.api_string_param_no_pass)) data.road = Tool.ConvertAddress(Tool.CheckRoadFormat(data.road!));
             if (data.section != null && !data.section.Equals(Appsettings.api_string_param_no_pass)) data.section = Tool.ConvertAddress(Tool.CheckSectionFormat(data.section!));

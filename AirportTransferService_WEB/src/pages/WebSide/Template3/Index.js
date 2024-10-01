@@ -179,7 +179,7 @@ export default function Index() {
                         onClick={() => reserve_Click({ type: "go" })} />
                 </Box>
             </Box>
-            <Box className="flex justify-center items-end min-h-0" style={{ height: '500px' }} >
+            <Box className="flex justify-center items-end min-h-0">
                 <Box className="w-full flex justify-center items-end min-h-0">
                     <Box className="relative w-full flex items-end">
                         <img

@@ -72,7 +72,20 @@ export const WebNavigation3 = (props) => {
                             </Typography>
                         </Box>
                         <Box className="flex space-x-10 text-info font-bold max-md:hidden">
-                            <a href="/index#target" className="cursor-pointer hover:opacity-80 font-normal">預約流程</a>
+                            <a href="/index" className="cursor-pointer hover:opacity-80 font-normal"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    // 取得hash
+                                    let hash = window.location.hash;
+                                    // 如果已經有hash，就跳轉回/index
+                                    console.log("hash", hash);
+                                    if (hash) {
+                                        window.location.replace('/index');
+                                        sessionStorage.setItem("hash", hash);
+                                    } else {
+                                        window.location.replace('/index#target');
+                                    }
+                                }}>預約流程</a>
                             <a className="cursor-pointer hover:opacity-80 font-normal" onClick={() => navigate("/Price")}>加價服務</a>
                             <a className="cursor-pointer hover:opacity-80 font-normal" onClick={() => reserve_Click({ type: "go" })}>預約及車資計算</a>
                         </Box>

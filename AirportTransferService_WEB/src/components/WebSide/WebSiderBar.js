@@ -89,7 +89,20 @@ export const WebSwipeableSideBar3 = () => {
                 <Box className={"flex-1 p-10"}>
                     <Box className="flex flex-col space-y-10 text-info font-bold">
                         <a className="cursor-pointer hover:opacity-80" onClick={() => navigate("/Index")}>首頁</a>
-                        <a href="/index#target" className="cursor-pointer hover:opacity-80">預約流程</a>
+                        <a href="/index" className="cursor-pointer hover:opacity-80"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                // 取得hash
+                                let hash = location.hash;
+                                // 如果已經有hash，就跳轉回/index
+                                console.log("hash", hash);
+                                if (hash) {
+                                    window.location.replace('/index');
+                                    sessionStorage.setItem("hash", hash);
+                                } else {
+                                    window.location.replace('/index#target');
+                                }
+                            }}>預約流程</a>
                         <a className="cursor-pointer hover:opacity-80" onClick={() => navigate("/Price")}>加價服務</a>
                         <a className="cursor-pointer hover:opacity-80" onClick={() => reserve_Click({ type: "go" })}>預約及車資計算</a>
                     </Box>

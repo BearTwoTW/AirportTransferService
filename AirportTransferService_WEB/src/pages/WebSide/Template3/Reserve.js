@@ -527,7 +527,7 @@ const GoTabPanel = forwardRef((props, ref) => {
             const filteredValue = val ? val.replace(/[0-9]/g, '') : null;
 
             if (name === "road") {
-                checkAlert = val ? !val.includes("道") && !val.includes("路") && !val.includes("街") : false;
+                checkAlert = val ? !val.includes("道") && !val.includes("路") && !val.includes("街") && !val.includes("村") && !val.includes("鄰") : false;
             }
 
             if (name === "section") {
@@ -788,8 +788,8 @@ const GoTabPanel = forwardRef((props, ref) => {
         const otherError =
             checkboxState.other && !orderAdd.es_ids?.some((item) => item.extraType === "其它");
 
+        if (orderAdd.road) requiredFields.road = !orderAdd.road.includes("道") && !orderAdd.road.includes("路") && !orderAdd.road.includes("街") && !orderAdd.road.includes("村") && !orderAdd.road.includes("鄰");
         if (orderAdd.section) requiredFields.section = !orderAdd.section.includes("段");
-        if (orderAdd.road) requiredFields.road = !orderAdd.road.includes("道") && !orderAdd.road.includes("路") && !orderAdd.road.includes("街");
 
         // 檢查是否有任何必填欄位未填
         const hasError = Object.values(requiredFields).some(Boolean) || mergeError || otherError;
@@ -858,8 +858,8 @@ const GoTabPanel = forwardRef((props, ref) => {
                                 <CusInput
                                     id={"add--road"}
                                     name={"road"}
-                                    label={"道/路/街"}
-                                    helperText={!orderAdd.road ? "" : orderAddCheck.road ? `內容必須包含"道/路/街"` : ""}
+                                    label={"道/路/街/村/鄰"}
+                                    helperText={!orderAdd.road ? "" : orderAddCheck.road ? `內容必須包含"道/路/街/村/鄰"` : ""}
                                     error={orderAddCheck.road}
                                     value={orderAdd.road}
                                     onChangeEvent={(e) => add_handelInput(e)}
@@ -1272,7 +1272,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
             const filteredValue = val ? val.replace(/[0-9]/g, '') : null;
 
             if (name === "road") {
-                checkAlert = val ? !val.includes("道") && !val.includes("路") && !val.includes("街") : false;
+                checkAlert = val ? !val.includes("道") && !val.includes("路") && !val.includes("街") && !val.includes("村") && !val.includes("鄰") : false;
             }
 
             if (name === "section") {
@@ -1538,7 +1538,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
             !orderAdd.es_ids?.some((item) => item.extraType === "其它" && item.es_id !== "00001");
 
         if (orderAdd.section) requiredFields.section = !orderAdd.section.includes("段");
-        if (orderAdd.road) requiredFields.road = !orderAdd.road.includes("道") && !orderAdd.road.includes("路") && !orderAdd.road.includes("街");
+        if (orderAdd.road) requiredFields.road = !orderAdd.road.includes("道") && !orderAdd.road.includes("路") && !orderAdd.road.includes("街") && !orderAdd.road.includes("村") && !orderAdd.road.includes("鄰");
 
         // 檢查是否有任何必填欄位未填
         const hasError = Object.values(requiredFields).some(Boolean) || mergeError || otherError;
@@ -1641,8 +1641,8 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                                 <CusInput
                                     id={"add--road"}
                                     name={"road"}
-                                    label={"道/路/街"}
-                                    helperText={!orderAdd.road ? "" : orderAddCheck.road ? `內容必須包含"道/路/街"` : ""}
+                                    label={"道/路/街/村/鄰"}
+                                    helperText={!orderAdd.road ? "" : orderAddCheck.road ? `內容必須包含"道/路/街/村/鄰"` : ""}
                                     error={orderAddCheck.road}
                                     value={orderAdd.road}
                                     onChangeEvent={(e) => add_handelInput(e)}
@@ -1692,7 +1692,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                                 <CusDatePicker
                                     id={"add--date_travel"}
                                     name={"date_travel"}
-                                    label={"出發日期"}
+                                    label={"抵達日期"}
                                     views={["year", "month", "day"]}
                                     minDate={moment().add(3, 'days')}
                                     error={orderAddCheck.date_travel}
@@ -1989,7 +1989,7 @@ const DialogsInner = forwardRef((props, ref) => {
                             <Typography color="secondary" fontWeight="bold">上車地點</Typography>
                         </Box>
                         <Box className="mt-2.5 pl-8">
-                            <Typography color="info" fontWeight="bold">{orderAdd.city + orderAdd.area + orderAdd.road + orderAdd.section + orderAdd.address}</Typography>
+                            <Typography color="info" fontWeight="bold">{orderAdd.city + orderAdd.area + orderAdd.road + (orderAdd.section ? orderAdd.section : "") + orderAdd.address}</Typography>
                         </Box>
                     </Grid>
                     <Grid item xs={12} md={6} lg={6}>
@@ -2054,9 +2054,10 @@ const DialogsInner = forwardRef((props, ref) => {
                             </Grid>
                         </Grid>
                     </Grid>
+                    <Grid item xs={12} className="border-b ml-4" />
                     {extraVisible ?
                         <Grid item xs={12} md={6} lg={6}>
-                            <Box className="flex items-center border-b pb-2.5 gap-2">
+                            <Box className="flex items-center pb-2.5 gap-2">
                                 <Add color={"secondary"} />
                                 <Typography color="secondary" fontWeight="bold">加價服務請於【結帳】時加購</Typography>
                             </Box>
@@ -2121,7 +2122,7 @@ const DialogsInner = forwardRef((props, ref) => {
                         </Grid>
                         : null}
                     <Grid item xs={12} md={6} lg={6}>
-                        <Box className="flex items-center border-b pb-2.5 gap-2">
+                        <Box className="flex items-center pb-2.5 gap-2">
                             <EditNote color={"secondary"} />
                             <Typography color="secondary" fontWeight="bold">基本資料</Typography>
                         </Box>
@@ -2178,7 +2179,7 @@ const DialogsInner = forwardRef((props, ref) => {
                             <Typography color="secondary" fontWeight="bold">下車地點</Typography>
                         </Box>
                         <Box className="mt-2.5">
-                            <Typography color="info" fontWeight="bold">{orderAdd.city + orderAdd.area + orderAdd.road + orderAdd.section + orderAdd.address}</Typography>
+                            <Typography color="info" fontWeight="bold">{orderAdd.city + orderAdd.area + orderAdd.road + (orderAdd.section ? orderAdd.section : "") + orderAdd.address}</Typography>
                         </Box>
                     </Grid>
                     <Grid item xs={12} className="border-b ml-4" />
@@ -2234,9 +2235,10 @@ const DialogsInner = forwardRef((props, ref) => {
                             </Grid>
                         </Grid>
                     </Grid>
+                    <Grid item xs={12} className="border-b ml-4" />
                     {extraVisible ?
                         <Grid item xs={12} md={6} lg={6}>
-                            <Box className="flex items-center border-b pb-2.5 gap-2">
+                            <Box className="flex items-center pb-2.5 gap-2">
                                 <Add color={"secondary"} />
                                 <Typography color="secondary" fontWeight="bold">加價服務請於【結帳】時加購</Typography>
                             </Box>
@@ -2334,7 +2336,7 @@ const DialogsInner = forwardRef((props, ref) => {
                         </Grid>
                         : null}
                     <Grid item xs={12} md={6} lg={6}>
-                        <Box className="flex items-center border-b pb-2.5 gap-2">
+                        <Box className="flex items-center pb-2.5 gap-2">
                             <EditNote color={"secondary"} />
                             <Typography color="secondary" fontWeight="bold">基本資料</Typography>
                         </Box>

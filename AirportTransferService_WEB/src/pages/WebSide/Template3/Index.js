@@ -70,12 +70,36 @@ export default function Index() {
     // 一進頁面就查詢
     useEffect(() => {
         getWebSetting();
-        // 加入#判斷
-        const targetId = window.location.hash.substring(1);
-        const targetElement = document.getElementById(targetId);
-        if (targetElement) {
-            targetElement.scrollIntoView({ behavior: "smooth" });
+        if (sessionStorage.getItem("hash")) {
+            let hash = sessionStorage.getItem("hash");
+            sessionStorage.removeItem("hash");
+            window.location.replace(`/index${hash}`);
         }
+
+        const handleHashChange = () => {
+            console.log("?");
+            // 加入#判斷
+            const targetId = window.location.hash.substring(1);
+            const targetElement = document.getElementById(targetId);
+            if (targetElement) {
+                setTimeout(() => {
+                    const headerHeight = document.querySelector('header')?.offsetHeight || 0;
+                    const targetPosition = targetElement.getBoundingClientRect().top + window.scrollY;
+
+                    window.scrollTo({
+                        top: targetPosition - headerHeight,
+                        behavior: 'smooth'
+                    });
+                }, 300);
+            }
+        };
+
+        window.addEventListener('hashchange', handleHashChange);
+        handleHashChange();
+
+        return () => {
+            window.removeEventListener('hashchange', handleHashChange);
+        };
     }, [pageSearch]);
 
     /**
@@ -139,10 +163,10 @@ export default function Index() {
                     </Box>
                 </Box>
             </Box>
-            <Box id="target" className="object-cover">
+            <Box className="object-cover">
                 <img className="w-full object-contain" src={imageD ? `${imageURL}${imageD}` : "https://fakeimg.pl/250x100/?text=img"}></img>
             </Box>
-            <Box className="flex flex-col">
+            <Box id="target" className="flex flex-col">
                 <Box className="object-cover">
                     <img className="w-full object-contain" src={imageE ? `${imageURL}${imageE}` : "https://fakeimg.pl/250x100/?text=img"}></img>
                 </Box>
@@ -155,7 +179,7 @@ export default function Index() {
                         onClick={() => reserve_Click({ type: "go" })} />
                 </Box>
             </Box>
-            <Box className="flex justify-center items-end min-h-0">
+            <Box className="flex justify-center items-end min-h-0" style={{ height: '500px' }} >
                 <Box className="w-full flex justify-center items-end min-h-0">
                     <Box className="relative w-full flex items-end">
                         <img

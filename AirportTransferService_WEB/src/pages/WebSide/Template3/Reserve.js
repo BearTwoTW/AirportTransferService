@@ -858,8 +858,8 @@ const GoTabPanel = forwardRef((props, ref) => {
                                 <CusInput
                                     id={"add--road"}
                                     name={"road"}
-                                    label={"道/路/街/村/鄰"}
-                                    helperText={!orderAdd.road ? "" : orderAddCheck.road ? `內容必須包含"道/路/街/村/鄰"` : ""}
+                                    label={"道/路/街/村/鄰 (數字限輸入中文如: 六村十一鄰)"}
+                                    helperText={!orderAdd.road ? "" : orderAddCheck.road ? `內容必須包含"道/路/街/村/鄰 (數字限輸入中文如: 六村十一鄰)"` : ""}
                                     error={orderAddCheck.road}
                                     value={orderAdd.road}
                                     onChangeEvent={(e) => add_handelInput(e)}
@@ -1641,8 +1641,8 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                                 <CusInput
                                     id={"add--road"}
                                     name={"road"}
-                                    label={"道/路/街/村/鄰"}
-                                    helperText={!orderAdd.road ? "" : orderAddCheck.road ? `內容必須包含"道/路/街/村/鄰"` : ""}
+                                    label={"道/路/街/村/鄰 (數字限輸入中文如: 六村十一鄰)"}
+                                    helperText={!orderAdd.road ? "" : orderAddCheck.road ? `內容必須包含"道/路/街/村/鄰 (數字限輸入中文如: 六村十一鄰)"` : ""}
                                     error={orderAddCheck.road}
                                     value={orderAdd.road}
                                     onChangeEvent={(e) => add_handelInput(e)}

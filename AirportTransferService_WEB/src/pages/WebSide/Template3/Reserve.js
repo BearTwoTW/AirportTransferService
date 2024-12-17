@@ -946,6 +946,7 @@ const GoTabPanel = forwardRef((props, ref) => {
                                     label={"出發日期"}
                                     views={["year", "month", "day"]}
                                     minDate={moment().add(3, 'days')}
+                                    maxDate={moment().add(30, 'days')}
                                     error={orderAddCheck.date_travel}
                                     value={orderAdd.date_travel}
                                     onChangeEvent={(e) => add_handelInput(e)}
@@ -1695,6 +1696,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                                     label={"抵達日期"}
                                     views={["year", "month", "day"]}
                                     minDate={moment().add(3, 'days')}
+                                    maxDate={moment().add(30, 'days')}
                                     error={orderAddCheck.date_travel}
                                     value={orderAdd.date_travel}
                                     onChangeEvent={(e) => add_handelInput(e)}

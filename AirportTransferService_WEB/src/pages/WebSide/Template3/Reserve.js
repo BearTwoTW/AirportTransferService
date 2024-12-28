@@ -11,6 +11,7 @@ import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import { LocationOnOutlined, LocationOn, CalendarMonth, PeopleAltOutlined, DirectionsCar, Add, EditNote, AccessTime, Backpack } from '@mui/icons-material';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import FlightLandIcon from '@mui/icons-material/FlightLand';
 import { Outlet, Link, NavLink, Navigate } from 'react-router-dom'
@@ -155,6 +156,12 @@ export default function Reserve() {
         bagsOptions: [], // 行李數
     });
 
+    // 公告
+    const [bulletinVisible, setBulletinVisible] = useState(false);
+    const [bulletinTitle, setBulletinTitle] = useState();
+    const [bulletinContent, setBulletinContent] = useState();
+
+    // 加價
     const [extraVisible, setExtraVisible] = useState(false);
     const [extraText, setExtraText] = useState();
 
@@ -173,6 +180,9 @@ export default function Reserve() {
     const getWebSetting = () => {
         ATS_WebSetting.ATS_WebSettingsSearch(webSettingSearch).then(res => {
             if (res.success) {
+                setBulletinVisible(res.data.filter(e => e.ws_id === "00011")[0].text1 === "Y" ? true : false);
+                setBulletinTitle(res.data.filter(e => e.ws_id === "00011")[0].text2);
+                setBulletinContent(res.data.filter(e => e.ws_id === "00011")[0].html1);
                 setExtraVisible(res.data.filter(e => e.ws_id === "00010")[0].text1 === "Y" ? true : false);
                 setExtraText(res.data.filter(e => e.ws_id === "00010")[0].text2);
             }
@@ -379,6 +389,22 @@ export default function Reserve() {
         });
     }
 
+    const bulletin_Click = (e, type, title, content) => {
+        useDialog.current.handleOpen();
+        setDialogData({
+            id: type,
+            DialogTitle: title,
+            maxWidth: "md",
+            DialogContent: <DialogsInner type={type} ref={useDialogInner} html={content} />,
+            DialogActions: (
+                <React.Fragment>
+                    <Button color="secondary" variant='outlined' onClick={dialogClose}>
+                        關閉
+                    </Button>
+                </React.Fragment>)
+        });
+    }
+
     /**關閉Dialog  */
     const dialogClose = () => {
         useDialog.current.handleClose();
@@ -386,7 +412,13 @@ export default function Reserve() {
 
     return (
         <React.Fragment>
-            <Box className="container mx-auto pt-20 pb-20 ">
+            <Box className="container mx-auto flex flex-col gap-5 pt-20 pb-20">
+                {bulletinVisible ?
+                    <Box className="w-full flex justify-between items-center p-5 rounded-lg bg-white cursor-pointer" onClick={(e) => bulletin_Click(e, "bulletin", bulletinTitle, bulletinContent)}>
+                        <Typography variant="h6" color="secondary" fontWeight="bold">春節加價及預約公告</Typography>
+                        <KeyboardArrowRightIcon color="secondary" />
+                    </Box>
+                    : null}
                 <Box className="rounded-lg bg-white">
                     <Box>
                         <Tabs
@@ -1975,8 +2007,7 @@ const LeaveTabPanel = forwardRef((props, ref) => {
 
 /** [內容]Dialog*/
 const DialogsInner = forwardRef((props, ref) => {
-    const { type, orderAdd, options, signboard, extra, sameDetail, other, price, message, extraVisible } = props;
-    console.log(other)
+    const { type, orderAdd, options, signboard, extra, sameDetail, other, price, message, extraVisible, html } = props;
     if (type === "go") {
         // 日期格式yyyy-mm-dd
         const date_travel = new Date(orderAdd.date_travel).toISOString().split('T')[0];
@@ -2377,6 +2408,14 @@ const DialogsInner = forwardRef((props, ref) => {
             <React.Fragment>
                 <Box className="p-2.5">
                     <Typography variant="body">{message}</Typography>
+                </Box>
+            </React.Fragment>
+        )
+    } else if (type === "bulletin") {
+        return (
+            <React.Fragment>
+                <Box sx={{ p: "1rem" }}>
+                    <Box dangerouslySetInnerHTML={{ __html: html }} />
                 </Box>
             </React.Fragment>
         )

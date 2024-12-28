@@ -139,8 +139,22 @@ export default function WebSetting() {
         html3: "",
     });
 
+    // 加價 文字設定 & 是否可見
+    const [bulletin, setBulletin] = useState({
+        ws_id: "00011",
+        title: "bulletin",
+        image: "",
+        text1: "",
+        text2: "",
+        text3: "",
+        html1: "",
+        html2: "",
+        html3: "",
+    });
+
     // 加價服務 是否顯示於前台
     const [checked, setChecked] = useState("Y");
+    const [bulletinChecked, setBulletinChecked] = useState("Y");
 
     // 查詢狀態 & 網站設定查詢結果
     const [isLoading, setIsLoading] = useState(true);
@@ -163,6 +177,9 @@ export default function WebSetting() {
                 setModalB(res.data.filter(item => item.ws_id === "00008")[0])
                 setNight(res.data.filter(item => item.ws_id === "00009")[0])
                 setChecked(res.data.filter(item => item.ws_id === "00010")[0].text1)
+                setExtra(res.data.filter(item => item.ws_id === "00010")[0])
+                setBulletin(res.data.filter(item => item.ws_id === "00011")[0])
+                setBulletinChecked(res.data.filter(item => item.ws_id === "00011")[0].text1)
             }
             setIsLoading(false);
         });
@@ -315,6 +332,17 @@ export default function WebSetting() {
     })
 
     /**
+     * @description [事件]公告標題-input
+     */
+    const bulletin_handleInput = useCallback((e) => {
+        const { name, value } = e.target
+        setBulletin(prevData => ({
+            ...prevData,
+            [name]: value
+        }));
+    })
+
+    /**
      * @description [事件]注意事項-儲存修改
      */
     const saveF_handelClick = useCallback((e) => {
@@ -412,12 +440,41 @@ export default function WebSetting() {
     })
 
     /**
+     * @description [事件]公告Popup-儲存修改
+     */
+    const saveBulletin_handelClick = useCallback((e) => {
+        ATS_WebSetting.ATS_WebSettingsUpdate(bulletin).then(res => {
+            if (res.success) {
+                enqueueSnackbar("修改成功", { variant: 'success' });
+            } else {
+                enqueueSnackbar("修改失敗", { variant: 'error' });
+            }
+        });
+    })
+
+    /**
+     * @description [事件]公告內容Popup-input
+     */
+    const bulletin_HandleInput = (e, editor, name) => {
+        let val = editor.getData();
+        setBulletin((prevData) => ({ ...prevData, [name]: val }))
+    }
+
+    /**
      * @description 加價是否可見
      */
     const extraOnChecked = useCallback((e) => {
         setChecked(checked === "N" ? "Y" : "N");
         setExtra((prevData) => ({ ...prevData, text1: checked === "N" ? "Y" : "N" }))
     }, [checked])
+
+    /**
+     * @description 公告是否可見
+     */
+    const bulletinOnChecked = useCallback((e) => {
+        setBulletinChecked(bulletinChecked === "N" ? "Y" : "N");
+        setBulletin((prevData) => ({ ...prevData, text1: bulletinChecked === "N" ? "Y" : "N" }))
+    }, [bulletinChecked])
 
     /**
      * @description 加價顯示 儲存修改
@@ -431,8 +488,6 @@ export default function WebSetting() {
             }
         });
     })
-
-    console.log(extra)
 
     // 提示框
     const { enqueueSnackbar } = useSnackbar();
@@ -878,6 +933,97 @@ export default function WebSetting() {
                                                                     },
                                                                 }} />
                                                         </Box>
+                                                    </Grid>
+                                                </React.Fragment>
+                                            }
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={6} lg={6}>
+                                        <CusInfoTitle
+                                            label={"公告設定"}
+                                            buttonType={"button"}
+                                            buttonGroup={
+                                                [{
+                                                    variant: "contained",
+                                                    color: "info",
+                                                    icon: <Save />,
+                                                    name: "儲存",
+                                                    onClick: (e) => saveBulletin_handelClick(e)
+                                                }]}
+                                            content={
+                                                <React.Fragment>
+                                                    <Grid container>
+                                                        <Grid item xs={12}>
+                                                            <CusSwitch color={"success"} label={"是否於前台顯示"} checked={bulletinChecked} onChange={(e) => bulletinOnChecked(e)} />
+                                                        </Grid>
+                                                        {bulletinChecked === "Y" ?
+                                                            <React.Fragment>
+                                                                <Grid item xs={12}>
+                                                                    <CusInput
+                                                                        id={"text2"}
+                                                                        label={"公告標題"}
+                                                                        placeholder={"請輸入公告標題"}
+                                                                        name={"text2"}
+                                                                        type={"text"}
+                                                                        value={bulletin.text2}
+                                                                        onChangeEvent={(e) => bulletin_handleInput(e)}
+                                                                    />
+                                                                </Grid>
+                                                                <Grid item xs={12}>
+                                                                    <Box style={{ minHeight: '350px' }}>
+                                                                        <CKEditor
+                                                                            editor={DecoupledEditor}
+                                                                            onReady={(editor) => {
+                                                                                // 加入工具列
+                                                                                editor.ui.view.editable.element.parentElement.insertBefore(
+                                                                                    editor.ui.view.toolbar.element,
+                                                                                    editor.ui.view.editable.element
+                                                                                )
+                                                                                editor.editing.view.change((writer) => {
+                                                                                    writer.setStyle({
+                                                                                        "background-color": "white",
+                                                                                        "min-height": '300px',
+                                                                                        "border": '1px solid #dddddd'
+                                                                                    }, editor.editing.view.document.getRoot())
+                                                                                })
+                                                                            }}
+                                                                            // 內容
+                                                                            data={bulletin ? bulletin.html1 : ""}
+                                                                            // 事件
+                                                                            onChange={(e, editor) => bulletin_HandleInput(e, editor, "html1")}
+                                                                            // 設定
+                                                                            config={{
+                                                                                // 語系
+                                                                                language: 'zh',
+                                                                                // 工具列
+                                                                                toolbar: {
+                                                                                    items: [
+                                                                                        'heading',
+                                                                                        '|',
+                                                                                        'fontFamily',
+                                                                                        'fontSize',
+                                                                                        'fontColor',
+                                                                                        'fontBackgroundColor',
+                                                                                        'bold',
+                                                                                        'italic',
+                                                                                        'underline',
+                                                                                        '|',
+                                                                                        'blockQuote',
+                                                                                        'alignment',
+                                                                                        'outdent',
+                                                                                        'indent',
+                                                                                        'numberedList',
+                                                                                        'bulletedList',
+                                                                                        '|',
+                                                                                        'undo',
+                                                                                        'redo',
+                                                                                    ],
+                                                                                },
+                                                                            }} />
+                                                                    </Box>
+                                                                </Grid>
+                                                            </React.Fragment>
+                                                            : null}
                                                     </Grid>
                                                 </React.Fragment>
                                             }

@@ -415,7 +415,7 @@ export default function Reserve() {
             <Box className="container mx-auto flex flex-col gap-5 pt-20 pb-20">
                 {bulletinVisible ?
                     <Box className="w-full flex justify-between items-center p-5 rounded-lg bg-white cursor-pointer" onClick={(e) => bulletin_Click(e, "bulletin", bulletinTitle, bulletinContent)}>
-                        <Typography variant="h6" color="secondary" fontWeight="bold">春節加價及預約公告</Typography>
+                        <Typography variant="h6" color="secondary" fontWeight="bold">{bulletinTitle}</Typography>
                         <KeyboardArrowRightIcon color="secondary" />
                     </Box>
                     : null}

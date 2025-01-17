@@ -27,6 +27,7 @@ import { CustomerAPI } from "../../../js/APITS";
 import { localStorageClear } from "../../../js/Function";
 import { OfficeSiteContext } from '../../../store/OfficeSiteContext'
 import { ATS_OrderMaster, ATS_CityAreaSettings, ATS_AirportTerminalSettings, ATS_CarModelSettings, ATS_ExtraSettings, ATS_PriceLinkSettings, ATS_WebSetting } from '../../../js/APITS';
+import { start } from 'repl';
 
 export default function Reserve() {
     const location = useLocation();
@@ -156,6 +157,17 @@ export default function Reserve() {
         bagsOptions: [], // 行李數
     });
 
+    // 暫停服務
+    const [systemDateTime, setSystemDateTime] = useState({
+        date: null,
+        time: null,
+    });
+    const [pauseService, setPauseService] = useState({
+        visible: "N",
+        start_date: null,
+        end_date: null,
+    });
+
     // 公告
     const [bulletinVisible, setBulletinVisible] = useState(false);
     const [bulletinTitle, setBulletinTitle] = useState();
@@ -180,6 +192,14 @@ export default function Reserve() {
     const getWebSetting = () => {
         ATS_WebSetting.ATS_WebSettingsSearch(webSettingSearch).then(res => {
             if (res.success) {
+                setPauseService(prev => {
+                    return {
+                        ...prev,
+                        visible: res.data.filter(e => e.ws_id === "00012")[0].text1,
+                        start_date: res.data.filter(e => e.ws_id === "00012")[0].text2,
+                        end_date: res.data.filter(e => e.ws_id === "00012")[0].text3,
+                    }
+                });
                 setBulletinVisible(res.data.filter(e => e.ws_id === "00011")[0].text1 === "Y" ? true : false);
                 setBulletinTitle(res.data.filter(e => e.ws_id === "00011")[0].text2);
                 setBulletinContent(res.data.filter(e => e.ws_id === "00011")[0].html1);
@@ -384,6 +404,22 @@ export default function Reserve() {
                     </Button>
                     <Button color="primary" variant='contained' onClick={dialogClose}>
                         確定
+                    </Button>
+                </React.Fragment>)
+        });
+    }
+
+    const pause_service_bulletin = ({ e, type, title, content }) => {
+        useDialog.current.handleOpen();
+        setDialogData({
+            id: type,
+            DialogTitle: title,
+            maxWidth: "md",
+            DialogContent: <DialogsInner type={type} ref={useDialogInner} html={content} />,
+            DialogActions: (
+                <React.Fragment>
+                    <Button color="secondary" variant='outlined' onClick={dialogClose}>
+                        關閉
                     </Button>
                 </React.Fragment>)
         });

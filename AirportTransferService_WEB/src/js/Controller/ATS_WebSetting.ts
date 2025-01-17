@@ -97,3 +97,10 @@ export interface ATS_WebSettingsUpdateParams {
 export const ATS_WebSettingsUpdate = async (obj: ATS_WebSettingsUpdateParams): Promise<ResultObj> => {
     return await AuthorizeFetch("ATS_WebSettings/ATS_WebSettingsUpdate", obj);
 };
+
+/**
+ * @description 網站設定修改
+ */
+export const GetSystemDateTime = async (): Promise<ResultObj> => {
+    return await AuthorizeFetch("ATS_WebSettings/GetSystemDateTime", {});
+};

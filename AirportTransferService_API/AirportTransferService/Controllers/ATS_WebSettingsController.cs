@@ -147,5 +147,24 @@ namespace AirportTransferService.Controllers
             _ATS_WebSettings.DeleteATS_WebSettings(data.ws_id);
             return new ResultObject<string> { success = true, message = "刪除成功" };
         }
+
+        /// <summary>
+        /// 取得系統時間
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost, AllowAnonymous]
+        public ResultObject<object> GetSystemDateTime()
+        {
+            return new ResultObject<object>
+            {
+                success = true,
+                message = "取得成功",
+                data = new
+                {
+                    date = DateTime.Now.Date,
+                    time = DateTime.Now.TimeOfDay
+                }
+            };
+        }
     }
 }

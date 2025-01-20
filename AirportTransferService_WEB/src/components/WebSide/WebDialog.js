@@ -49,6 +49,13 @@ export const WebDialog3 = forwardRef((props, ref) => {
       setOpen(false);
     }
   }));
+
+  const onClose_event = () => {
+    let onClose = true;
+    if (props.info.onClose === false) onClose = props.info.onClose;
+    if (onClose) setOpen(false);
+  }
+
   return (
     <React.Fragment>
       <Dialog
@@ -57,7 +64,7 @@ export const WebDialog3 = forwardRef((props, ref) => {
         aria-labelledby="draggable-dialog-title"
         maxWidth={props.info.maxWidth ? props.info.maxWidth : props.maxWidth}
         attribute={props.info.attribute}
-        onClose={() => setOpen(false)}
+        onClose={onClose_event}
         open={open}>
         {props.info.DialogTitle ?
           <DialogTitle id={"draggable-dialog-title"} sx={{ m: 0, p: 2, display: "flex" }}>

@@ -16,6 +16,7 @@ import { CusVerticalLinearStepper1 } from '../../../../components/CusStepper';
 import { NoResults } from '../../../../components/CusError';
 import { CusSpan } from '../../../../components/CusSpanTS';
 import { CusSwitch } from '../../../../components/CusSwitchTS';
+import { CusDatePicker } from '../../../../components/CusDatePicker';
 import { useCheckLogInXPermission, tryCatchError } from '../../../../js/Function';
 import { DDMenu, ATS_WebSetting, FilesAPI } from '../../../../js/APITS';
 import { imageURL } from '../../../../js/Domain';
@@ -139,7 +140,7 @@ export default function WebSetting() {
         html3: "",
     });
 
-    // 加價 文字設定 & 是否可見
+    // 公告欄 文字設定 & 是否可見
     const [bulletin, setBulletin] = useState({
         ws_id: "00011",
         title: "bulletin",
@@ -152,9 +153,23 @@ export default function WebSetting() {
         html3: "",
     });
 
+    // 暫停服務 文字設定 & 是否可見
+    const [pauseService, setPauseService] = useState({
+        ws_id: "00012",
+        title: "PauseService",
+        image: "",
+        text1: "",
+        text2: "",
+        text3: "",
+        html1: "",
+        html2: "",
+        html3: "",
+    });
+
     // 加價服務 是否顯示於前台
     const [checked, setChecked] = useState("Y");
     const [bulletinChecked, setBulletinChecked] = useState("Y");
+    const [pauseServiceChecked, setPauseServiceChecked] = useState("Y");
 
     // 查詢狀態 & 網站設定查詢結果
     const [isLoading, setIsLoading] = useState(true);
@@ -180,6 +195,8 @@ export default function WebSetting() {
                 setExtra(res.data.filter(item => item.ws_id === "00010")[0])
                 setBulletin(res.data.filter(item => item.ws_id === "00011")[0])
                 setBulletinChecked(res.data.filter(item => item.ws_id === "00011")[0].text1)
+                setPauseService(res.data.filter(item => item.ws_id === "00012")[0])
+                setPauseServiceChecked(res.data.filter(item => item.ws_id === "00012")[0].text1)
             }
             setIsLoading(false);
         });
@@ -343,6 +360,17 @@ export default function WebSetting() {
     })
 
     /**
+ * @description [事件]暫停服務標題-input
+ */
+    const pauseService_handleInput = useCallback((e) => {
+        const { name, value } = e.target
+        setPauseService(prevData => ({
+            ...prevData,
+            [name]: value
+        }));
+    })
+
+    /**
      * @description [事件]注意事項-儲存修改
      */
     const saveF_handelClick = useCallback((e) => {
@@ -453,11 +481,37 @@ export default function WebSetting() {
     })
 
     /**
+ * @description [事件]暫停服務Popup-儲存修改
+ */
+    const savePauseService_handelClick = useCallback((e) => {
+        ATS_WebSetting.ATS_WebSettingsUpdate(pauseService).then(res => {
+            if (res.success) {
+                enqueueSnackbar("修改成功", { variant: 'success' });
+            } else {
+                enqueueSnackbar("修改失敗", { variant: 'error' });
+            }
+        });
+    })
+
+    /**
      * @description [事件]公告內容Popup-input
      */
     const bulletin_HandleInput = (e, editor, name) => {
         let val = editor.getData();
         setBulletin((prevData) => ({ ...prevData, [name]: val }))
+    }
+
+    /**
+     * @description [事件]暫停服務內容Popup-input
+     */
+    const pauseService_HandleInput = (e, editor, name) => {
+        let val = editor.getData();
+        setPauseService((prevData) => ({ ...prevData, [name]: val }))
+    }
+    const pauseServiceDate_handleInput = (e) => {
+        const { name, value } = e.target
+        let formattedValue = new Date(value).toLocaleDateString('en-CA');
+        setPauseService((prevData) => ({ ...prevData, [name]: formattedValue }))
     }
 
     /**
@@ -475,6 +529,14 @@ export default function WebSetting() {
         setBulletinChecked(bulletinChecked === "N" ? "Y" : "N");
         setBulletin((prevData) => ({ ...prevData, text1: bulletinChecked === "N" ? "Y" : "N" }))
     }, [bulletinChecked])
+
+    /**
+     * @description 暫停服務是否可見
+     */
+    const pauseServiceOnChecked = useCallback((e) => {
+        setPauseServiceChecked(pauseServiceChecked === "N" ? "Y" : "N");
+        setPauseService((prevData) => ({ ...prevData, text1: pauseServiceChecked === "N" ? "Y" : "N" }))
+    }, [pauseServiceChecked])
 
     /**
      * @description 加價顯示 儲存修改
@@ -991,6 +1053,117 @@ export default function WebSetting() {
                                                                             data={bulletin ? bulletin.html1 : ""}
                                                                             // 事件
                                                                             onChange={(e, editor) => bulletin_HandleInput(e, editor, "html1")}
+                                                                            // 設定
+                                                                            config={{
+                                                                                // 語系
+                                                                                language: 'zh',
+                                                                                // 工具列
+                                                                                toolbar: {
+                                                                                    items: [
+                                                                                        'heading',
+                                                                                        '|',
+                                                                                        'fontFamily',
+                                                                                        'fontSize',
+                                                                                        'fontColor',
+                                                                                        'fontBackgroundColor',
+                                                                                        'bold',
+                                                                                        'italic',
+                                                                                        'underline',
+                                                                                        '|',
+                                                                                        'blockQuote',
+                                                                                        'alignment',
+                                                                                        'outdent',
+                                                                                        'indent',
+                                                                                        'numberedList',
+                                                                                        'bulletedList',
+                                                                                        '|',
+                                                                                        'undo',
+                                                                                        'redo',
+                                                                                    ],
+                                                                                },
+                                                                            }} />
+                                                                    </Box>
+                                                                </Grid>
+                                                            </React.Fragment>
+                                                            : null}
+                                                    </Grid>
+                                                </React.Fragment>
+                                            }
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={6} lg={6}>
+                                        <CusInfoTitle
+                                            label={"暫停服務設定"}
+                                            buttonType={"button"}
+                                            buttonGroup={
+                                                [{
+                                                    variant: "contained",
+                                                    color: "info",
+                                                    icon: <Save />,
+                                                    name: "儲存",
+                                                    onClick: (e) => savePauseService_handelClick(e)
+                                                }]}
+                                            content={
+                                                <React.Fragment>
+                                                    <Grid container>
+                                                        <Grid item xs={12}>
+                                                            <CusSwitch color={"success"} label={"是否於前台顯示"} checked={pauseServiceChecked} onChange={(e) => pauseServiceOnChecked(e)} />
+                                                        </Grid>
+                                                        {pauseServiceChecked === "Y" ?
+                                                            <React.Fragment>
+                                                                <Grid item xs={6}>
+                                                                    <CusDatePicker
+                                                                        id={"html2"}
+                                                                        name={"html2"}
+                                                                        label={"暫停服務日期起"}
+                                                                        views={["year", "month", "day"]}
+                                                                        value={pauseService.html2}
+                                                                        onChangeEvent={(e) => pauseServiceDate_handleInput(e)}
+                                                                    />
+                                                                </Grid>
+                                                                <Grid item xs={6}>
+                                                                    <CusDatePicker
+                                                                        id={"html3"}
+                                                                        name={"html3"}
+                                                                        label={"暫停服務日期起"}
+                                                                        views={["year", "month", "day"]}
+                                                                        value={pauseService.html3}
+                                                                        onChangeEvent={(e) => pauseServiceDate_handleInput(e)}
+                                                                    />
+                                                                </Grid>
+                                                                <Grid item xs={12}>
+                                                                    <CusInput
+                                                                        id={"text2"}
+                                                                        label={"暫停服務標題"}
+                                                                        placeholder={"請輸入暫停服務標題"}
+                                                                        name={"text2"}
+                                                                        type={"text"}
+                                                                        value={pauseService.text2}
+                                                                        onChangeEvent={(e) => pauseService_handleInput(e)}
+                                                                    />
+                                                                </Grid>
+                                                                <Grid item xs={12}>
+                                                                    <Box style={{ minHeight: '350px' }}>
+                                                                        <CKEditor
+                                                                            editor={DecoupledEditor}
+                                                                            onReady={(editor) => {
+                                                                                // 加入工具列
+                                                                                editor.ui.view.editable.element.parentElement.insertBefore(
+                                                                                    editor.ui.view.toolbar.element,
+                                                                                    editor.ui.view.editable.element
+                                                                                )
+                                                                                editor.editing.view.change((writer) => {
+                                                                                    writer.setStyle({
+                                                                                        "background-color": "white",
+                                                                                        "min-height": '300px',
+                                                                                        "border": '1px solid #dddddd'
+                                                                                    }, editor.editing.view.document.getRoot())
+                                                                                })
+                                                                            }}
+                                                                            // 內容
+                                                                            data={pauseService ? pauseService.html1 : ""}
+                                                                            // 事件
+                                                                            onChange={(e, editor) => pauseService_HandleInput(e, editor, "html1")}
                                                                             // 設定
                                                                             config={{
                                                                                 // 語系

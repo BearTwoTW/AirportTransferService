@@ -27,7 +27,6 @@ import { CustomerAPI } from "../../../js/APITS";
 import { localStorageClear } from "../../../js/Function";
 import { OfficeSiteContext } from '../../../store/OfficeSiteContext'
 import { ATS_OrderMaster, ATS_CityAreaSettings, ATS_AirportTerminalSettings, ATS_CarModelSettings, ATS_ExtraSettings, ATS_PriceLinkSettings, ATS_WebSetting } from '../../../js/APITS';
-import { start } from 'repl';
 
 export default function Reserve() {
     const location = useLocation();
@@ -157,21 +156,13 @@ export default function Reserve() {
         bagsOptions: [], // 行李數
     });
 
-    // 暫停服務
-    const [systemDateTime, setSystemDateTime] = useState({
-        date: null,
-        time: null,
-    });
-    const [pauseService, setPauseService] = useState({
-        visible: "N",
-        start_date: null,
-        end_date: null,
-    });
-
     // 公告
     const [bulletinVisible, setBulletinVisible] = useState(false);
     const [bulletinTitle, setBulletinTitle] = useState();
     const [bulletinContent, setBulletinContent] = useState();
+
+    // 暫停服務
+    const [pauseServiceVisible, setPauseServiceVisible] = useState(false);
 
     // 加價
     const [extraVisible, setExtraVisible] = useState(false);
@@ -192,14 +183,16 @@ export default function Reserve() {
     const getWebSetting = () => {
         ATS_WebSetting.ATS_WebSettingsSearch(webSettingSearch).then(res => {
             if (res.success) {
-                setPauseService(prev => {
-                    return {
-                        ...prev,
-                        visible: res.data.filter(e => e.ws_id === "00012")[0].text1,
-                        start_date: res.data.filter(e => e.ws_id === "00012")[0].text2,
-                        end_date: res.data.filter(e => e.ws_id === "00012")[0].text3,
-                    }
+                let resPauseService = res.data.filter(e => e.ws_id === "00012")[0];
+                // 暫停服務
+                checkPauseService({
+                    visible: resPauseService.text1,
+                    title: resPauseService.text2,
+                    content: resPauseService.html1,
+                    start_date: resPauseService.html2,
+                    end_date: resPauseService.html3,
                 });
+
                 setBulletinVisible(res.data.filter(e => e.ws_id === "00011")[0].text1 === "Y" ? true : false);
                 setBulletinTitle(res.data.filter(e => e.ws_id === "00011")[0].text2);
                 setBulletinContent(res.data.filter(e => e.ws_id === "00011")[0].html1);
@@ -409,7 +402,8 @@ export default function Reserve() {
         });
     }
 
-    const pause_service_bulletin = ({ e, type, title, content }) => {
+    // [事件]公告點擊 打開 Modal
+    const bulletin_Click = (e, type, title, content) => {
         useDialog.current.handleOpen();
         setDialogData({
             id: type,
@@ -425,17 +419,41 @@ export default function Reserve() {
         });
     }
 
-    const bulletin_Click = (e, type, title, content) => {
+    // [事件]暫停服務 檢查
+    const checkPauseService = ({ visible, title, content, start_date, end_date }) => {
+        if (visible === "Y") {
+            ATS_WebSetting.GetSystemDateTime().then(res => {
+                if (res.success) {
+                    const formattedDateTime = `${moment(res.data.date).format('YYYY-MM-DD')} ${res.data.time.split('.')[0]}`;
+                    const now = moment(formattedDateTime);
+
+                    // 判斷是否在暫停服務的時間範圍內
+                    if (now.isBetween(moment(start_date), moment(end_date))) {
+                        setPauseServiceVisible(true);
+                        pause_service_bulletin({
+                            type: "pause_service",
+                            title: title,
+                            content: content
+                        });
+                    }
+                }
+            });
+        }
+    };
+
+    // [事件]暫停服務 打開 Modal
+    const pause_service_bulletin = ({ type, title, content }) => {
         useDialog.current.handleOpen();
         setDialogData({
             id: type,
+            onClose: false,
+            closeBtn: false,
             DialogTitle: title,
-            maxWidth: "md",
             DialogContent: <DialogsInner type={type} ref={useDialogInner} html={content} />,
             DialogActions: (
                 <React.Fragment>
-                    <Button color="secondary" variant='outlined' onClick={dialogClose}>
-                        關閉
+                    <Button color="secondary" variant='outlined' onClick={() => navigate(-1)} >
+                        回上一頁
                     </Button>
                 </React.Fragment>)
         });
@@ -482,6 +500,7 @@ export default function Reserve() {
                             reserve_next={reserve_next}
                             reserve_error={reserve_error}
                             extraVisible={extraVisible}
+                            pauseServiceVisible={pauseServiceVisible}
                             extraText={extraText}
                             ref={useTabContent.current[0]}
                         />
@@ -492,6 +511,7 @@ export default function Reserve() {
                             reserve_next={reserve_next}
                             reserve_error={reserve_error}
                             extraVisible={extraVisible}
+                            pauseServiceVisible={pauseServiceVisible}
                             extraText={extraText}
                             ref={useTabContent.current[1]}
                         />
@@ -507,7 +527,7 @@ export default function Reserve() {
 
 /** [內容]送機 */
 const GoTabPanel = forwardRef((props, ref) => {
-    const { value, index, options, reserve_next, reserve_error, extraVisible, extraText } = props
+    const { value, index, options, reserve_next, reserve_error, extraVisible, pauseServiceVisible, extraText } = props
     const otherExtra = options.extraOptions.filter(option => option.type === "其它");
     const [extraOptions, setExtraOptions] = useState([]);
     const [selectedCounts, setSelectedCounts] = useState({});
@@ -1245,8 +1265,9 @@ const GoTabPanel = forwardRef((props, ref) => {
                             <WebTextIconButton3
                                 sx={{ color: "#FFFFFF" }}
                                 size={"medium"}
-                                color={"secondary"}
-                                text={"下一步"}
+                                color={pauseServiceVisible ? "error" : "secondary"}
+                                text={pauseServiceVisible ? "暫停服務" : "下一步"}
+                                disabled={pauseServiceVisible}
                                 onClick={(e) => confrm_Click({ e: e, type: "go", cal: "Y", orderAdd: orderAdd, signboard: checkboxState.signboard, extra: checkboxState.extra, sameDetail: checkboxState.sameDetail, other: checkboxState.other })}
                             />
                         </Box>
@@ -1259,7 +1280,7 @@ const GoTabPanel = forwardRef((props, ref) => {
 
 /** [內容]接機 */
 const LeaveTabPanel = forwardRef((props, ref) => {
-    const { value, index, options, reserve_next, reserve_error, extraVisible, extraText } = props
+    const { value, index, options, reserve_next, reserve_error, extraVisible, pauseServiceVisible, extraText } = props
     const otherExtra = options.extraOptions.filter(option => option.type === "其它");
     const [extraOptions, setExtraOptions] = useState([]);
     const [selectedCounts, setSelectedCounts] = useState({});
@@ -2029,8 +2050,9 @@ const LeaveTabPanel = forwardRef((props, ref) => {
                             <WebTextIconButton3
                                 sx={{ color: "#FFFFFF" }}
                                 size={"medium"}
-                                color={"secondary"}
-                                text={"下一步"}
+                                color={pauseServiceVisible ? "error" : "secondary"}
+                                text={pauseServiceVisible ? "暫停服務" : "下一步"}
+                                disabled={pauseServiceVisible}
                                 onClick={(e) => confrm_Click({ e: e, type: "leave", cal: "Y", orderAdd: orderAdd, signboard: checkboxState.signboard, extra: checkboxState.extra, sameDetail: checkboxState.sameDetail, other: checkboxState.other })}
                             />
                         </Box>
@@ -2448,6 +2470,14 @@ const DialogsInner = forwardRef((props, ref) => {
             </React.Fragment>
         )
     } else if (type === "bulletin") {
+        return (
+            <React.Fragment>
+                <Box sx={{ p: "1rem" }}>
+                    <Box dangerouslySetInnerHTML={{ __html: html }} />
+                </Box>
+            </React.Fragment>
+        )
+    } else if (type === "pause_service") {
         return (
             <React.Fragment>
                 <Box sx={{ p: "1rem" }}>
